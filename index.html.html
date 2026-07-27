@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام WAEL'S STUDENT MANAGEMENT CIC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<style>
+  :root{
+    --ink:#131c2e; --ink-soft:#5c6579; --paper:#e6e9f0; --panel:#ffffff; --line:#cfd4e0;
+    --brand:#1d3f72; --brand-soft:#e7edf7; --gold:#b8912f; --gold-soft:#f6efdc;
+    --canada:#d52b1e; --good:#1f7a4d; --good-soft:#e2f3ea; --warn:#b07d17; --warn-soft:#faf0d9;
+    --bad:#b23a2a; --bad-soft:#fbe7e3;
+    --shadow: 0 1px 3px rgba(19,28,46,.08), 0 8px 20px -10px rgba(19,28,46,.25);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Tajawal',sans-serif;}
+  h1,h2,h3{font-family:'Cairo',sans-serif;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 90px;}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);border-bottom:3px solid var(--brand);border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .logo-badge{width:48px;height:32px;border-radius:6px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.08);}
+  .logo-badge svg{display:block;width:100%;height:100%;}
+  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.2px;}
+  .topbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+  .btn{border:none;border-radius:9px;padding:9px 15px;font-family:'Tajawal';font-weight:700;font-size:13px;cursor:pointer;}
+  .btn-brand{background:var(--brand);color:#fff;}
+  .btn-ghost{background:var(--panel);border:1px solid var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--brand);}
+  .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:7px;}
+  .btn-danger{background:var(--bad-soft);color:var(--bad);}
+  .btn-block{width:100%;}
+
+  .corner-btn{position:fixed;bottom:18px;left:18px;z-index:40;border-radius:24px;padding:10px 16px;box-shadow:0 6px 18px rgba(0,0,0,.2);}
+  .settings-corner{position:fixed;top:18px;left:18px;z-index:40;border-radius:24px;padding:10px 16px;box-shadow:0 6px 18px rgba(0,0,0,.15);}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);}
+  .kpi .n{font-family:'Cairo';font-size:19px;font-weight:800;}
+  .kpi .l{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .kpi.good{border-top-color:var(--good);}
+  .kpi.good .n{color:var(--good);}
+  .kpi.bad{border-top-color:var(--bad);}
+  .kpi.bad .n{color:var(--bad);}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+  .search{flex:1;min-width:220px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-family:'Tajawal';font-size:14px;}
+  .search:focus{outline:none;border-color:var(--brand);}
+  select{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:'Tajawal';font-size:13px;}
+
+  .table-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  thead th{text-align:right;padding:11px 13px;font-size:11px;color:var(--ink-soft);background:#eceff5;border-bottom:2px solid var(--brand);font-weight:700;white-space:nowrap;}
+  tbody td{padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap;}
+  tbody tr{cursor:pointer;}
+  tbody tr:hover{background:#f7f9ff;}
+  .name-cell{font-weight:700;}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .b-good{background:var(--good-soft);color:var(--good);}
+  .b-warn{background:var(--warn-soft);color:var(--warn);}
+  .b-bad{background:var(--bad-soft);color:var(--bad);}
+  .empty{padding:50px 20px;text-align:center;color:var(--ink-soft);}
+
+  .scrim{position:fixed;inset:0;background:rgba(19,28,46,.4);display:none;z-index:55;}
+  .scrim.open{display:block;}
+  .drawer{
+    position:fixed;top:0;right:0;height:100vh;width:50vw;min-width:420px;max-width:96vw;background:#fff;
+    box-shadow:-8px 0 30px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .25s ease;
+    z-index:60;overflow-y:auto;padding:26px;
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-close{position:absolute;top:16px;left:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-soft);}
+  .d-name{font-size:20px;font-weight:800;margin:0 0 2px;padding-left:30px;font-family:'Cairo';}
+  .d-code{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
+  .d-section{margin-bottom:20px;}
+  .d-section h4{font-size:12.5px;color:var(--brand);margin:0 0 8px;font-weight:800;letter-spacing:.3px;padding-bottom:6px;border-bottom:2px solid var(--brand-soft);}
+  .d-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .d-row:last-child{border-bottom:none;}
+  .d-row b{font-weight:700;}
+  .status-box{border-radius:10px;padding:16px;text-align:center;margin-bottom:16px;}
+  .status-box .amt{font-family:'Cairo';font-size:26px;font-weight:800;}
+  .status-box .lbl{font-size:13px;margin-top:2px;}
+  .status-due{background:var(--bad-soft);color:var(--bad);}
+  .status-credit{background:var(--warn-soft);color:var(--warn);}
+  .status-clear{background:var(--good-soft);color:var(--good);}
+
+  .party-card{background:#f2f4f8;border:1px solid var(--line);border-right:4px solid var(--brand);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+  .party-card .pt{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;}
+  .party-card .pr{display:flex;justify-content:space-between;font-size:13px;padding:2px 0;}
+
+  .pay-list{border:1px solid var(--line);border-radius:9px;margin-bottom:10px;max-height:170px;overflow-y:auto;}
+  .pay-row{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;font-size:12.5px;border-bottom:1px solid var(--line);}
+  .pay-row:last-child{border-bottom:none;}
+  .pay-row .amt{font-weight:700;white-space:nowrap;}
+  .pay-empty{padding:14px;text-align:center;color:var(--ink-soft);font-size:12px;}
+
+  .field{margin-bottom:11px;}
+  .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px;font-weight:600;}
+  .field input, .field select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:'Tajawal';font-size:14px;background:#fbfbfd;}
+  .field input:focus, .field select:focus{outline:none;border-color:var(--brand);background:#fff;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .fee-hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .share-row{display:flex;gap:8px;margin-top:6px;}
+  .share-row .btn{flex:1;}
+  .divider{border:none;border-top:1px solid var(--line);margin:16px 0;}
+
+  .overlay{position:fixed;inset:0;background:rgba(19,28,46,.45);display:none;align-items:center;justify-content:center;z-index:70;padding:20px;}
+  .overlay.open{display:flex;}
+  .modal{background:#fff;border-radius:14px;padding:24px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+  .modal.modal-lg{max-width:50vw;min-width:420px;}
+  .modal h2{margin:0 0 16px;font-size:18px;}
+  .modal-actions{display:flex;gap:9px;margin-top:16px;}
+  .modal-actions .btn{flex:1;}
+
+  .settings-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 13px;font-family:'Tajawal';font-size:12.5px;cursor:pointer;font-weight:700;}
+  .tab-btn.active{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .settings-list{border:1px solid var(--line);border-radius:9px;margin-bottom:12px;max-height:190px;overflow-y:auto;}
+  .settings-item{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-size:13px;}
+  .settings-item:last-child{border-bottom:none;}
+  .settings-item .del{cursor:pointer;color:var(--bad);font-size:12px;border:none;background:none;font-weight:700;}
+  .settings-empty{padding:16px;text-align:center;color:var(--ink-soft);font-size:12.5px;}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:100;max-width:90vw;text-align:center;}
+  .toast.show{opacity:1;}
+
+  @media(max-width:900px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .drawer{width:100%;min-width:0;}
+    .modal, .modal.modal-lg{max-width:94vw;min-width:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo-badge">
+        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="40" height="24" fill="#FFFFFF"/>
+          <rect x="0" y="0" width="10" height="24" fill="#D52B1E"/>
+          <rect x="30" y="0" width="10" height="24" fill="#D52B1E"/>
+          <path d="M20 4.5 L21.3 8 L24.5 6.8 L23.2 10 L25.8 10.4 L22.6 12.3 L23.1 15.5 L20 14.1 L16.9 15.5 L17.4 12.3 L14.2 10.4 L16.8 10 L15.5 6.8 L18.7 8 Z M19.1 14.4 H20.9 L20.9 18.5 L22.3 19 H17.7 L19.1 18.5 Z" fill="#D52B1E"/>
+        </svg>
+      </div>
+      <div>
+        <h1>WAEL'S STUDENT MANAGEMENT CIC</h1>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="currentUserLabel" style="font-size:12px;color:var(--ink-soft);align-self:center;margin-inline-end:4px;"></span>
+      <button class="btn btn-ghost" data-perm="import" id="importBtn">📥 استيراد إكسل</button>
+      <button class="btn btn-ghost" data-perm="export" id="exportBtn">📤 تصدير إكسل</button>
+      <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none;">
+      <button class="btn btn-brand" data-perm="add" id="addBtn">+ تسجيل طالب</button>
+    </div>
+  </div>
+
+  <div id="mainContentArea">
+    <div class="kpis">
+      <div class="kpi"><div class="n" id="kpiTotal">0</div><div class="l">إجمالي الطلاب</div></div>
+      <div class="kpi"><div class="n" id="kpiExpected">0</div><div class="l">إجمالي المطلوب (ج.م)</div></div>
+      <div class="kpi good"><div class="n" id="kpiCollected">0</div><div class="l">إجمالي المحصّل (ج.م)</div></div>
+      <div class="kpi bad"><div class="n" id="kpiOutstanding">0</div><div class="l">إجمالي المتبقي (ج.م)</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input class="search" id="searchInput" placeholder="ابحث بالاسم أو الكود أو الهاتف..." />
+      <select id="filterCollege"><option value="">كل الكليات</option></select>
+      <select id="filterStatus">
+        <option value="">كل الحالات</option>
+        <option value="Paid">مكتمل السداد</option>
+        <option value="Partial">عليه فلوس</option>
+        <option value="NotStarted">لم يبدأ الدفع</option>
+      </select>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr><th>الكود</th><th>الاسم</th><th>الكلية</th><th>الهاتف</th><th>الإجمالي المطلوب</th><th>المدفوع</th><th>الموقف</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="emptyState" style="display:none;">
+        <h3>لسه مفيش طلاب مسجلين</h3>
+        <div>ابدأ بإعداد الكليات من ⚙️ الإعدادات، ثم سجّل أول طالب</div>
+      </div>
+    </div>
+  </div>
+  <div class="empty" id="noViewMessage" style="display:none;">
+    <h3>لا يوجد صلاحية مشاهدة</h3>
+    <div>حسابك لا يملك صلاحية "مشاهدة الطلاب". تواصل مع المسؤول.</div>
+  </div>
+
+  <div style="text-align:center;padding:26px 20px 6px;color:var(--ink-soft);font-size:11.5px;border-top:1px solid var(--line);margin-top:30px;">
+    © <span id="footerYear"></span> WAEL'S STUDENT MANAGEMENT CIC — جميع الحقوق محفوظة لمحمد وائل. أي استخدام أو نسخ أو إعادة توزيع لهذا النظام دون إذن ممنوع منعًا باتًا.
+  </div>
+</div>
+
+<button class="btn btn-ghost settings-corner" id="settingsBtn">⚙️ الإعدادات</button>
+<button class="btn btn-ghost corner-btn" id="logoutBtn">🔒 تسجيل الخروج</button>
+
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer">
+  <button class="drawer-close" id="drawerClose">✕</button>
+  <div class="d-name" id="d_name"></div>
+  <div class="d-code" id="d_code"></div>
+
+  <div class="status-box" id="d_statusBox">
+    <div class="amt" id="d_statusAmt">0 ج.م</div>
+    <div class="lbl" id="d_statusLbl">الموقف المالي</div>
+  </div>
+
+  <div class="d-section">
+    <h4>بيانات الطالب</h4>
+    <div class="d-row"><span>الكلية</span><b id="d_college">—</b></div>
+    <div class="d-row"><span>طريقة الاحتساب</span><b id="d_feeTypeLabel">—</b></div>
+    <div class="d-row"><span>طريقة السداد</span><b id="d_paymentMethod">كاش</b></div>
+    <div class="d-row"><span>الهاتف</span><b id="d_phone">—</b></div>
+    <div class="d-row"><span>الإيميل</span><b id="d_email">—</b></div>
+  </div>
+
+  <div class="d-section">
+    <h4>تفصيل المصاريف حسب الجهة (الشركة والجمعية تُسدد أولًا، ثم الباقي للمعهد)</h4>
+    <div class="party-card">
+      <div class="pt">🏢 الشركة</div>
+      <div class="pr"><span>الإجمالي</span><b id="d_companyTotal">0</b></div>
+      <div class="pr"><span>المدفوع</span><b id="d_companyPaid">0</b></div>
+      <div class="pr"><span>المتبقي</span><b id="d_companyRemaining">0</b></div>
+    </div>
+    <div class="party-card">
+      <div class="pt">🤝 الجمعية</div>
+      <div class="pr"><span>الإجمالي</span><b id="d_assocTotal">0</b></div>
+      <div class="pr"><span>المدفوع</span><b id="d_assocPaid">0</b></div>
+      <div class="pr"><span>المتبقي</span><b id="d_assocRemaining">0</b></div>
+    </div>
+    <div class="party-card">
+      <div class="pt">🎓 المعهد (بعد الخصم)</div>
+      <div class="pr"><span>الإجمالي</span><b id="d_instituteTotal">0</b></div>
+      <div class="pr"><span>المدفوع</span><b id="d_institutePaid">0</b></div>
+      <div class="pr"><span>المتبقي</span><b id="d_instituteRemaining">0</b></div>
+    </div>
+  </div>
+
+  <div class="d-section">
+    <h4>تفاصيل حساب المعهد</h4>
+    <div class="d-row"><span id="d_unitLabel">عدد الوحدات</span><b id="d_unitCount">0</b></div>
+    <div class="d-row"><span>مصاريف المعهد الأساسية</span><b id="d_instituteBase">0</b></div>
+    <div style="margin:8px 0;">
+      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin-bottom:4px;">الخصومات المطبقة (على مصاريف المعهد فقط)</div>
+      <div id="d_discountsList"></div>
+    </div>
+    <div class="d-row" id="d_instFeeRow" style="display:none;"><span>رسوم التقسيط</span><b id="d_instFee">0</b></div>
+    <div class="d-row"><span><b>الإجمالي المطلوب (كل الجهات)</b></span><b id="d_total">0</b></div>
+    <div class="d-row"><span>إجمالي المدفوع</span><b id="d_paid">0</b></div>
+  </div>
+
+  <div class="d-section" id="d_installmentSection" style="display:none;">
+    <h4>خطة التقسيط</h4>
+    <div id="d_installmentList"></div>
+    <div class="d-row" id="d_penaltyRow" style="display:none;"><span>إجمالي الغرامات المستحقة</span><b id="d_penaltyTotal" style="color:var(--bad);">0</b></div>
+  </div>
+
+  <div class="d-section" data-perm="payments">
+    <h4>سجل الدفعات</h4>
+    <div class="pay-list" id="payList"></div>
+    <div class="field-row">
+      <div class="field"><input id="f_payAmount" type="number" placeholder="مبلغ الدفعة (سالب = استرداد)" /></div>
+      <div class="field">
+        <select id="f_payMethod">
+          <option value="Cash">كاش</option>
+          <option value="Vodafone Cash">فودافون كاش</option>
+          <option value="InstaPay">انستاباي</option>
+          <option value="Bank Transfer">تحويل بنكي</option>
+          <option value="Card">فيزا/بطاقة</option>
+          <option value="Other">أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><input id="f_payNote" placeholder="ملاحظة (اختياري)" /></div>
+    <button class="btn btn-brand btn-block btn-sm" onclick="addPayment()">تسجيل الدفعة</button>
+  </div>
+
+  <div class="d-section" data-perm="share">
+    <h4>مشاركة بيانات الطالب</h4>
+    <div class="share-row">
+      <button class="btn btn-ghost btn-sm" onclick="openShareWaModal()">📱 واتساب</button>
+      <button class="btn btn-ghost btn-sm" onclick="openShareEmailModal()">✉️ إيميل</button>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="share-row">
+    <button class="btn btn-ghost btn-sm" data-perm="edit" onclick="openEditModal(currentDetailId)">✏️ تعديل</button>
+    <button class="btn btn-danger btn-sm" data-perm="delete" onclick="deleteStudent(currentDetailId)">🗑️ حذف الطالب</button>
+  </div>
+</div>
+
+<div class="overlay" id="studentOverlay">
+  <div class="modal modal-lg">
+    <h2 id="studentModalTitle">تسجيل طالب جديد</h2>
+    <div class="field-row">
+      <div class="field"><label>كود الطالب</label><input id="f_code" /></div>
+      <div class="field"><label>اسم الطالب</label><input id="f_name" /></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>رقم الهاتف</label><input id="f_phone" /></div>
+      <div class="field"><label>الإيميل (اختياري)</label><input id="f_email" /></div>
+    </div>
+    <div class="field">
+      <label>الكلية</label>
+      <select id="f_college"></select>
+      <div class="fee-hint" id="feeHint">—</div>
+    </div>
+    <div class="field">
+      <label id="f_unitLabel">عدد الوحدات</label>
+      <input id="f_unitCount" type="number" min="0" value="0" />
+      <div class="fee-hint" id="unitCalcHint"></div>
+    </div>
+    <div class="field-row-3">
+      <div class="field"><label>مصاريف المعهد (قابلة للتعديل)</label><input id="f_instituteFee" type="number" /></div>
+      <div class="field"><label>رسوم الشركة (قابلة للتعديل)</label><input id="f_companyFee" type="number" /></div>
+      <div class="field"><label>رسوم الجمعية (قابلة للتعديل)</label><input id="f_associationFee" type="number" /></div>
+    </div>
+    <div class="fee-hint" style="margin-bottom:10px;">القيم دي بتتحسب أوتوماتيك من إعدادات الكلية، بس تقدر تعدلها يدوي لو محتاج تظبطها لحالة معينة.</div>
+    <div class="field">
+      <label>الخصومات (تنطبق على مصاريف المعهد فقط — تقدر تختار أكتر من خصم)</label>
+      <input id="f_discountSearch" placeholder="ابحث في الخصومات..." oninput="renderDiscountChecklist(this.value)" style="margin-bottom:6px;" />
+      <div class="settings-list" id="f_discount" style="max-height:170px;"></div>
+      <div class="fee-hint" id="discountHint"></div>
+    </div>
+    <div class="field"><label>دفعة مبدئية الآن (اختياري)</label><input id="f_initialPay" type="number" /></div>
+    <div class="field">
+      <label>طريقة السداد</label>
+      <select id="f_paymentMethod">
+        <option value="cash">كاش</option>
+        <option value="installment">تقسيط</option>
+      </select>
+    </div>
+    <div id="installmentFields" style="display:none;">
+      <div class="field-row">
+        <div class="field"><label>عدد الأقساط</label><input id="f_instCount" type="number" min="2" value="3" /></div>
+        <div class="field"><label>تاريخ أول قسط</label><input id="f_instFirstDate" type="date" /></div>
+      </div>
+      <div class="field"><label>الفاصل بين كل قسط (أيام)</label><input id="f_instInterval" type="number" value="30" /></div>
+      <div class="field" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="f_applyInstFee" checked style="width:auto;">
+        <label style="margin:0;" for="f_applyInstFee">تطبيق رسوم التقسيط المحددة في الإعدادات</label>
+      </div>
+      <div class="fee-hint" id="instFeeHint"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeStudentModal()">إلغاء</button>
+      <button class="btn btn-brand" onclick="saveStudent()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <h2>الإعدادات</h2>
+    <div class="settings-tabs">
+      <button class="tab-btn active" id="tabColleges" data-perm="settings_colleges" onclick="switchTab('colleges')">الكليات والرسوم</button>
+      <button class="tab-btn" id="tabDiscounts" data-perm="settings_discounts" onclick="switchTab('discounts')">الخصومات</button>
+      <button class="tab-btn" id="tabInstallment" data-perm="settings_installments" onclick="switchTab('installment')">التقسيط والغرامات</button>
+      <button class="tab-btn" id="tabBackup" data-perm="backups" onclick="switchTab('backup')">النسخ الاحتياطي</button>
+      <button class="tab-btn" id="tabUsers" data-perm="manage_users" onclick="switchTab('users')">المستخدمين</button>
+    </div>
+
+    <div id="panelColleges">
+      <div class="settings-list" id="collegesList"></div>
+      <div class="field"><input id="newCollegeName" placeholder="اسم الكلية" /></div>
+      <div class="field">
+        <label>طريقة احتساب مصاريف المعهد</label>
+        <select id="newCollegeFeeType">
+          <option value="subject">بالمادة (يُسجّل عدد المواد لكل طالب)</option>
+          <option value="hour">بالساعة (يُسجّل عدد الساعات لكل طالب)</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field"><input id="newCollegeUnitPrice" type="number" placeholder="سعر المادة/الساعة (ج.م)" /></div>
+        <div class="field"><input id="newCollegeCompanyFee" type="number" placeholder="رسوم الشركة (ج.م)" /></div>
+      </div>
+      <div class="field"><input id="newCollegeAssociationFee" type="number" placeholder="رسوم الجمعية (ج.م)" /></div>
+      <button class="btn btn-brand btn-block btn-sm" onclick="addCollege()">+ إضافة كلية</button>
+    </div>
+
+    <div id="panelDiscounts" style="display:none;">
+      <input id="discountSettingsSearch" placeholder="ابحث في الخصومات..." oninput="renderSettingsLists()" style="margin-bottom:8px;" />
+      <div class="settings-list" id="discountsList"></div>
+      <div class="field-row">
+        <div class="field"><input id="newDiscountName" placeholder="اسم الخصم" /></div>
+        <div class="field"><select id="newDiscountType"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت</option></select></div>
+      </div>
+      <div class="field"><input id="newDiscountValue" type="number" placeholder="القيمة" /></div>
+      <button class="btn btn-brand btn-block btn-sm" onclick="addDiscount()">+ إضافة خصم</button>
+    </div>
+
+    <div id="panelInstallment" style="display:none;">
+      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin:4px 0 6px;">رسوم التقسيط (تُضاف تلقائيًا على مصاريف المعهد عند اختيار التقسيط)</div>
+      <div class="field-row">
+        <div class="field"><select id="instFeeType"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت</option></select></div>
+        <div class="field"><input id="instFeeValue" type="number" placeholder="القيمة" /></div>
+      </div>
+      <button class="btn btn-brand btn-block btn-sm" onclick="saveInstallmentFeeSetting()">حفظ رسوم التقسيط</button>
+      <hr class="divider">
+      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin:4px 0 6px;">الغرامة على القسط المتأخر</div>
+      <div class="field-row">
+        <div class="field"><select id="penaltyType"><option value="percent">نسبة % من القسط</option><option value="fixed">مبلغ ثابت لكل قسط</option></select></div>
+        <div class="field"><input id="penaltyValue" type="number" placeholder="القيمة" /></div>
+      </div>
+      <div class="field"><label>مهلة السماح قبل تطبيق الغرامة (أيام)</label><input id="penaltyGrace" type="number" placeholder="مثال: 7" /></div>
+      <button class="btn btn-brand btn-block btn-sm" onclick="savePenaltySetting()">حفظ إعدادات الغرامة</button>
+    </div>
+
+    <div id="panelBackup" style="display:none;">
+      <div class="fee-hint" id="syncStatusInfo" style="margin-bottom:6px;font-weight:700;"></div>
+      <div class="fee-hint" id="lastSavedInfo" style="margin-bottom:10px;">لسه معملش حفظ</div>
+      <button class="btn btn-brand btn-block btn-sm" onclick="downloadBackupNow()">⬇️ تنزيل نسخة احتياطية الآن (.json)</button>
+      <div class="fee-hint" style="margin:8px 0;">احتفظ بالملف ده في مكان خارج المتصفح (إيميل، جوجل درايف...) — دي النسخة الوحيدة المضمونة حتى لو اتمسحت بيانات المتصفح.</div>
+      <hr class="divider">
+      <label style="display:block;font-size:12px;color:var(--ink-soft);font-weight:700;margin-bottom:6px;">استعادة من ملف نسخة احتياطية</label>
+      <input type="file" id="restoreFileInput" accept=".json" />
+      <div class="fee-hint" style="margin:14px 0 6px;font-weight:700;color:var(--ink);">نسخ احتياطية تلقائية يومية (آخر 30 يوم)</div>
+      <div class="settings-list" id="backupList"></div>
+    </div>
+
+    <div id="panelUsers" style="display:none;">
+      <div class="settings-list" id="usersList"></div>
+      <div class="field-row">
+        <div class="field"><input id="newUserEmail" type="email" placeholder="user@example.com" /></div>
+        <div class="field"><input id="newUserPin" type="password" placeholder="الرقم السري (4 أرقام على الأقل)" /></div>
+      </div>
+      <div class="field">
+        <label>نطاق الرؤية المالية</label>
+        <select id="newUserFinScope">
+          <option value="all">الكل (كل التفاصيل المالية)</option>
+          <option value="institute">المعهد فقط</option>
+          <option value="company">الشركة فقط</option>
+          <option value="association">الجمعية فقط</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>الصلاحيات</label>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1;" onclick="setAllNewUserPerms(true)">تحديد الكل</button>
+          <button type="button" class="btn btn-ghost btn-sm" style="flex:1;" onclick="setAllNewUserPerms(false)">إلغاء الكل</button>
+        </div>
+        <div class="settings-list" id="newUserPermsList" style="max-height:220px;"></div>
+      </div>
+      <button class="btn btn-brand btn-block btn-sm" onclick="addUser()">+ إضافة مستخدم</button>
+      <div class="fee-hint" style="margin-top:10px;">الرقم السري ده وسيلة لمنع الأخطاء العرضية من الموظفين — مش حماية حقيقية. أي حد يوصل مباشرة للملف أو تخزين المتصفح يقدر يتخطاها.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-block" onclick="closeSettings()">تم</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay open" id="loginOverlay" style="z-index:200;">
+  <div class="modal">
+    <h2>تسجيل الدخول — WAEL'S STUDENT MANAGEMENT CIC</h2>
+    <div class="field">
+      <label>الإيميل</label>
+      <input id="loginEmailInput" type="email" placeholder="you@example.com" />
+    </div>
+    <div class="field">
+      <label>الرقم السري</label>
+      <input id="loginPinInput" type="password" placeholder="ادخل الرقم السري" />
+    </div>
+    <div class="fee-hint" id="loginError" style="color:var(--bad);"></div>
+    <div class="modal-actions">
+      <button class="btn btn-brand btn-block" onclick="attemptLogin()">دخول</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="shareWaOverlay">
+  <div class="modal">
+    <h2>مشاركة عبر واتساب</h2>
+    <div class="field"><label>رقم الهاتف (بمفتاح الدولة)</label><input id="waPhoneInput" placeholder="مثال: 201xxxxxxxxx" /></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeWaModal()">إلغاء</button>
+      <button class="btn btn-brand" onclick="sendWhatsApp()">إرسال</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="shareEmailOverlay">
+  <div class="modal">
+    <h2>مشاركة عبر البريد الإلكتروني</h2>
+    <div class="field"><label>البريد الإلكتروني (للمرجع)</label><input id="emailInput" placeholder="example@mail.com" /></div>
+    <div class="field">
+      <label>نص الرسالة</label>
+      <textarea id="emailMessageBox" rows="8" readonly style="width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:'Tajawal';font-size:13px;background:#fbfbfd;resize:vertical;"></textarea>
+    </div>
+    <div class="fee-hint">الزرار التاني بيحاول يفتح تطبيق البريد عندك مباشرة بالرسالة جاهزة</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEmailModal()">إغلاق</button>
+      <button class="btn btn-ghost" onclick="copyEmailMessage()">نسخ الرسالة</button>
+      <a id="mailtoLink" class="btn btn-brand" style="text-decoration:none;display:flex;align-items:center;justify-content:center;" target="_blank" rel="noopener">فتح البريد</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let data = { batchName:"دفعة جديدة", colleges:[], discounts:[], students:[], installmentFeeSetting:{type:'percent',value:0}, penaltySetting:{type:'percent',value:0,grace:0} };
+let currentEditId = null;
+let currentDetailId = null;
+const STORAGE_KEY = "revenue-batch-data-en-v1";
+
+const SYNC_URL = "https://script.google.com/macros/s/AKfycbyIAqNBbaogwgV3qwh0QdTH80oUFa-hR9lgNkdhTRj2wI_npA2gDWTr6UCHqpzAsV0xnw/exec";
+const SYNC_CONFIGURED = !!(SYNC_URL && SYNC_URL.indexOf('http') === 0);
+
+const LocalOnlyStore = {
+  async get(key){ try{ const value = localStorage.getItem(key); return value===null ? null : { key, value }; }catch(e){ return null; } },
+  async set(key, value){ try{ localStorage.setItem(key, value); return { key, value }; }catch(e){ return null; } },
+  async delete(key){ try{ localStorage.removeItem(key); return { key, deleted:true }; }catch(e){ return null; } },
+  async list(prefix){ try{ const keys = Object.keys(localStorage).filter(k => !prefix || k.startsWith(prefix)); return { keys, prefix }; }catch(e){ return { keys:[] }; } }
+};
+const SheetSyncStore = {
+  async _call(payload){
+    try{
+      const res = await fetch(SYNC_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
+      if(!res.ok) return null;
+      return await res.json();
+    }catch(e){ return null; }
+  },
+  async get(key){ const result = await this._call({ action:'get', key }); if(!result || result.value===undefined || result.value===null) return null; return { key, value: result.value }; },
+  async set(key, value){ const result = await this._call({ action:'set', key, value }); return result ? { key, value } : null; },
+  async delete(key){ return await this._call({ action:'delete', key }); },
+  async list(prefix){ const result = await this._call({ action:'list', prefix }); return (result && result.keys) ? { keys: result.keys, prefix } : { keys: [] }; }
+};
+const AppStore = SYNC_CONFIGURED ? SheetSyncStore : LocalOnlyStore;
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function fmt(n){ return (Math.round((n||0)*100)/100).toLocaleString('en-US'); }
+function escapeHtml(str){ return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+const ALL_PERMISSIONS = [
+  {key:'view', label:'مشاهدة الطلاب (البحث وعرض التفاصيل)'},
+  {key:'add', label:'إضافة طلاب (تسجيل جديد)'},
+  {key:'edit', label:'تعديل بيانات الطلاب'},
+  {key:'delete', label:'حذف الطلاب'},
+  {key:'payments', label:'تسجيل الدفعات والمستردات'},
+  {key:'share', label:'مشاركة بيانات الطالب (واتساب/إيميل)'},
+  {key:'settings_colleges', label:'إدارة الكليات والرسوم'},
+  {key:'settings_discounts', label:'إدارة الخصومات'},
+  {key:'settings_installments', label:'إدارة التقسيط والغرامات'},
+  {key:'import', label:'استيراد من إكسل'},
+  {key:'export', label:'تصدير إلى إكسل'},
+  {key:'backups', label:'إدارة النسخ الاحتياطية'},
+  {key:'manage_users', label:'إدارة المستخدمين والصلاحيات'},
+];
+
+const DEFAULT_DISCOUNTS = [
+  {name:'خصم التسجيل المبكر (19 يوليو – 1 أغسطس 2026)', type:'percent', value:10},
+  {name:'خصم التسجيل المبكر – عبر تطبيق CIC', type:'percent', value:15},
+  {name:'خصم يوم الأسرة المفتوح (Open Day)', type:'percent', value:10},
+  {name:'خصم السداد خلال 3 أيام عمل من إعلان النتيجة', type:'percent', value:25},
+  {name:'منحة رياضية – بطولة عالمية – المركز الأول', type:'percent', value:100},
+  {name:'منحة رياضية – بطولة عالمية – المركز الثاني', type:'percent', value:75},
+  {name:'منحة رياضية – بطولة عالمية – المركز الثالث', type:'percent', value:50},
+  {name:'منحة رياضية – بطولة محلية – المركز الأول', type:'percent', value:30},
+  {name:'منحة رياضية – بطولة محلية – المركز الثاني', type:'percent', value:20},
+  {name:'منحة رياضية – بطولة محلية – المركز الثالث', type:'percent', value:10},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – العشرة الأوائل', type:'percent', value:100},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 90-100%', type:'percent', value:50},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 80-90%', type:'percent', value:40},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 70-80%', type:'percent', value:30},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 65-70%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – العشرة الأوائل', type:'percent', value:100},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 90-100%', type:'percent', value:40},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 80-90%', type:'percent', value:30},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 70-80%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 65-70%', type:'percent', value:10},
+  {name:'منحة تفوق دراسي – مشترك – هندسة – العشرة الأوائل', type:'percent', value:100},
+  {name:'منحة تفوق دراسي – مشترك – هندسة – 90-100%', type:'percent', value:50},
+  {name:'منحة تفوق دراسي – مشترك – هندسة – 80-90%', type:'percent', value:40},
+  {name:'منحة تفوق دراسي – مشترك – هندسة – 70-80%', type:'percent', value:30},
+  {name:'منحة تفوق دراسي – مشترك – هندسة – 65-70%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مشترك – إعلام – العشرة الأوائل', type:'percent', value:100},
+  {name:'منحة تفوق دراسي – مشترك – إعلام – 90-100%', type:'percent', value:50},
+  {name:'منحة تفوق دراسي – مشترك – إعلام – 80-90%', type:'percent', value:40},
+  {name:'منحة تفوق دراسي – مشترك – إعلام – 70-80%', type:'percent', value:30},
+  {name:'منحة تفوق دراسي – مشترك – إعلام – 65-70%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (القاهرة الجديدة) – 90-100%', type:'percent', value:30},
+  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (القاهرة الجديدة) – 80-90%', type:'percent', value:25},
+  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (القاهرة الجديدة) – 70-80%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (الشيخ زايد) – 90-100%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (الشيخ زايد) – 80-90%', type:'percent', value:15},
+  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (الشيخ زايد) – 70-80%', type:'percent', value:10},
+  {name:'منحة تفوق دراسي – مصري – هندسة – 90-100%', type:'percent', value:30},
+  {name:'منحة تفوق دراسي – مصري – هندسة – 80-90%', type:'percent', value:25},
+  {name:'منحة تفوق دراسي – مصري – هندسة – 70-80%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مصري – حاسب آلي (الشيخ زايد) – 90-100%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مصري – حاسب آلي (الشيخ زايد) – 80-90%', type:'percent', value:15},
+  {name:'منحة تفوق دراسي – مصري – حاسب آلي (الشيخ زايد) – 70-80%', type:'percent', value:10},
+  {name:'منحة تفوق دراسي – مصري – إعلام – 90-100%', type:'percent', value:30},
+  {name:'منحة تفوق دراسي – مصري – إعلام – 80-90%', type:'percent', value:25},
+  {name:'منحة تفوق دراسي – مصري – إعلام – 70-80%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مصري – حاسب آلي (القاهرة الجديدة) – 90-100%', type:'percent', value:20},
+  {name:'منحة تفوق دراسي – مصري – حاسب آلي (القاهرة الجديدة) – 80-90%', type:'percent', value:15},
+  {name:'منحة تفوق دراسي – مصري – حاسب آلي (القاهرة الجديدة) – 70-80%', type:'percent', value:10},
+  {name:'مساعدة مالية – وفاة أحد الوالدين (البرنامج المصري)', type:'percent', value:10},
+  {name:'مساعدة مالية – تسجيل مبكر (البرنامج المصري)', type:'percent', value:10},
+  {name:'مساعدة مالية – موظف حكومي/قطاع عام (الأب) – مشترك', type:'percent', value:20},
+  {name:'مساعدة مالية – القوات المسلحة والشرطة – مشترك', type:'percent', value:20},
+  {name:'مساعدة مالية – عضو هيئة تدريس بجامعة حكومية – مشترك', type:'percent', value:20},
+  {name:'مساعدة مالية – وفاة الأب – مشترك', type:'percent', value:20},
+  {name:'مساعدة مالية – أخ/أخت خريج من CIC – مشترك', type:'percent', value:20},
+  {name:'مساعدة مالية – تسجيل مبكر – مشترك', type:'percent', value:10},
+];
+
+let lastSavedAt = null;
+async function loadData(){
+  try{
+    const res = await AppStore.get(STORAGE_KEY);
+    if(res && res.value) data = Object.assign(data, JSON.parse(res.value));
+  }catch(e){}
+  data.colleges = (data.colleges||[]).map(c=>{
+    if(c.feeType) return c;
+    return { id:c.id, name:c.name, feeType:'subject', unitPrice: Number(c.fee||0), companyFee:0, associationFee:0 };
+  });
+  if(!data.discounts || data.discounts.length===0){
+    data.discounts = DEFAULT_DISCOUNTS.map(d=>({ id:uid(), name:d.name, type:d.type, value:d.value }));
+    await persist();
+  }
+  if(data.users && data.users.length){
+    let migrated=false;
+    data.users = data.users.map(u=>{
+      if(u.email && u.permissions) return u;
+      migrated=true;
+      const legacyFullAccess = u.role==='admin';
+      return {
+        id: u.id || uid(),
+        email: u.email || ((u.name||'user').toLowerCase().replace(/[^a-z0-9]+/g,'.') + '@cic.local'),
+        pin: u.pin || '1234',
+        financialScope: u.financialScope || 'all',
+        permissions: u.permissions || (legacyFullAccess ? ALL_PERMISSIONS.map(p=>p.key) : ['view','add','edit','payments','share','export'])
+      };
+    });
+    if(migrated) await persist();
+  }
+  if(!data.users || data.users.length===0){
+    data.users = [{ id:uid(), email:'admin@cic.local', pin:'1234', financialScope:'all', permissions: ALL_PERMISSIONS.map(p=>p.key) }];
+    await persist();
+  }
+  refreshCollegeSelects();
+  refreshDiscountSelects();
+  render();
+  maybeCreateDailyBackup();
+}
+async function persist(){
+  try{ await AppStore.set(STORAGE_KEY, JSON.stringify(data)); lastSavedAt = new Date(); }
+  catch(e){ showToast('حصل خطأ في الحفظ'); }
+}
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function getCollege(id){ return data.colleges.find(c=>c.id===id); }
+function getDiscount(id){ return data.discounts.find(d=>d.id===id); }
+
+function discountAmount(s){
+  const ids = s.discountIds || [];
+  const base = Number(s.instituteFee||0);
+  return ids.reduce((sum,id)=>{
+    const d=getDiscount(id); if(!d) return sum;
+    return sum + (d.type==='percent' ? base*Number(d.value)/100 : Number(d.value));
+  },0);
+}
+function studentInstituteTotal(s){ return Math.max(Number(s.instituteFee||0) - discountAmount(s), 0); }
+function studentTotal(s){
+  return studentInstituteTotal(s) + Number(s.installmentFee||0) + Number(s.companyFeeAmount||0) + Number(s.associationFeeAmount||0);
+}
+function paidAmount(s){ return (s.payments||[]).reduce((a,p)=>a+p.amount,0); }
+
+function partyBreakdown(s){
+  const companyTotal = Number(s.companyFeeAmount||0);
+  const assocTotal = Number(s.associationFeeAmount||0);
+  const instituteTotal = studentInstituteTotal(s) + Number(s.installmentFee||0);
+  let pool = paidAmount(s);
+  const companyPaid = Math.max(Math.min(pool, companyTotal), 0); pool -= companyPaid;
+  const assocPaid = Math.max(Math.min(pool, assocTotal), 0); pool -= assocPaid;
+  const institutePaid = Math.max(Math.min(pool, instituteTotal), 0); pool -= institutePaid;
+  return {
+    companyTotal, companyPaid, companyRemaining: Math.max(companyTotal-companyPaid,0),
+    assocTotal, assocPaid, assocRemaining: Math.max(assocTotal-assocPaid,0),
+    instituteTotal, institutePaid, instituteRemaining: Math.max(instituteTotal-institutePaid,0),
+  };
+}
+
+function allocateInstallments(s){
+  if(!s.installments || s.installments.length===0) return [];
+  const sorted = s.installments.slice().sort((a,b)=> new Date(a.dueDate)-new Date(b.dueDate));
+  let pool = paidAmount(s);
+  const today = new Date();
+  const grace = Number((data.penaltySetting&&data.penaltySetting.grace)||0);
+  return sorted.map(inst=>{
+    let status;
+    if(pool >= inst.amount - 0.001){ status='مدفوع'; pool -= inst.amount; }
+    else if(pool > 0.001){ status='جزئي'; pool=0; }
+    else { status='لم يبدأ'; }
+    const due=new Date(inst.dueDate);
+    const graceDate=new Date(due); graceDate.setDate(graceDate.getDate()+grace);
+    const overdue = status!=='مدفوع' && today>graceDate;
+    let penalty=0;
+    if(overdue && data.penaltySetting && Number(data.penaltySetting.value)>0){
+      penalty = data.penaltySetting.type==='percent' ? inst.amount*Number(data.penaltySetting.value)/100 : Number(data.penaltySetting.value);
+    }
+    return Object.assign({}, inst, { status: overdue? 'متأخر':status, penalty });
+  });
+}
+function totalPenalties(s){ return allocateInstallments(s).reduce((sum,i)=>sum+i.penalty,0); }
+function remaining(s){ return studentTotal(s) + totalPenalties(s) - paidAmount(s); }
+function payStatus(s){
+  const r=remaining(s);
+  if(r<=0.001 && paidAmount(s)>0) return 'Paid';
+  if(paidAmount(s)>0) return 'Partial';
+  return 'NotStarted';
+}
+function statusCell(s){
+  const r=remaining(s);
+  if(r>0.001) return `<span class="badge b-bad">عليه ${fmt(r)} ج.م</span>`;
+  if(r<-0.001) return `<span class="badge b-warn">له ${fmt(-r)} ج.م</span>`;
+  return '<span class="badge b-good">مكتمل السداد</span>';
+}
+
+function render(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const fCollege=document.getElementById('filterCollege').value;
+  const fStatus=document.getElementById('filterStatus').value;
+
+  let list=data.students.filter(s=>{
+    if(q && !(s.name.toLowerCase().includes(q)||(s.code||'').toLowerCase().includes(q)||(s.phone||'').includes(q))) return false;
+    if(fCollege && s.collegeId!==fCollege) return false;
+    if(fStatus && payStatus(s)!==fStatus) return false;
+    return true;
+  });
+
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  document.getElementById('emptyState').style.display = data.students.length===0 ? 'block':'none';
+
+  list.forEach(s=>{
+    const college=getCollege(s.collegeId);
+    const tr=document.createElement('tr');
+    tr.onclick=()=>openDrawer(s.id);
+    tr.innerHTML=`
+      <td>${escapeHtml(s.code||'—')}</td>
+      <td class="name-cell">${escapeHtml(s.name)}${s.paymentMethod==='installment' ? ' <span class="badge b-warn" style="margin-inline-start:4px;">تقسيط</span>' : ''}</td>
+      <td>${escapeHtml(college?college.name:'—')}</td>
+      <td>${escapeHtml(s.phone||'—')}</td>
+      <td>${fmt(studentTotal(s))}</td>
+      <td>${fmt(paidAmount(s))}</td>
+      <td>${statusCell(s)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  renderKPIs();
+}
+function renderKPIs(){
+  const total=data.students.length;
+  const expected=data.students.reduce((a,s)=>a+studentTotal(s),0);
+  const collected=data.students.reduce((a,s)=>a+paidAmount(s),0);
+  const outstanding=data.students.reduce((a,s)=>a+Math.max(remaining(s),0),0);
+  document.getElementById('kpiTotal').textContent=total;
+  document.getElementById('kpiExpected').textContent=fmt(expected);
+  document.getElementById('kpiCollected').textContent=fmt(collected);
+  document.getElementById('kpiOutstanding').textContent=fmt(outstanding);
+}
+
+function refreshCollegeSelects(){
+  const fSel=document.getElementById('filterCollege');
+  const mSel=document.getElementById('f_college');
+  fSel.innerHTML='<option value="">كل الكليات</option>';
+  mSel.innerHTML='';
+  data.colleges.forEach(c=>{
+    fSel.innerHTML+=`<option value="${c.id}">${escapeHtml(c.name)}</option>`;
+    const unitLabel = c.feeType==='hour' ? 'ج.م/ساعة' : 'ج.م/مادة';
+    mSel.innerHTML+=`<option value="${c.id}">${escapeHtml(c.name)} — ${fmt(c.unitPrice)} ${unitLabel}</option>`;
+  });
+  refreshFormPreview();
+}
+let selectedDiscountIds = new Set();
+function refreshDiscountSelects(){
+  const searchEl=document.getElementById('f_discountSearch');
+  if(searchEl) searchEl.value='';
+  renderDiscountChecklist('');
+}
+function renderDiscountChecklist(filterText){
+  const container=document.getElementById('f_discount');
+  if(data.discounts.length===0){ container.innerHTML='<div class="settings-empty">لا توجد خصومات مضافة</div>'; return; }
+  const ft=(filterText||'').toLowerCase();
+  const filtered = data.discounts.filter(d=> !ft || d.name.toLowerCase().includes(ft));
+  if(filtered.length===0){ container.innerHTML='<div class="settings-empty">لا توجد نتائج مطابقة</div>'; return; }
+  container.innerHTML=filtered.map(d=>{
+    const label = d.type==='percent' ? `${d.name} (${d.value}%)` : `${d.name} (${fmt(d.value)} ج.م)`;
+    const checked = selectedDiscountIds.has(d.id) ? 'checked' : '';
+    return `<label class="settings-item" style="cursor:pointer;"><span>${escapeHtml(label)}</span><input type="checkbox" class="discount-check" value="${d.id}" ${checked} onchange="toggleDiscountSelection('${d.id}', this.checked)"></label>`;
+  }).join('');
+}
+function toggleDiscountSelection(id, isChecked){
+  if(isChecked) selectedDiscountIds.add(id); else selectedDiscountIds.delete(id);
+  refreshFormPreview();
+}
+function getSelectedDiscountIds(){ return Array.from(selectedDiscountIds); }
+
+document.getElementById('f_college').addEventListener('change', onCollegeChange);
+document.getElementById('f_unitCount').addEventListener('input', refreshFormPreview);
+document.getElementById('f_paymentMethod').addEventListener('change', toggleInstallmentFields);
+document.getElementById('f_instCount').addEventListener('input', refreshFormPreview);
+document.getElementById('f_applyInstFee').addEventListener('change', refreshFormPreview);
+document.getElementById('emailInput').addEventListener('input', updateMailtoLink);
+function toggleInstallmentFields(){
+  const method=document.getElementById('f_paymentMethod').value;
+  document.getElementById('installmentFields').style.display = method==='installment' ? 'block':'none';
+  refreshFormPreview();
+}
+function onCollegeChange(){
+  const c=getCollege(document.getElementById('f_college').value);
+  document.getElementById('f_unitLabel').textContent = c && c.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
+  if(c){
+    document.getElementById('f_companyFee').value = c.companyFee||0;
+    document.getElementById('f_associationFee').value = c.associationFee||0;
+  }
+  refreshFormPreview();
+}
+function computeInstituteBase(){
+  const c=getCollege(document.getElementById('f_college').value);
+  const count = Number(document.getElementById('f_unitCount').value)||0;
+  return c ? Number(c.unitPrice||0)*count : 0;
+}
+function refreshFormPreview(){
+  const c=getCollege(document.getElementById('f_college').value);
+  const unitLabel = c && c.feeType==='hour' ? 'ساعة' : 'مادة';
+  document.getElementById('feeHint').textContent = c ? `سعر ال${unitLabel}: ${fmt(c.unitPrice)} ج.م` : 'اختر الكلية أولًا';
+  const base = computeInstituteBase();
+  document.getElementById('unitCalcHint').textContent = c ? `مصاريف المعهد الأساسية: ${fmt(base)} ج.م` : '';
+  if(!document.getElementById('f_instituteFee').dataset.userEdited){
+    document.getElementById('f_instituteFee').value = base;
+  }
+  const instituteFeeVal = Number(document.getElementById('f_instituteFee').value)||0;
+  const ids=getSelectedDiscountIds();
+  const totalDisc = ids.reduce((sum,id)=>{
+    const d=getDiscount(id); if(!d) return sum;
+    return sum + (d.type==='percent' ? instituteFeeVal*Number(d.value)/100 : Number(d.value));
+  },0);
+  document.getElementById('discountHint').textContent = totalDisc>0 ? `إجمالي الخصم (من مصاريف المعهد): ${fmt(totalDisc)} ج.م` : '';
+
+  if(document.getElementById('f_paymentMethod').value==='installment'){
+    const instituteAfterDiscount = Math.max(instituteFeeVal-totalDisc,0);
+    const apply=document.getElementById('f_applyInstFee').checked;
+    const feeAmt = apply ? (data.installmentFeeSetting.type==='percent'? instituteAfterDiscount*Number(data.installmentFeeSetting.value)/100 : Number(data.installmentFeeSetting.value)) : 0;
+    const company = Number(document.getElementById('f_companyFee').value)||0;
+    const assoc = Number(document.getElementById('f_associationFee').value)||0;
+    const grand = instituteAfterDiscount+feeAmt+company+assoc;
+    const count=Number(document.getElementById('f_instCount').value)||1;
+    document.getElementById('instFeeHint').textContent = `الإجمالي شامل كل الجهات ورسوم التقسيط: ${fmt(grand)} ج.م — تقريبًا ${fmt(grand/count)} ج.م لكل قسط`;
+  }
+}
+document.addEventListener('input', (e)=>{
+  if(e.target && e.target.id==='f_instituteFee'){ e.target.dataset.userEdited='1'; }
+});
+
+function openSettings(){
+  document.getElementById('settingsOverlay').classList.add('open');
+  renderSettingsLists();
+  document.getElementById('instFeeType').value = data.installmentFeeSetting.type;
+  document.getElementById('instFeeValue').value = data.installmentFeeSetting.value;
+  document.getElementById('penaltyType').value = data.penaltySetting.type;
+  document.getElementById('penaltyValue').value = data.penaltySetting.value;
+  document.getElementById('penaltyGrace').value = data.penaltySetting.grace;
+  const tabOrder = [['colleges','settings_colleges'],['discounts','settings_discounts'],['installment','settings_installments'],['backup','backups'],['users','manage_users']];
+  const firstAllowed = tabOrder.find(([tab,perm])=>hasPermission(perm));
+  switchTab(firstAllowed ? firstAllowed[0] : 'colleges');
+}
+function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('open'); }
+function switchTab(tab){
+  document.getElementById('tabColleges').classList.toggle('active', tab==='colleges');
+  document.getElementById('tabDiscounts').classList.toggle('active', tab==='discounts');
+  document.getElementById('tabInstallment').classList.toggle('active', tab==='installment');
+  document.getElementById('tabBackup').classList.toggle('active', tab==='backup');
+  document.getElementById('tabUsers').classList.toggle('active', tab==='users');
+  document.getElementById('panelColleges').style.display = tab==='colleges'?'block':'none';
+  document.getElementById('panelDiscounts').style.display = tab==='discounts'?'block':'none';
+  document.getElementById('panelInstallment').style.display = tab==='installment'?'block':'none';
+  document.getElementById('panelBackup').style.display = tab==='backup'?'block':'none';
+  document.getElementById('panelUsers').style.display = tab==='users'?'block':'none';
+  if(tab==='backup'){
+    document.getElementById('lastSavedInfo').textContent = lastSavedAt ? ('آخر حفظ: '+lastSavedAt.toLocaleString('ar-EG')) : 'لسه معملش حفظ';
+    document.getElementById('syncStatusInfo').innerHTML = SYNC_CONFIGURED
+      ? '🟢 المزامنة السحابية: متصلة — البيانات بتتزامن على أي جهاز بيفتح نفس الملف'
+      : '🟡 المزامنة السحابية: غير مفعّلة — البيانات بتتحفظ على هذا المتصفح فقط';
+    renderBackupList();
+  }
+  if(tab==='users'){ renderUsersList(); renderNewUserPermsChecklist(); }
+}
+
+async function addCollege(){
+  const name=document.getElementById('newCollegeName').value.trim();
+  const feeType=document.getElementById('newCollegeFeeType').value;
+  const unitPrice=Number(document.getElementById('newCollegeUnitPrice').value)||0;
+  const companyFee=Number(document.getElementById('newCollegeCompanyFee').value)||0;
+  const associationFee=Number(document.getElementById('newCollegeAssociationFee').value)||0;
+  if(!name){ showToast('اكتب اسم الكلية'); return; }
+  data.colleges.push({id:uid(), name, feeType, unitPrice, companyFee, associationFee});
+  document.getElementById('newCollegeName').value='';
+  document.getElementById('newCollegeUnitPrice').value='';
+  document.getElementById('newCollegeCompanyFee').value='';
+  document.getElementById('newCollegeAssociationFee').value='';
+  await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
+}
+async function removeCollege(id){
+  if(!confirm('حذف الكلية دي؟')) return;
+  data.colleges=data.colleges.filter(c=>c.id!==id);
+  await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
+}
+async function addDiscount(){
+  const name=document.getElementById('newDiscountName').value.trim();
+  const type=document.getElementById('newDiscountType').value;
+  const value=Number(document.getElementById('newDiscountValue').value)||0;
+  if(!name){ showToast('اكتب اسم الخصم'); return; }
+  data.discounts.push({id:uid(),name,type,value});
+  document.getElementById('newDiscountName').value='';
+  document.getElementById('newDiscountValue').value='';
+  await persist(); renderSettingsLists(); refreshDiscountSelects(); render();
+}
+async function removeDiscount(id){
+  if(!confirm('حذف الخصم ده؟')) return;
+  data.discounts=data.discounts.filter(d=>d.id!==id);
+  await persist(); renderSettingsLists(); refreshDiscountSelects(); render();
+}
+function renderSettingsLists(){
+  const cList=document.getElementById('collegesList');
+  cList.innerHTML = data.colleges.length===0 ? '<div class="settings-empty">لا توجد كليات مضافة</div>' :
+    data.colleges.map(c=>{
+      const unitLabel = c.feeType==='hour' ? 'ج.م/ساعة' : 'ج.م/مادة';
+      return `<div class="settings-item"><span>${escapeHtml(c.name)} — ${fmt(c.unitPrice)} ${unitLabel} · شركة ${fmt(c.companyFee)} · جمعية ${fmt(c.associationFee)}</span><button class="del" onclick="removeCollege('${c.id}')">حذف</button></div>`;
+    }).join('');
+  const dList=document.getElementById('discountsList');
+  const searchEl=document.getElementById('discountSettingsSearch');
+  const ft=searchEl ? searchEl.value.toLowerCase() : '';
+  const filteredDiscounts = data.discounts.filter(d=> !ft || d.name.toLowerCase().includes(ft));
+  dList.innerHTML = filteredDiscounts.length===0 ? `<div class="settings-empty">${data.discounts.length===0?'لا توجد خصومات مضافة':'لا توجد نتائج مطابقة'}</div>` :
+    filteredDiscounts.map(d=>`<div class="settings-item"><span>${escapeHtml(d.name)} — ${d.type==='percent'?d.value+'%':fmt(d.value)+' ج.م'}</span><button class="del" onclick="removeDiscount('${d.id}')">حذف</button></div>`).join('');
+}
+async function saveInstallmentFeeSetting(){
+  data.installmentFeeSetting = { type: document.getElementById('instFeeType').value, value: Number(document.getElementById('instFeeValue').value)||0 };
+  await persist(); render(); showToast('تم حفظ رسوم التقسيط');
+}
+async function savePenaltySetting(){
+  data.penaltySetting = { type: document.getElementById('penaltyType').value, value: Number(document.getElementById('penaltyValue').value)||0, grace: Number(document.getElementById('penaltyGrace').value)||0 };
+  await persist(); render(); showToast('تم حفظ إعدادات الغرامة');
+}
+
+let currentUser = null;
+function hasPermission(key){ return !!(currentUser && (currentUser.permissions||[]).includes(key)); }
+function attemptLogin(){
+  const email=document.getElementById('loginEmailInput').value.trim().toLowerCase();
+  const pin=document.getElementById('loginPinInput').value.trim();
+  const user=data.users.find(u=>(u.email||'').toLowerCase()===email);
+  if(!user || user.pin!==pin){ document.getElementById('loginError').textContent='الإيميل أو الرقم السري غير صحيح.'; return; }
+  currentUser=user;
+  document.getElementById('loginOverlay').classList.remove('open');
+  document.getElementById('loginEmailInput').value='';
+  document.getElementById('loginPinInput').value='';
+  document.getElementById('loginError').textContent='';
+  applyPermissions();
+}
+function logout(){
+  currentUser=null;
+  document.getElementById('loginEmailInput').value='';
+  document.getElementById('loginPinInput').value='';
+  document.getElementById('loginError').textContent='';
+  document.getElementById('loginOverlay').classList.add('open');
+}
+function applyPermissions(){
+  document.querySelectorAll('[data-perm]').forEach(el=>{ el.style.display = hasPermission(el.getAttribute('data-perm')) ? '' : 'none'; });
+  const anySettingsAccess = ['settings_colleges','settings_discounts','settings_installments','backups','manage_users'].some(hasPermission);
+  const settingsBtn = document.getElementById('settingsBtn');
+  if(settingsBtn) settingsBtn.style.display = anySettingsAccess ? '' : 'none';
+  document.getElementById('currentUserLabel').textContent = currentUser ? currentUser.email : '';
+  document.getElementById('mainContentArea').style.display = hasPermission('view') ? '' : 'none';
+  document.getElementById('noViewMessage').style.display = hasPermission('view') ? 'none' : 'block';
+}
+function permsSummary(perms){
+  if(!perms || perms.length===0) return 'بدون صلاحيات';
+  if(perms.length===ALL_PERMISSIONS.length) return 'صلاحية كاملة';
+  return perms.map(k=>{ const p=ALL_PERMISSIONS.find(x=>x.key===k); return p ? p.label.split('(')[0].trim() : k; }).join('، ');
+}
+function scopeLabel(scope){
+  return scope==='institute' ? 'المعهد فقط' : scope==='company' ? 'الشركة فقط' : scope==='association' ? 'الجمعية فقط' : 'الكل';
+}
+function renderUsersList(){
+  const el=document.getElementById('usersList');
+  if(!el) return;
+  el.innerHTML = (!data.users || data.users.length===0) ? '<div class="settings-empty">لا يوجد مستخدمين</div>' :
+    data.users.map(u=>`<div class="settings-item"><span>${escapeHtml(u.email)} — ${escapeHtml(permsSummary(u.permissions))} — نطاق: ${scopeLabel(u.financialScope)}</span><button class="del" onclick="removeUser('${u.id}')">حذف</button></div>`).join('');
+}
+function renderNewUserPermsChecklist(){
+  const el=document.getElementById('newUserPermsList');
+  if(!el) return;
+  el.innerHTML = ALL_PERMISSIONS.map(p=>`<label class="settings-item" style="cursor:pointer;"><span>${escapeHtml(p.label)}</span><input type="checkbox" class="newuser-perm-check" value="${p.key}"></label>`).join('');
+}
+function setAllNewUserPerms(checked){ document.querySelectorAll('.newuser-perm-check').forEach(el=>{ el.checked=checked; }); }
+async function addUser(){
+  const email=document.getElementById('newUserEmail').value.trim().toLowerCase();
+  const pin=document.getElementById('newUserPin').value.trim();
+  const financialScope=document.getElementById('newUserFinScope').value;
+  if(!email || !email.includes('@') || !email.includes('.')){ showToast('اكتب إيميل صحيح'); return; }
+  if(data.users.some(u=>(u.email||'').toLowerCase()===email)){ showToast('يوجد مستخدم بنفس الإيميل ده بالفعل'); return; }
+  if(!/^[0-9]{4,}$/.test(pin)){ showToast('الرقم السري لازم 4 أرقام على الأقل'); return; }
+  const permissions = Array.from(document.querySelectorAll('.newuser-perm-check:checked')).map(el=>el.value);
+  if(permissions.length===0){ showToast('اختر صلاحية واحدة على الأقل'); return; }
+  data.users.push({id:uid(), email, pin, financialScope, permissions});
+  document.getElementById('newUserEmail').value='';
+  document.getElementById('newUserPin').value='';
+  renderNewUserPermsChecklist();
+  await persist();
+  renderUsersList();
+  showToast('تم إضافة المستخدم');
+}
+async function removeUser(id){
+  const managers = data.users.filter(u=>(u.permissions||[]).includes('manage_users'));
+  const target = data.users.find(u=>u.id===id);
+  if(target && (target.permissions||[]).includes('manage_users') && managers.length<=1){ showToast('لازم يفضل مستخدم واحد على الأقل معاه صلاحية إدارة المستخدمين'); return; }
+  if(!confirm('حذف المستخدم ده؟')) return;
+  data.users = data.users.filter(u=>u.id!==id);
+  await persist();
+  renderUsersList();
+  showToast('تم حذف المستخدم');
+}
+
+function openAddModal(){
+  if(data.colleges.length===0){ showToast('ضيف الكليات وأسعارها الأول من الإعدادات ⚙️'); openSettings(); return; }
+  currentEditId=null;
+  document.getElementById('studentModalTitle').textContent='تسجيل طالب جديد';
+  document.getElementById('f_code').value='';
+  document.getElementById('f_name').value='';
+  document.getElementById('f_phone').value='';
+  document.getElementById('f_email').value='';
+  document.getElementById('f_college').value=data.colleges[0]?.id||'';
+  document.getElementById('f_unitCount').value=0;
+  document.getElementById('f_instituteFee').value=0;
+  document.getElementById('f_instituteFee').dataset.userEdited='';
+  document.getElementById('f_companyFee').value=data.colleges[0]?.companyFee||0;
+  document.getElementById('f_associationFee').value=data.colleges[0]?.associationFee||0;
+  selectedDiscountIds = new Set();
+  refreshDiscountSelects();
+  document.getElementById('f_initialPay').value='';
+  document.getElementById('f_paymentMethod').value='cash';
+  document.getElementById('f_instCount').value=3;
+  document.getElementById('f_instInterval').value=30;
+  const defDate=new Date(); defDate.setDate(defDate.getDate()+30);
+  document.getElementById('f_instFirstDate').value=defDate.toISOString().slice(0,10);
+  document.getElementById('f_applyInstFee').checked=true;
+  onCollegeChange();
+  toggleInstallmentFields();
+  document.getElementById('studentOverlay').classList.add('open');
+}
+function openEditModal(id){
+  const s=data.students.find(x=>x.id===id); if(!s) return;
+  currentEditId=id;
+  closeDrawer();
+  document.getElementById('studentModalTitle').textContent='تعديل بيانات الطالب';
+  document.getElementById('f_code').value=s.code||'';
+  document.getElementById('f_name').value=s.name;
+  document.getElementById('f_phone').value=s.phone||'';
+  document.getElementById('f_email').value=s.email||'';
+  document.getElementById('f_college').value=s.collegeId||'';
+  const c=getCollege(s.collegeId);
+  document.getElementById('f_unitLabel').textContent = c && c.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
+  document.getElementById('f_unitCount').value=s.unitCount||0;
+  document.getElementById('f_instituteFee').value=s.instituteFee||0;
+  document.getElementById('f_instituteFee').dataset.userEdited='1';
+  document.getElementById('f_companyFee').value=s.companyFeeAmount||0;
+  document.getElementById('f_associationFee').value=s.associationFeeAmount||0;
+  selectedDiscountIds = new Set(s.discountIds || []);
+  refreshDiscountSelects();
+  document.getElementById('f_initialPay').value='';
+  document.getElementById('f_paymentMethod').value=s.paymentMethod||'cash';
+  document.getElementById('f_instCount').value=s.installmentCount||3;
+  document.getElementById('f_instFirstDate').value=s.installmentFirstDate ? s.installmentFirstDate.slice(0,10) : new Date().toISOString().slice(0,10);
+  document.getElementById('f_instInterval').value=s.installmentInterval||30;
+  document.getElementById('f_applyInstFee').checked=!!s.installmentFeeApplied;
+  toggleInstallmentFields();
+  document.getElementById('studentOverlay').classList.add('open');
+}
+function closeStudentModal(){ document.getElementById('studentOverlay').classList.remove('open'); }
+async function saveStudent(){
+  const name=document.getElementById('f_name').value.trim();
+  const collegeId=document.getElementById('f_college').value;
+  if(!name){ showToast('اكتب اسم الطالب'); return; }
+  if(!collegeId){ showToast('اختار الكلية'); return; }
+
+  const unitCount = Number(document.getElementById('f_unitCount').value)||0;
+  const instituteFee = Number(document.getElementById('f_instituteFee').value)||0;
+  const companyFeeAmount = Number(document.getElementById('f_companyFee').value)||0;
+  const associationFeeAmount = Number(document.getElementById('f_associationFee').value)||0;
+  const discountIds = getSelectedDiscountIds();
+
+  const paymentMethod = document.getElementById('f_paymentMethod').value;
+  let planData = { paymentMethod:'cash', installmentFee:0, installmentFeeApplied:false, installmentCount:0, installmentFirstDate:null, installmentInterval:0, installments:[] };
+
+  const discTotal = discountIds.reduce((sum,id)=>{
+    const d=getDiscount(id); if(!d) return sum;
+    return sum + (d.type==='percent' ? instituteFee*Number(d.value)/100 : Number(d.value));
+  },0);
+  const instituteAfterDiscount = Math.max(instituteFee-discTotal,0);
+
+  if(paymentMethod==='installment'){
+    const apply = document.getElementById('f_applyInstFee').checked;
+    const feeAmt = apply ? (data.installmentFeeSetting.type==='percent'? instituteAfterDiscount*Number(data.installmentFeeSetting.value)/100 : Number(data.installmentFeeSetting.value)) : 0;
+    const grand = instituteAfterDiscount+feeAmt+companyFeeAmount+associationFeeAmount;
+    const count = Math.max(Number(document.getElementById('f_instCount').value)||1,1);
+    const firstDateStr = document.getElementById('f_instFirstDate').value || new Date().toISOString().slice(0,10);
+    const interval = Number(document.getElementById('f_instInterval').value)||30;
+    const perAmount = Math.floor((grand/count)*100)/100;
+    const installments=[]; let runningTotal=0;
+    for(let i=0;i<count;i++){
+      const d=new Date(firstDateStr); d.setDate(d.getDate()+interval*i);
+      let amt = perAmount;
+      if(i===count-1) amt = Math.round((grand-runningTotal)*100)/100;
+      runningTotal += amt;
+      installments.push({ id:uid(), dueDate:d.toISOString(), amount:amt });
+    }
+    planData = { paymentMethod:'installment', installmentFee:feeAmt, installmentFeeApplied:apply, installmentCount:count, installmentFirstDate:firstDateStr, installmentInterval:interval, installments };
+  }
+
+  const baseFields = {
+    code:document.getElementById('f_code').value.trim(), name,
+    phone:document.getElementById('f_phone').value.trim(),
+    email:document.getElementById('f_email').value.trim(),
+    collegeId, unitCount, instituteFee, companyFeeAmount, associationFeeAmount, discountIds,
+    ...planData
+  };
+
+  if(currentEditId){
+    const s=data.students.find(x=>x.id===currentEditId);
+    Object.assign(s, baseFields);
+  } else {
+    const s={ id:uid(), ...baseFields, payments:[] };
+    const initial=Number(document.getElementById('f_initialPay').value)||0;
+    if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, method:'Cash', note:'دفعة أولى'});
+    data.students.push(s);
+  }
+  await persist();
+  closeStudentModal();
+  render();
+  showToast('تم الحفظ بنجاح');
+}
+async function deleteStudent(id){
+  if(!confirm('متأكد إنك عايز تحذف الطالب ده؟')) return;
+  data.students=data.students.filter(x=>x.id!==id);
+  await persist();
+  closeDrawer();
+  render();
+  showToast('تم الحذف');
+}
+
+function openDrawer(id){
+  currentDetailId=id;
+  const s=data.students.find(x=>x.id===id); if(!s) return;
+  const college=getCollege(s.collegeId);
+  const discountIds = s.discountIds || [];
+  const scope = currentUser ? (currentUser.financialScope||'all') : 'all';
+
+  document.getElementById('d_name').textContent=s.name;
+  document.getElementById('d_code').textContent='كود: '+(s.code||'—');
+  document.getElementById('d_college').textContent=college?college.name:'—';
+  document.getElementById('d_feeTypeLabel').textContent = college ? (college.feeType==='hour' ? 'بالساعة' : 'بالمادة') : '—';
+  document.getElementById('d_paymentMethod').textContent = s.paymentMethod==='installment' ? 'تقسيط' : 'كاش';
+  document.getElementById('d_phone').textContent=s.phone||'—';
+  document.getElementById('d_email').textContent=s.email||'—';
+
+  const pb = partyBreakdown(s);
+  const companyCard = document.getElementById('d_companyTotal').closest('.party-card');
+  const assocCard = document.getElementById('d_assocTotal').closest('.party-card');
+  const instCard = document.getElementById('d_instituteTotal').closest('.party-card');
+  companyCard.style.display = (scope==='all'||scope==='company') ? 'block' : 'none';
+  assocCard.style.display = (scope==='all'||scope==='association') ? 'block' : 'none';
+  instCard.style.display = (scope==='all'||scope==='institute') ? 'block' : 'none';
+  document.getElementById('d_companyTotal').textContent=fmt(pb.companyTotal)+' ج.م';
+  document.getElementById('d_companyPaid').textContent=fmt(pb.companyPaid)+' ج.م';
+  document.getElementById('d_companyRemaining').textContent=fmt(pb.companyRemaining)+' ج.م';
+  document.getElementById('d_assocTotal').textContent=fmt(pb.assocTotal)+' ج.م';
+  document.getElementById('d_assocPaid').textContent=fmt(pb.assocPaid)+' ج.م';
+  document.getElementById('d_assocRemaining').textContent=fmt(pb.assocRemaining)+' ج.م';
+  document.getElementById('d_instituteTotal').textContent=fmt(pb.instituteTotal)+' ج.م';
+  document.getElementById('d_institutePaid').textContent=fmt(pb.institutePaid)+' ج.م';
+  document.getElementById('d_instituteRemaining').textContent=fmt(pb.instituteRemaining)+' ج.م';
+
+  document.getElementById('d_unitLabel').textContent = college && college.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
+  document.getElementById('d_unitCount').textContent = s.unitCount||0;
+  document.getElementById('d_instituteBase').textContent = fmt(s.instituteFee||0)+' ج.م';
+
+  const instFeeRow=document.getElementById('d_instFeeRow');
+  if(s.installmentFee>0){ instFeeRow.style.display='flex'; document.getElementById('d_instFee').textContent=fmt(s.installmentFee)+' ج.م'; }
+  else instFeeRow.style.display='none';
+
+  const discountsListEl=document.getElementById('d_discountsList');
+  if(discountIds.length===0){
+    discountsListEl.innerHTML='<div class="d-row"><span>بدون خصومات</span><b>—</b></div>';
+  } else {
+    const base=Number(s.instituteFee||0);
+    discountsListEl.innerHTML = discountIds.map(id=>{
+      const d=getDiscount(id); if(!d) return '';
+      const amt = d.type==='percent' ? base*Number(d.value)/100 : Number(d.value);
+      const label = d.type==='percent' ? `${d.name} (${d.value}%)` : d.name;
+      return `<div class="d-row"><span>${escapeHtml(label)}</span><b>${fmt(amt)} ج.م</b></div>`;
+    }).join('') + `<div class="d-row"><span><b>إجمالي الخصم</b></span><b>${fmt(discountAmount(s))} ج.م</b></div>`;
+  }
+
+  document.getElementById('d_total').textContent=fmt(studentTotal(s))+' ج.م';
+  document.getElementById('d_paid').textContent=fmt(paidAmount(s))+' ج.م';
+
+  const r=remaining(s);
+  const box=document.getElementById('d_statusBox');
+  box.className='status-box';
+  if(paidAmount(s)===0 && r>0){
+    box.classList.add('status-due');
+    document.getElementById('d_statusAmt').textContent='عليه '+fmt(r)+' ج.م';
+    document.getElementById('d_statusLbl').textContent='لم يبدأ الدفع';
+  } else if(r>0.001){
+    box.classList.add('status-due');
+    document.getElementById('d_statusAmt').textContent='عليه '+fmt(r)+' ج.م';
+    document.getElementById('d_statusLbl').textContent='متبقي من إجمالي المطلوب';
+  } else if(r<-0.001){
+    box.classList.add('status-credit');
+    document.getElementById('d_statusAmt').textContent='له '+fmt(-r)+' ج.م';
+    document.getElementById('d_statusLbl').textContent='مدفوع زيادة عن المطلوب';
+  } else {
+    box.classList.add('status-clear');
+    document.getElementById('d_statusAmt').textContent='مكتمل السداد';
+    document.getElementById('d_statusLbl').textContent='لا يوجد مستحقات';
+  }
+
+  document.getElementById('f_payAmount').value='';
+  document.getElementById('f_payMethod').value='Cash';
+  document.getElementById('f_payNote').value='';
+  renderPayList(s);
+
+  const instSection=document.getElementById('d_installmentSection');
+  if(s.paymentMethod==='installment' && s.installments && s.installments.length){
+    instSection.style.display='block';
+    const allocated = allocateInstallments(s);
+    document.getElementById('d_installmentList').innerHTML = allocated.map((inst,idx)=>{
+      const stColor = inst.status==='مدفوع'?'var(--good)': inst.status==='متأخر'?'var(--bad)':'var(--ink-soft)';
+      const penaltyTxt = inst.penalty>0 ? ` · غرامة ${fmt(inst.penalty)} ج.م` : '';
+      return `<div class="d-row"><span>قسط ${idx+1} — ${new Date(inst.dueDate).toLocaleDateString('ar-EG')}</span><b style="color:${stColor}">${fmt(inst.amount)} ج.م (${inst.status})${penaltyTxt}</b></div>`;
+    }).join('');
+    const pTotal = totalPenalties(s);
+    const pRow=document.getElementById('d_penaltyRow');
+    if(pTotal>0.001){ pRow.style.display='flex'; document.getElementById('d_penaltyTotal').textContent=fmt(pTotal)+' ج.م'; }
+    else pRow.style.display='none';
+  } else {
+    instSection.style.display='none';
+  }
+
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('scrim').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+function renderPayList(s){
+  const payments=s.payments||[];
+  const list=document.getElementById('payList');
+  if(payments.length===0){ list.innerHTML='<div class="pay-empty">لسه مفيش دفعات مسجلة</div>'; return; }
+  list.innerHTML=payments.slice().reverse().map(p=>{
+    const isRefund = p.amount<0;
+    const tag = isRefund ? ' (استرداد)' : '';
+    return `<div class="pay-row"><span>${new Date(p.date).toLocaleDateString('ar-EG')} ${p.method?'· '+escapeHtml(p.method):''}${p.note?' · '+escapeHtml(p.note):''}${tag}</span><span class="amt" style="color:${isRefund?'var(--bad)':'var(--good)'}">${isRefund?'-':''}${fmt(Math.abs(p.amount))} ج.م</span></div>`;
+  }).join('');
+}
+async function addPayment(){
+  const amount=Number(document.getElementById('f_payAmount').value)||0;
+  if(amount===0){ showToast('اكتب مبلغ صحيح (رقم سالب = استرداد)'); return; }
+  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
+  s.payments=s.payments||[];
+  s.payments.push({date:new Date().toISOString(), amount, method:document.getElementById('f_payMethod').value, note:document.getElementById('f_payNote').value.trim()});
+  await persist();
+  openDrawer(s.id);
+  render();
+  showToast(amount<0 ? 'تم تسجيل الاسترداد' : 'تم تسجيل الدفعة');
+}
+
+function buildShareText(s){
+  const college=getCollege(s.collegeId);
+  const pb = partyBreakdown(s);
+  const today = new Date().toLocaleDateString('ar-EG');
+  const lines=[];
+  lines.push('CANADIAN INTERNATIONAL COLLEGE (CIC)');
+  lines.push('قسم الإيرادات — كشف حساب رسمي');
+  lines.push('');
+  lines.push(`التاريخ: ${today}`);
+  lines.push('');
+  lines.push(`عزيزي/عزيزتي ${s.name}،`);
+  lines.push('');
+  lines.push('نرفق لكم كشف الحساب الرسمي الخاص بكم لدى الكلية الكندية الدولية (CIC).');
+  lines.push('');
+  lines.push('بيانات الطالب');
+  lines.push(`الاسم: ${s.name}`);
+  lines.push(`الكود: ${s.code||'—'}`);
+  if(s.phone) lines.push(`الهاتف: ${s.phone}`);
+  if(s.email) lines.push(`الإيميل: ${s.email}`);
+  lines.push(`الكلية: ${college?college.name:'—'}`);
+  lines.push('');
+  lines.push('تفصيل المصاريف حسب الجهة');
+  lines.push(`الشركة: إجمالي ${fmt(pb.companyTotal)} ج.م — مدفوع ${fmt(pb.companyPaid)} ج.م — متبقي ${fmt(pb.companyRemaining)} ج.م`);
+  lines.push(`الجمعية: إجمالي ${fmt(pb.assocTotal)} ج.م — مدفوع ${fmt(pb.assocPaid)} ج.م — متبقي ${fmt(pb.assocRemaining)} ج.م`);
+  lines.push(`المعهد (بعد الخصم): إجمالي ${fmt(pb.instituteTotal)} ج.م — مدفوع ${fmt(pb.institutePaid)} ج.م — متبقي ${fmt(pb.instituteRemaining)} ج.م`);
+  lines.push('');
+  if(s.paymentMethod==='installment' && s.installments && s.installments.length){
+    lines.push('جدول الأقساط');
+    allocateInstallments(s).forEach((inst,idx)=>{
+      let line=`  ${idx+1}. استحقاق ${new Date(inst.dueDate).toLocaleDateString('ar-EG')} — ${fmt(inst.amount)} ج.م — الحالة: ${inst.status}`;
+      if(inst.penalty>0) line+=` — غرامة: ${fmt(inst.penalty)} ج.م`;
+      lines.push(line);
+    });
+    lines.push('');
+  }
+  const payments=s.payments||[];
+  lines.push('سجل الدفعات');
+  if(payments.length){
+    payments.forEach(p=>{
+      const isRefund=p.amount<0;
+      lines.push(`  - ${new Date(p.date).toLocaleDateString('ar-EG')}: ${isRefund?'استرداد ':''}${fmt(Math.abs(p.amount))} ج.م${p.method?' عن طريق '+p.method:''}${p.note?' — '+p.note:''}`);
+    });
+  } else {
+    lines.push('  لا توجد دفعات مسجلة حتى الآن.');
+  }
+  lines.push('');
+  lines.push('ملخص الحساب');
+  lines.push(`إجمالي المدفوع: ${fmt(paidAmount(s))} ج.م`);
+  const r=remaining(s);
+  if(r>0.001) lines.push(`المتبقي: ${fmt(r)} ج.م`);
+  else if(r<-0.001) lines.push(`رصيد دائن (مدفوع زيادة): ${fmt(-r)} ج.م`);
+  else lines.push('الحساب مكتمل السداد.');
+  lines.push('');
+  lines.push('لأي استفسار بخصوص هذا الكشف، برجاء التواصل مع قسم الإيرادات.');
+  lines.push('');
+  lines.push('مع تحيات،');
+  lines.push('قسم الإيرادات');
+  lines.push('الكلية الكندية الدولية (CIC)');
+  return lines.join('\n');
+}
+function openShareWaModal(){
+  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
+  document.getElementById('waPhoneInput').value=(s.phone||'').replace(/[^0-9]/g,'');
+  document.getElementById('shareWaOverlay').classList.add('open');
+}
+function closeWaModal(){ document.getElementById('shareWaOverlay').classList.remove('open'); }
+function sendWhatsApp(){
+  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
+  const phone=document.getElementById('waPhoneInput').value.replace(/[^0-9]/g,'');
+  if(!phone){ showToast('اكتب رقم صحيح'); return; }
+  const text=encodeURIComponent(buildShareText(s));
+  window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+  closeWaModal();
+}
+function openShareEmailModal(){
+  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
+  document.getElementById('emailInput').value=s.email||'';
+  document.getElementById('emailMessageBox').value=buildShareText(s);
+  updateMailtoLink();
+  document.getElementById('shareEmailOverlay').classList.add('open');
+}
+function closeEmailModal(){ document.getElementById('shareEmailOverlay').classList.remove('open'); }
+function updateMailtoLink(){
+  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
+  const to=document.getElementById('emailInput').value.trim();
+  const subject=encodeURIComponent('كشف حساب رسمي — '+s.name+' — الكلية الكندية الدولية (CIC)');
+  const body=encodeURIComponent(document.getElementById('emailMessageBox').value);
+  document.getElementById('mailtoLink').href = `mailto:${to}?subject=${subject}&body=${body}`;
+}
+function copyEmailMessage(){
+  const box=document.getElementById('emailMessageBox');
+  box.select();
+  navigator.clipboard.writeText(box.value).then(()=>{
+    showToast('تم نسخ الرسالة — الصقها في تطبيق البريد');
+  }).catch(()=>{
+    document.execCommand('copy');
+    showToast('تم نسخ الرسالة — الصقها في تطبيق البريد');
+  });
+}
+
+const DEFAULT_DATA_SHAPE = { batchName:"دفعة جديدة", colleges:[], discounts:[], students:[], installmentFeeSetting:{type:'percent',value:0}, penaltySetting:{type:'percent',value:0,grace:0} };
+async function maybeCreateDailyBackup(){
+  const todayStr = new Date().toISOString().slice(0,10);
+  if(data.lastBackupDate === todayStr) return;
+  try{
+    await AppStore.set('backup:'+todayStr, JSON.stringify(data));
+    data.lastBackupDate = todayStr;
+    await persist();
+    pruneOldBackups();
+  }catch(e){}
+}
+async function pruneOldBackups(){
+  try{
+    const list = await AppStore.list('backup:');
+    const keys = (list && list.keys) ? list.keys.slice().sort() : [];
+    const excess = keys.length - 30;
+    if(excess>0){ for(const k of keys.slice(0, excess)){ try{ await AppStore.delete(k); }catch(e){} } }
+  }catch(e){}
+}
+async function renderBackupList(){
+  const el=document.getElementById('backupList');
+  if(!el) return;
+  el.innerHTML='<div class="settings-empty">جاري التحميل...</div>';
+  try{
+    const list = await AppStore.list('backup:');
+    const keys = (list && list.keys) ? list.keys.slice().sort().reverse() : [];
+    if(keys.length===0){ el.innerHTML='<div class="settings-empty">لا توجد نسخ احتياطية تلقائية بعد</div>'; return; }
+    el.innerHTML = keys.map(k=>{
+      const dateLabel = k.replace('backup:','');
+      return `<div class="settings-item"><span>${dateLabel}</span><button class="del" style="color:var(--brand);" onclick="restoreBackup('${k}')">استعادة</button></div>`;
+    }).join('');
+  }catch(e){ el.innerHTML='<div class="settings-empty">تعذر تحميل النسخ الاحتياطية</div>'; }
+}
+async function restoreBackup(key){
+  if(!confirm('استعادة النظام لهذه النسخة؟ سيتم استبدال كل البيانات الحالية.')) return;
+  try{
+    const res = await AppStore.get(key);
+    if(!res || !res.value){ showToast('النسخة غير موجودة'); return; }
+    data = Object.assign({}, DEFAULT_DATA_SHAPE, JSON.parse(res.value));
+    await persist();
+    refreshCollegeSelects(); refreshDiscountSelects(); render();
+    showToast('تم الاستعادة من النسخة الاحتياطية');
+  }catch(e){ showToast('تعذرت الاستعادة'); }
+}
+function downloadBackupNow(){
+  const snapshot = JSON.stringify(data, null, 2);
+  const blob = new Blob([snapshot], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download = 'CIC_Backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('تم تنزيل النسخة الاحتياطية');
+}
+function handleRestoreFile(e){
+  const file=e.target.files[0]; if(!file) return;
+  if(!confirm('هيتم استبدال كل البيانات الحالية بهذا الملف. متابعة؟')){ e.target.value=''; return; }
+  const reader=new FileReader();
+  reader.onload = async (evt)=>{
+    try{
+      const parsed = JSON.parse(evt.target.result);
+      data = Object.assign({}, DEFAULT_DATA_SHAPE, parsed);
+      await persist();
+      refreshCollegeSelects(); refreshDiscountSelects(); render();
+      showToast('تم استعادة النسخة الاحتياطية بنجاح');
+    }catch(err){ showToast('تعذر قراءة هذا الملف'); }
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+async function exportExcel(){
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Students', { views:[{ state:'frozen', ySplit:1 }] });
+  const columns = [
+    {header:'Student Code', key:'code', width:14},
+    {header:'Name', key:'name', width:24},
+    {header:'Payment Method', key:'payMethod', width:18},
+    {header:'Amount Paid', key:'paid', width:14},
+    {header:'Remaining', key:'remaining', width:14},
+    {header:'Payment Plan', key:'planType', width:14},
+    {header:'College', key:'college', width:18},
+    {header:'Fee Type', key:'feeType', width:12},
+    {header:'Unit Count', key:'unitCount', width:12},
+    {header:'Institute Fee (Base)', key:'instituteFee', width:16},
+    {header:'Company Fee', key:'companyFee', width:14},
+    {header:'Association Fee', key:'associationFee', width:14},
+    {header:'Discounts', key:'discounts', width:22},
+    {header:'Total Discount', key:'discountTotal', width:14},
+    {header:'Installment Fee', key:'instFee', width:14},
+    {header:'Total Due', key:'total', width:14},
+    {header:'Penalties Due', key:'penalty', width:14},
+    {header:'Phone', key:'phone', width:15},
+    {header:'Email', key:'email', width:24},
+    {header:'Status', key:'status', width:13},
+    {header:'Notes', key:'notes', width:30},
+  ];
+  ws.columns = columns;
+  data.students.forEach(s=>{
+    const college=getCollege(s.collegeId);
+    const discountIds = s.discountIds || [];
+    const discountNames = discountIds.map(id=>getDiscount(id)).filter(Boolean).map(d=>d.name).join(', ');
+    const payMethods = Array.from(new Set((s.payments||[]).map(p=>p.method||'Cash'))).join(', ');
+    const notes = (s.payments||[]).filter(p=>p.note).map(p=>p.note).join('; ');
+    ws.addRow({
+      code:s.code||'', name:s.name, payMethod: payMethods || '—',
+      paid: paidAmount(s), remaining: remaining(s),
+      planType: s.paymentMethod==='installment' ? 'Installment' : 'Cash',
+      college: college?college.name:'', feeType: college? (college.feeType==='hour'?'Per Hour':'Per Subject') : '',
+      unitCount: s.unitCount||0, instituteFee: s.instituteFee||0,
+      companyFee: s.companyFeeAmount||0, associationFee: s.associationFeeAmount||0,
+      discounts: discountNames, discountTotal: discountAmount(s), instFee: s.installmentFee||0,
+      total: studentTotal(s), penalty: totalPenalties(s), phone: s.phone||'', email: s.email||'',
+      status: payStatus(s)==='Paid'?'Fully Paid':payStatus(s)==='Partial'?'Balance Due':'Not Paid',
+      notes: notes || ''
+    });
+  });
+  const headerRow = ws.getRow(1);
+  headerRow.height = 24;
+  headerRow.eachCell(cell=>{
+    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF131C2E'} };
+    cell.font = { color:{argb:'FFFFFFFF'}, bold:true, size:11, name:'Calibri' };
+    cell.alignment = { horizontal:'center', vertical:'middle' };
+    cell.border = { bottom:{style:'medium', color:{argb:'FFB8912F'}} };
+  });
+  const moneyCols = ['instituteFee','companyFee','associationFee','paid','remaining','discountTotal','instFee','total','penalty'];
+  ws.eachRow((row, rowNumber)=>{
+    if(rowNumber===1) return;
+    const bg = rowNumber%2===0 ? 'FFF2F3F6' : 'FFFFFFFF';
+    row.eachCell({includeEmpty:true}, cell=>{
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:bg} };
+      cell.alignment = { horizontal:'left', vertical:'middle' };
+      cell.border = { bottom:{style:'thin', color:{argb:'FFE1E4EA'}} };
+      cell.font = { name:'Calibri', size:11 };
+    });
+    moneyCols.forEach(k=>{ const colIdx = columns.findIndex(c=>c.key===k)+1; row.getCell(colIdx).numFmt = '#,##0.00'; });
+    const remCell = row.getCell(columns.findIndex(c=>c.key==='remaining')+1);
+    const rVal = Number(remCell.value)||0;
+    if(rVal>0.001) remCell.font = { color:{argb:'FFB23A2A'}, bold:true, name:'Calibri', size:11 };
+    else if(rVal<-0.001) remCell.font = { color:{argb:'FFB07D17'}, bold:true, name:'Calibri', size:11 };
+    else remCell.font = { color:{argb:'FF1F7A4D'}, bold:true, name:'Calibri', size:11 };
+  });
+  const lastColLetter = String.fromCharCode(64+columns.length);
+  ws.autoFilter = { from:'A1', to: lastColLetter+'1' };
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = (data.batchName||'Students')+'.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function handleImportFile(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload = async (evt)=>{
+    try{
+      const wb = XLSX.read(evt.target.result, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      let added=0, createdColleges=0;
+      rows.forEach(row=>{
+        const name = String(row['Name']||row['Student Name']||'').trim();
+        if(!name) return;
+        const collegeName = String(row['College']||'').trim();
+        let college = data.colleges.find(c=>c.name===collegeName);
+        if(!college && collegeName){
+          college = {id:uid(), name:collegeName, feeType:'subject', unitPrice:0, companyFee:0, associationFee:0};
+          data.colleges.push(college);
+          createdColleges++;
+        }
+        const s = {
+          id:uid(), code:String(row['Code']||'').trim(), name,
+          phone:String(row['Phone']||'').trim(), email:String(row['Email']||'').trim(),
+          collegeId: college? college.id : '', unitCount:0,
+          instituteFee: college? Number(college.unitPrice||0) : 0,
+          companyFeeAmount: college? Number(college.companyFee||0) : 0,
+          associationFeeAmount: college? Number(college.associationFee||0) : 0,
+          discountIds:[],
+          paymentMethod:'cash', installmentFee:0, installmentFeeApplied:false, installmentCount:0, installmentFirstDate:null, installmentInterval:0, installments:[],
+          payments:[]
+        };
+        const initial=Number(row['Initial Payment'])||0;
+        if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, method:'Cash', note:'Imported from Excel'});
+        data.students.push(s);
+        added++;
+      });
+      await persist();
+      refreshCollegeSelects();
+      render();
+      showToast(`تم استيراد ${added} طالب${createdColleges? ' — تم إنشاء '+createdColleges+' كلية جديدة تلقائيًا، راجع أسعارها في الإعدادات':''}`);
+    }catch(err){ showToast('حصل خطأ في قراءة الملف'); }
+    e.target.value='';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+document.getElementById('addBtn').addEventListener('click', openAddModal);
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('exportBtn').addEventListener('click', exportExcel);
+document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change', handleImportFile);
+document.getElementById('restoreFileInput').addEventListener('change', handleRestoreFile);
+document.getElementById('logoutBtn').addEventListener('click', logout);
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('filterCollege').addEventListener('change', render);
+document.getElementById('filterStatus').addEventListener('change', render);
+document.getElementById('studentOverlay').addEventListener('click', e=>{ if(e.target.id==='studentOverlay') closeStudentModal(); });
+document.getElementById('settingsOverlay').addEventListener('click', e=>{ if(e.target.id==='settingsOverlay') closeSettings(); });
+document.getElementById('scrim').addEventListener('click', closeDrawer);
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('shareWaOverlay').addEventListener('click', e=>{ if(e.target.id==='shareWaOverlay') closeWaModal(); });
+document.getElementById('shareEmailOverlay').addEventListener('click', e=>{ if(e.target.id==='shareEmailOverlay') closeEmailModal(); });
+
+loadData();
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
