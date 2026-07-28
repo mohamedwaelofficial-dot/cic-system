@@ -532,7 +532,7 @@
     <h2>دفتر الكاش اليومي</h2>
     <div class="field-row">
       <div class="field"><label>عرض معاملات يوم</label><input id="ledgerDateInput" type="date" /></div>
-      <div class="field"><label>أو ابحث باسم الطالب (في كل الأيام)</label><input id="ledgerStudentSearch" placeholder="اكتب اسم الطالب..." /></div>
+      <div class="field"><label>أو ابحث بكود الطالب (في كل الأيام)</label><input id="ledgerStudentSearch" placeholder="اكتب كود الطالب..." /></div>
     </div>
 
     <div class="party-card">
@@ -557,9 +557,9 @@
     </div>
     <div class="field-row">
       <div class="field"><label>المبلغ</label><input id="ledgerAmount" type="number" /></div>
-      <div class="field"><label>اسم الطالب (اختياري)</label><input id="ledgerStudentName" list="studentNamesList" /></div>
+      <div class="field"><label>كود الطالب (اختياري)</label><input id="ledgerStudentCode" list="studentCodesList" placeholder="اكتب أو اختار من القائمة" /></div>
     </div>
-    <datalist id="studentNamesList"></datalist>
+    <datalist id="studentCodesList"></datalist>
     <div class="field"><label>ملاحظة (اختياري)</label><input id="ledgerNote" /></div>
     <button class="btn btn-brand btn-block btn-sm" onclick="addLedgerEntry()">+ تسجيل المعاملة</button>
 
@@ -1651,18 +1651,21 @@ function populateLedgerCategories(){
   opts += `<option value="أخرى">أخرى</option>`;
   sel.innerHTML = opts;
 }
-function populateStudentNamesDatalist(){
-  const dl = document.getElementById('studentNamesList');
-  dl.innerHTML = data.students.map(s=>`<option value="${escapeHtml(s.name)}">`).join('');
+function populateStudentCodesDatalist(){
+  const dl = document.getElementById('studentCodesList');
+  dl.innerHTML = data.students.filter(s=>s.code).map(s=>`<option value="${escapeHtml(s.code)}">${escapeHtml(s.name)}</option>`).join('');
+}
+function getStudentByCode(code){
+  return data.students.find(s=> (s.code||'').toLowerCase()===String(code||'').toLowerCase());
 }
 function openCashLedger(){
   document.getElementById('ledgerDateInput').value = new Date().toISOString().slice(0,10);
   document.getElementById('ledgerStudentSearch').value='';
   document.getElementById('ledgerAmount').value='';
-  document.getElementById('ledgerStudentName').value='';
+  document.getElementById('ledgerStudentCode').value='';
   document.getElementById('ledgerNote').value='';
   populateLedgerCategories();
-  populateStudentNamesDatalist();
+  populateStudentCodesDatalist();
   renderLedgerForDate(document.getElementById('ledgerDateInput').value);
   document.getElementById('cashLedgerOverlay').classList.add('open');
 }
@@ -1673,7 +1676,8 @@ function ledgerEntryRowHtml(e, showDate){
   const timeLabel = showDate
     ? `📅 ${e.date}`
     : new Date(e.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-  const details = `${timeLabel} — ${escapeHtml(e.category)}${e.studentName?' — '+escapeHtml(e.studentName):''}${e.note?' — '+escapeHtml(e.note):''}`;
+  const studentInfo = e.studentCode ? (()=>{ const st=getStudentByCode(e.studentCode); return ' — كود '+escapeHtml(e.studentCode)+(st?' ('+escapeHtml(st.name)+')':' (طالب غير معروف)'); })() : '';
+  const details = `${timeLabel} — ${escapeHtml(e.category)}${studentInfo}${e.note?' — '+escapeHtml(e.note):''}`;
   return `<div class="settings-item"><span>${details}</span><span style="display:flex;align-items:center;gap:8px;"><b style="color:${color};white-space:nowrap;">${sign}${fmt(e.amount)} ج.م</b><button class="del" onclick="removeLedgerEntry('${e.id}')">حذف</button></span></div>`;
 }
 function updateLedgerTotals(entries){
@@ -1689,10 +1693,10 @@ function renderLedgerForDate(dateStr){
   list.innerHTML = entries.length===0 ? '<div class="settings-empty">لا توجد معاملات في هذا اليوم</div>' : entries.map(e=>ledgerEntryRowHtml(e,false)).join('');
   updateLedgerTotals(entries);
 }
-function searchLedgerByStudent(name){
-  const q = name.trim().toLowerCase();
+function searchLedgerByStudent(code){
+  const q = code.trim().toLowerCase();
   if(!q){ renderLedgerForDate(document.getElementById('ledgerDateInput').value); return; }
-  const results = (data.cashLedger||[]).filter(e=> (e.studentName||'').toLowerCase().includes(q))
+  const results = (data.cashLedger||[]).filter(e=> (e.studentCode||'').toLowerCase().includes(q))
     .sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp));
   const list = document.getElementById('ledgerEntriesList');
   list.innerHTML = results.length===0 ? '<div class="settings-empty">لا توجد نتائج بالاسم ده</div>' : results.map(e=>ledgerEntryRowHtml(e,true)).join('');
@@ -1703,16 +1707,16 @@ async function addLedgerEntry(){
   const direction = document.getElementById('ledgerDirection').value;
   const amount = Number(document.getElementById('ledgerAmount').value)||0;
   if(amount<=0){ showToast('اكتب مبلغ صحيح'); return; }
-  const studentName = document.getElementById('ledgerStudentName').value.trim();
+  const studentCode = document.getElementById('ledgerStudentCode').value.trim();
   const note = document.getElementById('ledgerNote').value.trim();
   const dateStr = document.getElementById('ledgerDateInput').value || new Date().toISOString().slice(0,10);
   data.cashLedger = data.cashLedger || [];
   data.cashLedger.push({
-    id: uid(), date: dateStr, direction, category, studentName, amount, note,
+    id: uid(), date: dateStr, direction, category, studentCode, amount, note,
     recordedBy: currentUser ? currentUser.email : '', timestamp: new Date().toISOString()
   });
   document.getElementById('ledgerAmount').value='';
-  document.getElementById('ledgerStudentName').value='';
+  document.getElementById('ledgerStudentCode').value='';
   document.getElementById('ledgerNote').value='';
   await persist();
   document.getElementById('ledgerStudentSearch').value='';
@@ -1738,17 +1742,19 @@ async function exportLedgerDay(){
     {header:'Time', key:'time', width:12},
     {header:'Direction', key:'direction', width:12},
     {header:'Category', key:'category', width:24},
-    {header:'Student', key:'student', width:22},
+    {header:'Student Code', key:'studentCode', width:16},
+    {header:'Student Name', key:'studentName', width:22},
     {header:'Amount', key:'amount', width:14},
     {header:'Note', key:'note', width:28},
     {header:'Recorded By', key:'recordedBy', width:22},
   ];
   ws.columns = columns;
   entries.forEach(e=>{
+    const st = e.studentCode ? getStudentByCode(e.studentCode) : null;
     ws.addRow({
       time: new Date(e.timestamp).toLocaleTimeString('en-GB'),
       direction: e.direction==='in' ? 'In' : 'Out',
-      category: e.category, student: e.studentName||'', amount: e.amount,
+      category: e.category, studentCode: e.studentCode||'', studentName: st?st.name:'', amount: e.amount,
       note: e.note||'', recordedBy: e.recordedBy||''
     });
   });
