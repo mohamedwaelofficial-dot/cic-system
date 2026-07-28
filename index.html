@@ -158,6 +158,8 @@
       <span id="currentUserLabel" style="font-size:12px;color:var(--ink-soft);align-self:center;margin-inline-end:4px;"></span>
       <button class="btn btn-ghost" data-perm="import" id="importBtn">📥 استيراد إكسل</button>
       <button class="btn btn-ghost" data-perm="export" id="exportBtn">📤 تصدير إكسل</button>
+      <button class="btn btn-ghost" data-perm="export" id="dailyReportBtn">📊 تقرير يومي</button>
+      <button class="btn btn-ghost" data-perm="cash_ledger" id="cashLedgerBtn">💰 دفتر الكاش</button>
       <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none;">
       <button class="btn btn-brand" data-perm="add" id="addBtn">+ تسجيل طالب</button>
     </div>
@@ -511,6 +513,63 @@
   </div>
 </div>
 
+<!-- Daily student registration report -->
+<div class="overlay" id="dailyReportOverlay">
+  <div class="modal">
+    <h2>التقرير اليومي — طلاب مسجلين حسب التاريخ</h2>
+    <div class="field"><label>اختر التاريخ</label><input id="reportDateInput" type="date" /></div>
+    <div class="fee-hint" id="reportCountHint"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDailyReportModal()">إلغاء</button>
+      <button class="btn btn-brand" onclick="exportDailyReport()">📤 تصدير تقرير اليوم ده</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cash Ledger -->
+<div class="overlay" id="cashLedgerOverlay">
+  <div class="modal modal-lg">
+    <h2>دفتر الكاش اليومي</h2>
+    <div class="field-row">
+      <div class="field"><label>عرض معاملات يوم</label><input id="ledgerDateInput" type="date" /></div>
+      <div class="field"><label>أو ابحث باسم الطالب (في كل الأيام)</label><input id="ledgerStudentSearch" placeholder="اكتب اسم الطالب..." /></div>
+    </div>
+
+    <div class="party-card">
+      <div class="pr"><span>إجمالي المقبوض (In)</span><b id="ledgerTotalIn" style="color:var(--good);">0</b></div>
+      <div class="pr"><span>إجمالي المنصرف (Out)</span><b id="ledgerTotalOut" style="color:var(--bad);">0</b></div>
+      <div class="pr"><span><b>الصافي</b></span><b id="ledgerNet">0</b></div>
+    </div>
+
+    <div class="settings-list" id="ledgerEntriesList" style="max-height:240px;"></div>
+
+    <hr class="divider">
+    <h3 style="font-size:14px;margin:0 0 10px;">تسجيل معاملة جديدة</h3>
+    <div class="field-row">
+      <div class="field"><label>البند</label><select id="ledgerCategory"></select></div>
+      <div class="field">
+        <label>الاتجاه</label>
+        <select id="ledgerDirection">
+          <option value="in">قبض (وارد لعندي)</option>
+          <option value="out">صرف (خارج مني)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>المبلغ</label><input id="ledgerAmount" type="number" /></div>
+      <div class="field"><label>اسم الطالب (اختياري)</label><input id="ledgerStudentName" list="studentNamesList" /></div>
+    </div>
+    <datalist id="studentNamesList"></datalist>
+    <div class="field"><label>ملاحظة (اختياري)</label><input id="ledgerNote" /></div>
+    <button class="btn btn-brand btn-block btn-sm" onclick="addLedgerEntry()">+ تسجيل المعاملة</button>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeCashLedger()">إغلاق</button>
+      <button class="btn btn-brand" onclick="exportLedgerDay()">📤 تصدير يوم الكاش ده إكسل</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -561,6 +620,7 @@ const ALL_PERMISSIONS = [
   {key:'export', label:'تصدير إلى إكسل'},
   {key:'backups', label:'إدارة النسخ الاحتياطية'},
   {key:'manage_users', label:'إدارة المستخدمين والصلاحيات'},
+  {key:'cash_ledger', label:'دفتر الكاش اليومي (تسجيل ومراجعة المعاملات النقدية)'},
 ];
 
 const DEFAULT_DISCOUNTS = [
@@ -1152,7 +1212,7 @@ async function saveStudent(){
     const s=data.students.find(x=>x.id===currentEditId);
     Object.assign(s, baseFields);
   } else {
-    const s={ id:uid(), ...baseFields, payments:[] };
+    const s={ id:uid(), registeredAt:new Date().toISOString(), ...baseFields, payments:[] };
     const initial=Number(document.getElementById('f_initialPay').value)||0;
     if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, method:'Cash', note:'دفعة أولى'});
     data.students.push(s);
@@ -1471,11 +1531,15 @@ function handleRestoreFile(e){
 }
 
 async function exportExcel(){
+  await exportStudentsToExcel(data.students, data.batchName||'Students');
+}
+async function exportStudentsToExcel(studentsList, filenameBase){
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('Students', { views:[{ state:'frozen', ySplit:1 }] });
   const columns = [
     {header:'Student Code', key:'code', width:14},
     {header:'Name', key:'name', width:24},
+    {header:'Registration Date', key:'regDate', width:16},
     {header:'Payment Method', key:'payMethod', width:18},
     {header:'Amount Paid', key:'paid', width:14},
     {header:'Remaining', key:'remaining', width:14},
@@ -1497,14 +1561,15 @@ async function exportExcel(){
     {header:'Notes', key:'notes', width:30},
   ];
   ws.columns = columns;
-  data.students.forEach(s=>{
+  studentsList.forEach(s=>{
     const college=getCollege(s.collegeId);
     const discountIds = s.discountIds || [];
     const discountNames = discountIds.map(id=>getDiscount(id)).filter(Boolean).map(d=>d.name).join(', ');
     const payMethods = Array.from(new Set((s.payments||[]).map(p=>p.method||'Cash'))).join(', ');
     const notes = (s.payments||[]).filter(p=>p.note).map(p=>p.note).join('; ');
     ws.addRow({
-      code:s.code||'', name:s.name, payMethod: payMethods || '—',
+      code:s.code||'', name:s.name, regDate: s.registeredAt ? s.registeredAt.slice(0,10) : '',
+      payMethod: payMethods || '—',
       paid: paidAmount(s), remaining: remaining(s),
       planType: s.paymentMethod==='installment' ? 'Installment' : 'Cash',
       college: college?college.name:'', feeType: college? (college.feeType==='hour'?'Per Hour':'Per Subject') : '',
@@ -1547,7 +1612,170 @@ async function exportExcel(){
   const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = (data.batchName||'Students')+'.xlsx';
+  a.href = url; a.download = (filenameBase||'Students')+'.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ---- Daily student registration report ----
+function studentsRegisteredOn(dateStr){
+  return data.students.filter(s=> s.registeredAt && s.registeredAt.slice(0,10)===dateStr);
+}
+function openDailyReportModal(){
+  document.getElementById('reportDateInput').value = new Date().toISOString().slice(0,10);
+  updateReportCountHint();
+  document.getElementById('dailyReportOverlay').classList.add('open');
+}
+function closeDailyReportModal(){ document.getElementById('dailyReportOverlay').classList.remove('open'); }
+function updateReportCountHint(){
+  const dateStr = document.getElementById('reportDateInput').value;
+  const count = studentsRegisteredOn(dateStr).length;
+  document.getElementById('reportCountHint').textContent = `عدد الطلاب المسجلين في هذا التاريخ: ${count}`;
+}
+async function exportDailyReport(){
+  const dateStr = document.getElementById('reportDateInput').value;
+  const list = studentsRegisteredOn(dateStr);
+  if(list.length===0){ showToast('لا يوجد طلاب اتسجلوا في التاريخ ده'); return; }
+  await exportStudentsToExcel(list, `Daily_Registrations_${dateStr}`);
+  closeDailyReportModal();
+}
+
+// ---- Cash Ledger ----
+function populateLedgerCategories(){
+  const sel = document.getElementById('ledgerCategory');
+  let opts = data.colleges.map(c=>`<option value="معهد ${escapeHtml(c.name)}">معهد ${escapeHtml(c.name)}</option>`).join('');
+  opts += `<option value="الشركة">الشركة</option>`;
+  opts += `<option value="الجمعية">الجمعية</option>`;
+  opts += `<option value="استرداد">استرداد (Refund)</option>`;
+  opts += `<option value="توريد">توريد (تسليم كاش)</option>`;
+  opts += `<option value="أخرى">أخرى</option>`;
+  sel.innerHTML = opts;
+}
+function populateStudentNamesDatalist(){
+  const dl = document.getElementById('studentNamesList');
+  dl.innerHTML = data.students.map(s=>`<option value="${escapeHtml(s.name)}">`).join('');
+}
+function openCashLedger(){
+  document.getElementById('ledgerDateInput').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ledgerStudentSearch').value='';
+  document.getElementById('ledgerAmount').value='';
+  document.getElementById('ledgerStudentName').value='';
+  document.getElementById('ledgerNote').value='';
+  populateLedgerCategories();
+  populateStudentNamesDatalist();
+  renderLedgerForDate(document.getElementById('ledgerDateInput').value);
+  document.getElementById('cashLedgerOverlay').classList.add('open');
+}
+function closeCashLedger(){ document.getElementById('cashLedgerOverlay').classList.remove('open'); }
+function ledgerEntryRowHtml(e, showDate){
+  const sign = e.direction==='in' ? '+' : '-';
+  const color = e.direction==='in' ? 'var(--good)' : 'var(--bad)';
+  const timeLabel = showDate
+    ? `📅 ${e.date}`
+    : new Date(e.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+  const details = `${timeLabel} — ${escapeHtml(e.category)}${e.studentName?' — '+escapeHtml(e.studentName):''}${e.note?' — '+escapeHtml(e.note):''}`;
+  return `<div class="settings-item"><span>${details}</span><span style="display:flex;align-items:center;gap:8px;"><b style="color:${color};white-space:nowrap;">${sign}${fmt(e.amount)} ج.م</b><button class="del" onclick="removeLedgerEntry('${e.id}')">حذف</button></span></div>`;
+}
+function updateLedgerTotals(entries){
+  const totalIn = entries.filter(e=>e.direction==='in').reduce((s,e)=>s+e.amount,0);
+  const totalOut = entries.filter(e=>e.direction==='out').reduce((s,e)=>s+e.amount,0);
+  document.getElementById('ledgerTotalIn').textContent = fmt(totalIn)+' ج.م';
+  document.getElementById('ledgerTotalOut').textContent = fmt(totalOut)+' ج.م';
+  document.getElementById('ledgerNet').textContent = fmt(totalIn-totalOut)+' ج.م';
+}
+function renderLedgerForDate(dateStr){
+  const entries = (data.cashLedger||[]).filter(e=>e.date===dateStr).sort((a,b)=> new Date(a.timestamp)-new Date(b.timestamp));
+  const list = document.getElementById('ledgerEntriesList');
+  list.innerHTML = entries.length===0 ? '<div class="settings-empty">لا توجد معاملات في هذا اليوم</div>' : entries.map(e=>ledgerEntryRowHtml(e,false)).join('');
+  updateLedgerTotals(entries);
+}
+function searchLedgerByStudent(name){
+  const q = name.trim().toLowerCase();
+  if(!q){ renderLedgerForDate(document.getElementById('ledgerDateInput').value); return; }
+  const results = (data.cashLedger||[]).filter(e=> (e.studentName||'').toLowerCase().includes(q))
+    .sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp));
+  const list = document.getElementById('ledgerEntriesList');
+  list.innerHTML = results.length===0 ? '<div class="settings-empty">لا توجد نتائج بالاسم ده</div>' : results.map(e=>ledgerEntryRowHtml(e,true)).join('');
+  updateLedgerTotals(results);
+}
+async function addLedgerEntry(){
+  const category = document.getElementById('ledgerCategory').value;
+  const direction = document.getElementById('ledgerDirection').value;
+  const amount = Number(document.getElementById('ledgerAmount').value)||0;
+  if(amount<=0){ showToast('اكتب مبلغ صحيح'); return; }
+  const studentName = document.getElementById('ledgerStudentName').value.trim();
+  const note = document.getElementById('ledgerNote').value.trim();
+  const dateStr = document.getElementById('ledgerDateInput').value || new Date().toISOString().slice(0,10);
+  data.cashLedger = data.cashLedger || [];
+  data.cashLedger.push({
+    id: uid(), date: dateStr, direction, category, studentName, amount, note,
+    recordedBy: currentUser ? currentUser.email : '', timestamp: new Date().toISOString()
+  });
+  document.getElementById('ledgerAmount').value='';
+  document.getElementById('ledgerStudentName').value='';
+  document.getElementById('ledgerNote').value='';
+  await persist();
+  document.getElementById('ledgerStudentSearch').value='';
+  renderLedgerForDate(dateStr);
+  showToast('تم تسجيل المعاملة');
+}
+async function removeLedgerEntry(id){
+  if(!confirm('حذف المعاملة دي؟')) return;
+  data.cashLedger = (data.cashLedger||[]).filter(e=>e.id!==id);
+  await persist();
+  const searchVal = document.getElementById('ledgerStudentSearch').value;
+  if(searchVal.trim()) searchLedgerByStudent(searchVal);
+  else renderLedgerForDate(document.getElementById('ledgerDateInput').value);
+  showToast('تم الحذف');
+}
+async function exportLedgerDay(){
+  const dateStr = document.getElementById('ledgerDateInput').value;
+  const entries = (data.cashLedger||[]).filter(e=>e.date===dateStr).sort((a,b)=> new Date(a.timestamp)-new Date(b.timestamp));
+  if(entries.length===0){ showToast('لا توجد معاملات في هذا اليوم لتصديرها'); return; }
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Cash Ledger');
+  const columns = [
+    {header:'Time', key:'time', width:12},
+    {header:'Direction', key:'direction', width:12},
+    {header:'Category', key:'category', width:24},
+    {header:'Student', key:'student', width:22},
+    {header:'Amount', key:'amount', width:14},
+    {header:'Note', key:'note', width:28},
+    {header:'Recorded By', key:'recordedBy', width:22},
+  ];
+  ws.columns = columns;
+  entries.forEach(e=>{
+    ws.addRow({
+      time: new Date(e.timestamp).toLocaleTimeString('en-GB'),
+      direction: e.direction==='in' ? 'In' : 'Out',
+      category: e.category, student: e.studentName||'', amount: e.amount,
+      note: e.note||'', recordedBy: e.recordedBy||''
+    });
+  });
+  const totalIn = entries.filter(e=>e.direction==='in').reduce((s,e)=>s+e.amount,0);
+  const totalOut = entries.filter(e=>e.direction==='out').reduce((s,e)=>s+e.amount,0);
+  ws.addRow({});
+  ws.addRow({category:'TOTAL IN', amount: totalIn});
+  ws.addRow({category:'TOTAL OUT', amount: totalOut});
+  ws.addRow({category:'NET', amount: totalIn-totalOut});
+  const headerRow = ws.getRow(1);
+  headerRow.height = 22;
+  headerRow.eachCell(cell=>{
+    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF131C2E'} };
+    cell.font = { color:{argb:'FFFFFFFF'}, bold:true, size:11, name:'Calibri' };
+    cell.alignment = { horizontal:'center', vertical:'middle' };
+    cell.border = { bottom:{style:'medium', color:{argb:'FFB8912F'}} };
+  });
+  const amountColIdx = columns.findIndex(c=>c.key==='amount')+1;
+  ws.eachRow((row, rowNumber)=>{
+    if(rowNumber===1) return;
+    row.getCell(amountColIdx).numFmt = '#,##0.00';
+  });
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download = `Cash_Ledger_${dateStr}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1599,6 +1827,17 @@ function handleImportFile(e){
 document.getElementById('addBtn').addEventListener('click', openAddModal);
 document.getElementById('settingsBtn').addEventListener('click', openSettings);
 document.getElementById('exportBtn').addEventListener('click', exportExcel);
+document.getElementById('dailyReportBtn').addEventListener('click', openDailyReportModal);
+document.getElementById('reportDateInput').addEventListener('change', updateReportCountHint);
+document.getElementById('dailyReportOverlay').addEventListener('click', e=>{ if(e.target.id==='dailyReportOverlay') closeDailyReportModal(); });
+document.getElementById('cashLedgerBtn').addEventListener('click', openCashLedger);
+document.getElementById('ledgerDateInput').addEventListener('change', ()=>{ document.getElementById('ledgerStudentSearch').value=''; renderLedgerForDate(document.getElementById('ledgerDateInput').value); });
+document.getElementById('ledgerStudentSearch').addEventListener('input', e=>searchLedgerByStudent(e.target.value));
+document.getElementById('ledgerCategory').addEventListener('change', ()=>{
+  const cat=document.getElementById('ledgerCategory').value;
+  document.getElementById('ledgerDirection').value = (cat==='استرداد'||cat==='توريد') ? 'out' : 'in';
+});
+document.getElementById('cashLedgerOverlay').addEventListener('click', e=>{ if(e.target.id==='cashLedgerOverlay') closeCashLedger(); });
 document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change', handleImportFile);
 document.getElementById('restoreFileInput').addEventListener('change', handleRestoreFile);
