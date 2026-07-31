@@ -215,6 +215,7 @@
   <button class="drawer-close" id="drawerClose">✕</button>
   <div class="d-name" id="d_name"></div>
   <div class="d-code" id="d_code"></div>
+  <div class="d-code" id="d_createdBy" style="display:none;color:var(--brand);"></div>
 
   <div class="status-box" id="d_statusBox">
     <div class="amt" id="d_statusAmt">0 ج.م</div>
@@ -465,7 +466,10 @@
         <div class="field"><select id="newDiscountType"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت</option></select></div>
       </div>
       <div class="field"><input id="newDiscountValue" type="number" placeholder="القيمة" /></div>
-      <button class="btn btn-brand btn-block btn-sm" onclick="addDiscount()">+ إضافة خصم</button>
+      <div class="share-row">
+        <button class="btn btn-brand btn-block btn-sm" id="addDiscountBtn" onclick="addDiscount()">+ إضافة خصم</button>
+        <button class="btn btn-ghost btn-sm" id="cancelDiscountEditBtn" style="display:none;flex:0 0 auto;" onclick="cancelDiscountEdit()">إلغاء التعديل</button>
+      </div>
     </div>
 
     <div id="panelInstallment" style="display:none;">
@@ -1057,6 +1061,7 @@ document.addEventListener('input', (e)=>{
 function openSettings(){
   document.getElementById('settingsOverlay').classList.add('open');
   cancelCollegeEdit();
+  cancelDiscountEdit();
   renderSettingsLists();
   document.getElementById('instFeeType').value = data.installmentFeeSetting.type;
   document.getElementById('instFeeValue').value = data.installmentFeeSetting.value;
@@ -1140,19 +1145,46 @@ async function removeCollege(id){
   if(currentEditCollegeId===id) cancelCollegeEdit();
   await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
 }
+let currentEditDiscountId = null;
 async function addDiscount(){
   const name=document.getElementById('newDiscountName').value.trim();
   const type=document.getElementById('newDiscountType').value;
   const value=Number(document.getElementById('newDiscountValue').value)||0;
   if(!name){ showToast('اكتب اسم الخصم'); return; }
-  data.discounts.push({id:uid(),name,type,value});
-  document.getElementById('newDiscountName').value='';
-  document.getElementById('newDiscountValue').value='';
+  if(currentEditDiscountId){
+    const d=data.discounts.find(x=>x.id===currentEditDiscountId);
+    if(d){ Object.assign(d, {name, type, value}); }
+    showToast('تم تعديل الخصم');
+    cancelDiscountEdit();
+  } else {
+    data.discounts.push({id:uid(),name,type,value});
+    showToast('تم إضافة الخصم');
+    document.getElementById('newDiscountName').value='';
+    document.getElementById('newDiscountValue').value='';
+  }
   await persist(); renderSettingsLists(); refreshDiscountSelects(); render();
+}
+function editDiscount(id){
+  const d=data.discounts.find(x=>x.id===id); if(!d) return;
+  currentEditDiscountId=id;
+  document.getElementById('newDiscountName').value=d.name;
+  document.getElementById('newDiscountType').value=d.type;
+  document.getElementById('newDiscountValue').value=d.value;
+  document.getElementById('addDiscountBtn').textContent='💾 حفظ تعديل الخصم';
+  document.getElementById('cancelDiscountEditBtn').style.display='inline-block';
+}
+function cancelDiscountEdit(){
+  currentEditDiscountId=null;
+  document.getElementById('newDiscountName').value='';
+  document.getElementById('newDiscountType').value='percent';
+  document.getElementById('newDiscountValue').value='';
+  document.getElementById('addDiscountBtn').textContent='+ إضافة خصم';
+  document.getElementById('cancelDiscountEditBtn').style.display='none';
 }
 async function removeDiscount(id){
   if(!confirm('حذف الخصم ده؟')) return;
   data.discounts=data.discounts.filter(d=>d.id!==id);
+  if(currentEditDiscountId===id) cancelDiscountEdit();
   await persist(); renderSettingsLists(); refreshDiscountSelects(); render();
 }
 function renderSettingsLists(){
@@ -1167,7 +1199,7 @@ function renderSettingsLists(){
   const ft=searchEl ? searchEl.value.toLowerCase() : '';
   const filteredDiscounts = data.discounts.filter(d=> !ft || d.name.toLowerCase().includes(ft));
   dList.innerHTML = filteredDiscounts.length===0 ? `<div class="settings-empty">${data.discounts.length===0?'لا توجد خصومات مضافة':'لا توجد نتائج مطابقة'}</div>` :
-    filteredDiscounts.map(d=>`<div class="settings-item"><span>${escapeHtml(d.name)} — ${d.type==='percent'?d.value+'%':fmt(d.value)+' ج.م'}</span><button class="del" onclick="removeDiscount('${d.id}')">حذف</button></div>`).join('');
+    filteredDiscounts.map(d=>`<div class="settings-item"><span>${escapeHtml(d.name)} — ${d.type==='percent'?d.value+'%':fmt(d.value)+' ج.م'}</span><span style="display:flex;gap:10px;"><button class="del" style="color:var(--brand);" onclick="editDiscount('${d.id}')">تعديل</button><button class="del" onclick="removeDiscount('${d.id}')">حذف</button></span></div>`).join('');
 }
 async function saveInstallmentFeeSetting(){
   data.installmentFeeSetting = { type: document.getElementById('instFeeType').value, value: Number(document.getElementById('instFeeValue').value)||0 };
@@ -1425,7 +1457,7 @@ async function saveStudent(){
     const s=data.students.find(x=>x.id===currentEditId);
     Object.assign(s, baseFields);
   } else {
-    const s={ id:uid(), registeredAt:new Date().toISOString(), ...baseFields, payments:[] };
+    const s={ id:uid(), registeredAt:new Date().toISOString(), createdBy: currentUser ? currentUser.email : '', ...baseFields, payments:[] };
     const initial=Number(document.getElementById('f_initialPay').value)||0;
     if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, currency:'EGP', method:'Cash', note:'دفعة أولى'});
     data.students.push(s);
@@ -1453,6 +1485,13 @@ function openDrawer(id){
 
   document.getElementById('d_name').textContent=s.name;
   document.getElementById('d_code').textContent='كود: '+(s.code||'—');
+  const createdByEl = document.getElementById('d_createdBy');
+  if(hasPermission('manage_users') && s.createdBy){
+    createdByEl.textContent='سجّله: '+s.createdBy;
+    createdByEl.style.display='block';
+  } else {
+    createdByEl.style.display='none';
+  }
   document.getElementById('d_college').textContent=college?college.name:'—';
   document.getElementById('d_feeTypeLabel').textContent = college ? (college.feeType==='hour' ? 'بالساعة' : 'بالمادة') : '—';
   document.getElementById('d_paymentMethod').textContent = s.paymentMethod==='installment' ? 'تقسيط' : 'كاش';
