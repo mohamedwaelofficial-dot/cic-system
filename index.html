@@ -244,11 +244,23 @@
       <div class="pr"><span>المدفوع</span><b id="d_assocPaid">0</b></div>
       <div class="pr"><span>المتبقي</span><b id="d_assocRemaining">0</b></div>
     </div>
-    <div class="party-card">
+    <div class="party-card" id="d_instituteCardEgp">
       <div class="pt">🎓 المعهد (بعد الخصم)</div>
       <div class="pr"><span>الإجمالي</span><b id="d_instituteTotal">0</b></div>
       <div class="pr"><span>المدفوع</span><b id="d_institutePaid">0</b></div>
       <div class="pr"><span>المتبقي</span><b id="d_instituteRemaining">0</b></div>
+    </div>
+    <div class="party-card" id="d_ministryCard" style="display:none;">
+      <div class="pt">🏛️ رسوم الوزارة</div>
+      <div class="pr"><span>الإجمالي</span><b id="d_ministryTotal">0</b></div>
+      <div class="pr"><span>المدفوع</span><b id="d_ministryPaid">0</b></div>
+      <div class="pr"><span>المتبقي</span><b id="d_ministryRemaining">0</b></div>
+    </div>
+    <div class="party-card" id="d_instituteCardUsd" style="display:none;border-right-color:var(--canada);">
+      <div class="pt">🎓 المعهد (دولار — برنامج كندي/وافد)</div>
+      <div class="pr"><span>الإجمالي</span><b id="d_instituteTotalUsd">0</b></div>
+      <div class="pr"><span>المدفوع</span><b id="d_institutePaidUsd">0</b></div>
+      <div class="pr"><span>المتبقي</span><b id="d_instituteRemainingUsd">0</b></div>
     </div>
   </div>
 
@@ -274,18 +286,31 @@
   <div class="d-section" data-perm="payments">
     <h4>سجل الدفعات</h4>
     <div class="pay-list" id="payList"></div>
-    <div class="field-row">
-      <div class="field"><input id="f_payAmount" type="number" placeholder="مبلغ الدفعة (سالب = استرداد)" /></div>
-      <div class="field">
-        <select id="f_payMethod">
-          <option value="Cash">كاش</option>
-          <option value="Vodafone Cash">فودافون كاش</option>
-          <option value="InstaPay">انستاباي</option>
-          <option value="Bank Transfer">تحويل بنكي</option>
-          <option value="Card">فيزا/بطاقة</option>
-          <option value="Other">أخرى</option>
-        </select>
+    <div class="field" id="f_payForWrap" style="display:none;">
+      <label>الدفعة دي لـ</label>
+      <select id="f_payFor" onchange="togglePayCurrencyFields()">
+        <option value="egp">باقي الرسوم (جنيه — شركة/جمعية/وزارة)</option>
+        <option value="usd">مصاريف المعهد (دولار)</option>
+      </select>
+    </div>
+    <div id="f_payEgpFields">
+      <div class="field"><input id="f_payAmount" type="number" placeholder="مبلغ الدفعة بالجنيه (سالب = استرداد)" /></div>
+    </div>
+    <div id="f_payUsdFields" style="display:none;">
+      <div class="field-row">
+        <div class="field"><input id="f_payAmountUsd" type="number" placeholder="المبلغ بالدولار (سالب = استرداد)" /></div>
+        <div class="field"><input id="f_payRate" type="number" placeholder="سعر الدولار وقت الدفع" /></div>
       </div>
+    </div>
+    <div class="field">
+      <select id="f_payMethod">
+        <option value="Cash">كاش</option>
+        <option value="Vodafone Cash">فودافون كاش</option>
+        <option value="InstaPay">انستاباي</option>
+        <option value="Bank Transfer">تحويل بنكي</option>
+        <option value="Card">فيزا/بطاقة</option>
+        <option value="Other">أخرى</option>
+      </select>
     </div>
     <div class="field"><input id="f_payNote" placeholder="ملاحظة (اختياري)" /></div>
     <button class="btn btn-brand btn-block btn-sm" onclick="addPayment()">تسجيل الدفعة</button>
@@ -317,24 +342,57 @@
       <div class="field"><label>رقم الهاتف</label><input id="f_phone" /></div>
       <div class="field"><label>الإيميل (اختياري)</label><input id="f_email" /></div>
     </div>
+    <div class="field-row">
+      <div class="field">
+        <label>الجنسية</label>
+        <select id="f_nationality">
+          <option value="egyptian">مصري</option>
+          <option value="foreign">وافد</option>
+        </select>
+      </div>
+      <div class="field" id="f_canadianWrap">
+        <label>&nbsp;</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:var(--ink);padding:9px 0;">
+          <input type="checkbox" id="f_isCanadian" style="width:auto;">
+          برنامج كندي
+        </label>
+      </div>
+    </div>
+    <div class="field" id="f_instituteCurrencyWrap" style="display:none;">
+      <label>عملة مصاريف المعهد (البرنامج الكندي)</label>
+      <select id="f_instituteCurrency">
+        <option value="usd">دولار</option>
+        <option value="egp">جنيه مصري</option>
+      </select>
+    </div>
+    <div class="field" id="ministryFeeWrap">
+      <label>رسوم الوزارة (مبلغ ثابت — للمصريين فقط)</label>
+      <input id="f_ministryFee" type="number" />
+    </div>
     <div class="field">
       <label>الكلية</label>
       <select id="f_college"></select>
       <div class="fee-hint" id="feeHint">—</div>
     </div>
-    <div class="field">
-      <label id="f_unitLabel">عدد الوحدات</label>
-      <input id="f_unitCount" type="number" min="0" value="0" />
-      <div class="fee-hint" id="unitCalcHint"></div>
+    <div id="egpInstituteBlock">
+      <div class="field">
+        <label id="f_unitLabel">عدد الوحدات</label>
+        <input id="f_unitCount" type="number" min="0" value="0" />
+        <div class="fee-hint" id="unitCalcHint"></div>
+      </div>
+    </div>
+    <div id="usdInstituteBlock" style="display:none;">
+      <div class="field"><label>مصاريف المعهد (دولار)</label><input id="f_instituteFeeUSD" type="number" min="0" value="0" /></div>
+      <div class="fee-hint" style="margin-bottom:10px;">مصاريف المعهد بتتسجل بالدولار، والتحويل للجنيه بيحصل مع كل دفعة على حسب سعر الصرف وقتها.</div>
     </div>
     <div class="field-row-3">
-      <div class="field"><label>مصاريف المعهد (قابلة للتعديل)</label><input id="f_instituteFee" type="number" /></div>
+      <div class="field" id="instituteFeeEgpWrap"><label>مصاريف المعهد (قابلة للتعديل)</label><input id="f_instituteFee" type="number" /></div>
       <div class="field"><label>رسوم الشركة (قابلة للتعديل)</label><input id="f_companyFee" type="number" /></div>
       <div class="field"><label>رسوم الجمعية (قابلة للتعديل)</label><input id="f_associationFee" type="number" /></div>
     </div>
     <div class="fee-hint" style="margin-bottom:10px;">القيم دي بتتحسب أوتوماتيك من إعدادات الكلية، بس تقدر تعدلها يدوي لو محتاج تظبطها لحالة معينة.</div>
-    <div class="field">
-      <label>الخصومات (تنطبق على مصاريف المعهد فقط — تقدر تختار أكتر من خصم)</label>
+    <div class="field" id="discountBlockWrap">
+      <label>الخصومات (تنطبق على مصاريف المعهد بالجنيه فقط — تقدر تختار أكتر من خصم)</label>
       <input id="f_discountSearch" placeholder="ابحث في الخصومات..." oninput="renderDiscountChecklist(this.value)" style="margin-bottom:6px;" />
       <div class="settings-list" id="f_discount" style="max-height:170px;"></div>
       <div class="fee-hint" id="discountHint"></div>
@@ -392,7 +450,11 @@
         <div class="field"><input id="newCollegeCompanyFee" type="number" placeholder="رسوم الشركة (ج.م)" /></div>
       </div>
       <div class="field"><input id="newCollegeAssociationFee" type="number" placeholder="رسوم الجمعية (ج.م)" /></div>
-      <button class="btn btn-brand btn-block btn-sm" onclick="addCollege()">+ إضافة كلية</button>
+      <div class="share-row">
+        <button class="btn btn-brand btn-block btn-sm" id="addCollegeBtn" onclick="addCollege()">+ إضافة كلية</button>
+        <button class="btn btn-ghost btn-sm" id="cancelCollegeEditBtn" style="display:none;flex:0 0 auto;" onclick="cancelCollegeEdit()">إلغاء التعديل</button>
+      </div>
+      <div class="fee-hint" style="margin-top:8px;">تعديل بيانات كلية موجودة بيغيّر السعر الافتراضي للطلاب الجدد بس — مش بيغيّر مصاريف الطلاب المسجلين بالفعل (لازم تعدّلها من صفحة الطالب نفسه لو محتاج).</div>
     </div>
 
     <div id="panelDiscounts" style="display:none;">
@@ -407,6 +469,10 @@
     </div>
 
     <div id="panelInstallment" style="display:none;">
+      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin:4px 0 6px;">رسوم الوزارة الافتراضية (مبلغ ثابت بالجنيه — بتتطبق تلقائيًا على كل طالب مصري عند التسجيل)</div>
+      <div class="field"><input id="ministryFeeDefault" type="number" placeholder="مثال: 500" /></div>
+      <button class="btn btn-brand btn-block btn-sm" onclick="saveMinistryFeeSetting()">حفظ رسوم الوزارة</button>
+      <hr class="divider">
       <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin:4px 0 6px;">رسوم التقسيط (تُضاف تلقائيًا على مصاريف المعهد عند اختيار التقسيط)</div>
       <div class="field-row">
         <div class="field"><select id="instFeeType"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت</option></select></div>
@@ -458,7 +524,8 @@
         </div>
         <div class="settings-list" id="newUserPermsList" style="max-height:220px;"></div>
       </div>
-      <button class="btn btn-brand btn-block btn-sm" onclick="addUser()">+ إضافة مستخدم</button>
+      <button class="btn btn-brand btn-block btn-sm" id="addUserBtn" onclick="addUser()">+ إضافة مستخدم</button>
+      <button class="btn btn-ghost btn-block btn-sm" id="cancelUserEditBtn" style="display:none;margin-top:6px;" onclick="cancelUserEdit()">إلغاء التعديل</button>
       <div class="fee-hint" style="margin-top:10px;">الرقم السري ده وسيلة لمنع الأخطاء العرضية من الموظفين — مش حماية حقيقية. أي حد يوصل مباشرة للملف أو تخزين المتصفح يقدر يتخطاها.</div>
     </div>
 
@@ -573,7 +640,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let data = { batchName:"دفعة جديدة", colleges:[], discounts:[], students:[], installmentFeeSetting:{type:'percent',value:0}, penaltySetting:{type:'percent',value:0,grace:0} };
+let data = { batchName:"دفعة جديدة", colleges:[], discounts:[], students:[], installmentFeeSetting:{type:'percent',value:0}, penaltySetting:{type:'percent',value:0,grace:0}, ministryFeeSetting:{value:0} };
 let currentEditId = null;
 let currentDetailId = null;
 const STORAGE_KEY = "revenue-batch-data-en-v1";
@@ -733,7 +800,14 @@ function showToast(msg){
 function getCollege(id){ return data.colleges.find(c=>c.id===id); }
 function getDiscount(id){ return data.discounts.find(d=>d.id===id); }
 
+function isStudentUsd(s){
+  if(s.nationality==='foreign') return true;
+  if(s.nationality==='egyptian' && s.isCanadian) return (s.instituteCurrency||'usd')==='usd';
+  return false;
+}
+function ministryFeeOf(s){ return s.nationality==='egyptian' ? Number(s.ministryFee||0) : 0; }
 function discountAmount(s){
+  if(isStudentUsd(s)) return 0;
   const ids = s.discountIds || [];
   const base = Number(s.instituteFee||0);
   return ids.reduce((sum,id)=>{
@@ -741,23 +815,29 @@ function discountAmount(s){
     return sum + (d.type==='percent' ? base*Number(d.value)/100 : Number(d.value));
   },0);
 }
-function studentInstituteTotal(s){ return Math.max(Number(s.instituteFee||0) - discountAmount(s), 0); }
+function studentInstituteTotal(s){ return isStudentUsd(s) ? 0 : Math.max(Number(s.instituteFee||0) - discountAmount(s), 0); }
 function studentTotal(s){
-  return studentInstituteTotal(s) + Number(s.installmentFee||0) + Number(s.companyFeeAmount||0) + Number(s.associationFeeAmount||0);
+  return studentInstituteTotal(s) + Number(s.installmentFee||0) + Number(s.companyFeeAmount||0) + Number(s.associationFeeAmount||0) + ministryFeeOf(s);
 }
-function paidAmount(s){ return (s.payments||[]).reduce((a,p)=>a+p.amount,0); }
+function paidAmount(s){ return (s.payments||[]).filter(p=>p.currency!=='USD').reduce((a,p)=>a+p.amount,0); }
+function paidAmountUsd(s){ return (s.payments||[]).filter(p=>p.currency==='USD').reduce((a,p)=>a+Number(p.amountUsd||p.amount||0),0); }
+function instituteUsdTotal(s){ return isStudentUsd(s) ? Number(s.instituteFeeUSD||0) : 0; }
+function instituteUsdRemaining(s){ return instituteUsdTotal(s) - paidAmountUsd(s); }
 
 function partyBreakdown(s){
   const companyTotal = Number(s.companyFeeAmount||0);
   const assocTotal = Number(s.associationFeeAmount||0);
+  const ministryTotal = ministryFeeOf(s);
   const instituteTotal = studentInstituteTotal(s) + Number(s.installmentFee||0);
   let pool = paidAmount(s);
   const companyPaid = Math.max(Math.min(pool, companyTotal), 0); pool -= companyPaid;
   const assocPaid = Math.max(Math.min(pool, assocTotal), 0); pool -= assocPaid;
+  const ministryPaid = Math.max(Math.min(pool, ministryTotal), 0); pool -= ministryPaid;
   const institutePaid = Math.max(Math.min(pool, instituteTotal), 0); pool -= institutePaid;
   return {
     companyTotal, companyPaid, companyRemaining: Math.max(companyTotal-companyPaid,0),
     assocTotal, assocPaid, assocRemaining: Math.max(assocTotal-assocPaid,0),
+    ministryTotal, ministryPaid, ministryRemaining: Math.max(ministryTotal-ministryPaid,0),
     instituteTotal, institutePaid, instituteRemaining: Math.max(instituteTotal-institutePaid,0),
   };
 }
@@ -785,14 +865,22 @@ function allocateInstallments(s){
 }
 function totalPenalties(s){ return allocateInstallments(s).reduce((sum,i)=>sum+i.penalty,0); }
 function remaining(s){ return studentTotal(s) + totalPenalties(s) - paidAmount(s); }
+function isFullyPaid(s){ return remaining(s)<=0.001 && (!isStudentUsd(s) || instituteUsdRemaining(s)<=0.001); }
 function payStatus(s){
   const r=remaining(s);
-  if(r<=0.001 && paidAmount(s)>0) return 'Paid';
-  if(paidAmount(s)>0) return 'Partial';
+  const anyPaid = paidAmount(s)>0 || paidAmountUsd(s)>0;
+  if(isFullyPaid(s) && anyPaid) return 'Paid';
+  if(anyPaid) return 'Partial';
   return 'NotStarted';
 }
 function statusCell(s){
   const r=remaining(s);
+  const usd = isStudentUsd(s);
+  const usdRem = usd ? instituteUsdRemaining(s) : 0;
+  if(usd && (r>0.001 || usdRem>0.001)){
+    const parts=[]; if(r>0.001) parts.push(fmt(r)+' ج.م'); if(usdRem>0.001) parts.push(fmt(usdRem)+' $');
+    return `<span class="badge b-bad">عليه ${parts.join(' + ')}</span>`;
+  }
   if(r>0.001) return `<span class="badge b-bad">عليه ${fmt(r)} ج.م</span>`;
   if(r<-0.001) return `<span class="badge b-warn">له ${fmt(-r)} ج.م</span>`;
   return '<span class="badge b-good">مكتمل السداد</span>';
@@ -884,6 +972,36 @@ document.getElementById('f_paymentMethod').addEventListener('change', toggleInst
 document.getElementById('f_instCount').addEventListener('input', refreshFormPreview);
 document.getElementById('f_applyInstFee').addEventListener('change', refreshFormPreview);
 document.getElementById('emailInput').addEventListener('input', updateMailtoLink);
+document.getElementById('f_nationality').addEventListener('change', toggleNationalityFields);
+document.getElementById('f_isCanadian').addEventListener('change', toggleNationalityFields);
+document.getElementById('f_instituteCurrency').addEventListener('change', toggleNationalityFields);
+function isUsdCurrency(){
+  const nat = document.getElementById('f_nationality').value;
+  if(nat==='foreign') return true;
+  if(nat==='egyptian' && document.getElementById('f_isCanadian').checked){
+    return document.getElementById('f_instituteCurrency').value==='usd';
+  }
+  return false;
+}
+function toggleNationalityFields(){
+  const nat = document.getElementById('f_nationality').value;
+  const isCanadian = document.getElementById('f_isCanadian').checked;
+  const usd = isUsdCurrency();
+  document.getElementById('f_canadianWrap').style.display = nat==='egyptian' ? 'block' : 'none';
+  document.getElementById('f_instituteCurrencyWrap').style.display = (nat==='egyptian' && isCanadian) ? 'block' : 'none';
+  document.getElementById('ministryFeeWrap').style.display = nat==='egyptian' ? 'block' : 'none';
+  if(nat==='egyptian' && !document.getElementById('f_ministryFee').dataset.userEdited){
+    document.getElementById('f_ministryFee').value = data.ministryFeeSetting ? data.ministryFeeSetting.value : 0;
+  }
+  document.getElementById('egpInstituteBlock').style.display = usd ? 'none':'block';
+  document.getElementById('usdInstituteBlock').style.display = usd ? 'block':'none';
+  document.getElementById('instituteFeeEgpWrap').style.display = usd ? 'none':'block';
+  document.getElementById('discountBlockWrap').style.display = usd ? 'none':'block';
+  refreshFormPreview();
+}
+document.addEventListener('input', (e)=>{
+  if(e.target && e.target.id==='f_ministryFee'){ e.target.dataset.userEdited='1'; }
+});
 function toggleInstallmentFields(){
   const method=document.getElementById('f_paymentMethod').value;
   document.getElementById('installmentFields').style.display = method==='installment' ? 'block':'none';
@@ -905,16 +1023,17 @@ function computeInstituteBase(){
 }
 function refreshFormPreview(){
   const c=getCollege(document.getElementById('f_college').value);
+  const usd = isUsdCurrency();
   const unitLabel = c && c.feeType==='hour' ? 'ساعة' : 'مادة';
   document.getElementById('feeHint').textContent = c ? `سعر ال${unitLabel}: ${fmt(c.unitPrice)} ج.م` : 'اختر الكلية أولًا';
-  const base = computeInstituteBase();
-  document.getElementById('unitCalcHint').textContent = c ? `مصاريف المعهد الأساسية: ${fmt(base)} ج.م` : '';
-  if(!document.getElementById('f_instituteFee').dataset.userEdited){
+  const base = usd ? 0 : computeInstituteBase();
+  document.getElementById('unitCalcHint').textContent = (c && !usd) ? `مصاريف المعهد الأساسية: ${fmt(base)} ج.م` : '';
+  if(!usd && !document.getElementById('f_instituteFee').dataset.userEdited){
     document.getElementById('f_instituteFee').value = base;
   }
   const instituteFeeVal = Number(document.getElementById('f_instituteFee').value)||0;
   const ids=getSelectedDiscountIds();
-  const totalDisc = ids.reduce((sum,id)=>{
+  const totalDisc = usd ? 0 : ids.reduce((sum,id)=>{
     const d=getDiscount(id); if(!d) return sum;
     return sum + (d.type==='percent' ? instituteFeeVal*Number(d.value)/100 : Number(d.value));
   },0);
@@ -937,9 +1056,11 @@ document.addEventListener('input', (e)=>{
 
 function openSettings(){
   document.getElementById('settingsOverlay').classList.add('open');
+  cancelCollegeEdit();
   renderSettingsLists();
   document.getElementById('instFeeType').value = data.installmentFeeSetting.type;
   document.getElementById('instFeeValue').value = data.installmentFeeSetting.value;
+  document.getElementById('ministryFeeDefault').value = data.ministryFeeSetting ? data.ministryFeeSetting.value : 0;
   document.getElementById('penaltyType').value = data.penaltySetting.type;
   document.getElementById('penaltyValue').value = data.penaltySetting.value;
   document.getElementById('penaltyGrace').value = data.penaltySetting.grace;
@@ -966,9 +1087,10 @@ function switchTab(tab){
       : '🟡 المزامنة السحابية: غير مفعّلة — البيانات بتتحفظ على هذا المتصفح فقط';
     renderBackupList();
   }
-  if(tab==='users'){ renderUsersList(); renderNewUserPermsChecklist(); }
+  if(tab==='users'){ cancelUserEdit(); renderUsersList(); }
 }
 
+let currentEditCollegeId = null;
 async function addCollege(){
   const name=document.getElementById('newCollegeName').value.trim();
   const feeType=document.getElementById('newCollegeFeeType').value;
@@ -976,16 +1098,46 @@ async function addCollege(){
   const companyFee=Number(document.getElementById('newCollegeCompanyFee').value)||0;
   const associationFee=Number(document.getElementById('newCollegeAssociationFee').value)||0;
   if(!name){ showToast('اكتب اسم الكلية'); return; }
-  data.colleges.push({id:uid(), name, feeType, unitPrice, companyFee, associationFee});
+  if(currentEditCollegeId){
+    const c=getCollege(currentEditCollegeId);
+    if(c){ Object.assign(c, {name, feeType, unitPrice, companyFee, associationFee}); }
+    showToast('تم تعديل الكلية');
+    cancelCollegeEdit();
+  } else {
+    data.colleges.push({id:uid(), name, feeType, unitPrice, companyFee, associationFee});
+    showToast('تم إضافة الكلية');
+    document.getElementById('newCollegeName').value='';
+    document.getElementById('newCollegeUnitPrice').value='';
+    document.getElementById('newCollegeCompanyFee').value='';
+    document.getElementById('newCollegeAssociationFee').value='';
+  }
+  await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
+}
+function editCollege(id){
+  const c=getCollege(id); if(!c) return;
+  currentEditCollegeId=id;
+  document.getElementById('newCollegeName').value=c.name;
+  document.getElementById('newCollegeFeeType').value=c.feeType;
+  document.getElementById('newCollegeUnitPrice').value=c.unitPrice;
+  document.getElementById('newCollegeCompanyFee').value=c.companyFee;
+  document.getElementById('newCollegeAssociationFee').value=c.associationFee;
+  document.getElementById('addCollegeBtn').textContent='💾 حفظ تعديل الكلية';
+  document.getElementById('cancelCollegeEditBtn').style.display='inline-block';
+}
+function cancelCollegeEdit(){
+  currentEditCollegeId=null;
   document.getElementById('newCollegeName').value='';
+  document.getElementById('newCollegeFeeType').value='subject';
   document.getElementById('newCollegeUnitPrice').value='';
   document.getElementById('newCollegeCompanyFee').value='';
   document.getElementById('newCollegeAssociationFee').value='';
-  await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
+  document.getElementById('addCollegeBtn').textContent='+ إضافة كلية';
+  document.getElementById('cancelCollegeEditBtn').style.display='none';
 }
 async function removeCollege(id){
   if(!confirm('حذف الكلية دي؟')) return;
   data.colleges=data.colleges.filter(c=>c.id!==id);
+  if(currentEditCollegeId===id) cancelCollegeEdit();
   await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
 }
 async function addDiscount(){
@@ -1008,7 +1160,7 @@ function renderSettingsLists(){
   cList.innerHTML = data.colleges.length===0 ? '<div class="settings-empty">لا توجد كليات مضافة</div>' :
     data.colleges.map(c=>{
       const unitLabel = c.feeType==='hour' ? 'ج.م/ساعة' : 'ج.م/مادة';
-      return `<div class="settings-item"><span>${escapeHtml(c.name)} — ${fmt(c.unitPrice)} ${unitLabel} · شركة ${fmt(c.companyFee)} · جمعية ${fmt(c.associationFee)}</span><button class="del" onclick="removeCollege('${c.id}')">حذف</button></div>`;
+      return `<div class="settings-item"><span>${escapeHtml(c.name)} — ${fmt(c.unitPrice)} ${unitLabel} · شركة ${fmt(c.companyFee)} · جمعية ${fmt(c.associationFee)}</span><span style="display:flex;gap:10px;"><button class="del" style="color:var(--brand);" onclick="editCollege('${c.id}')">تعديل</button><button class="del" onclick="removeCollege('${c.id}')">حذف</button></span></div>`;
     }).join('');
   const dList=document.getElementById('discountsList');
   const searchEl=document.getElementById('discountSettingsSearch');
@@ -1020,6 +1172,10 @@ function renderSettingsLists(){
 async function saveInstallmentFeeSetting(){
   data.installmentFeeSetting = { type: document.getElementById('instFeeType').value, value: Number(document.getElementById('instFeeValue').value)||0 };
   await persist(); render(); showToast('تم حفظ رسوم التقسيط');
+}
+async function saveMinistryFeeSetting(){
+  data.ministryFeeSetting = { value: Number(document.getElementById('ministryFeeDefault').value)||0 };
+  await persist(); render(); showToast('تم حفظ رسوم الوزارة');
 }
 async function savePenaltySetting(){
   data.penaltySetting = { type: document.getElementById('penaltyType').value, value: Number(document.getElementById('penaltyValue').value)||0, grace: Number(document.getElementById('penaltyGrace').value)||0 };
@@ -1068,7 +1224,7 @@ function renderUsersList(){
   const el=document.getElementById('usersList');
   if(!el) return;
   el.innerHTML = (!data.users || data.users.length===0) ? '<div class="settings-empty">لا يوجد مستخدمين</div>' :
-    data.users.map(u=>`<div class="settings-item"><span>${escapeHtml(u.email)} — ${escapeHtml(permsSummary(u.permissions))} — نطاق: ${scopeLabel(u.financialScope)}</span><button class="del" onclick="removeUser('${u.id}')">حذف</button></div>`).join('');
+    data.users.map(u=>`<div class="settings-item"><span>${escapeHtml(u.email)} — ${escapeHtml(permsSummary(u.permissions))} — نطاق: ${scopeLabel(u.financialScope)}</span><span style="display:flex;gap:10px;"><button class="del" style="color:var(--brand);" onclick="editUser('${u.id}')">تعديل</button><button class="del" onclick="removeUser('${u.id}')">حذف</button></span></div>`).join('');
 }
 function renderNewUserPermsChecklist(){
   const el=document.getElementById('newUserPermsList');
@@ -1076,22 +1232,56 @@ function renderNewUserPermsChecklist(){
   el.innerHTML = ALL_PERMISSIONS.map(p=>`<label class="settings-item" style="cursor:pointer;"><span>${escapeHtml(p.label)}</span><input type="checkbox" class="newuser-perm-check" value="${p.key}"></label>`).join('');
 }
 function setAllNewUserPerms(checked){ document.querySelectorAll('.newuser-perm-check').forEach(el=>{ el.checked=checked; }); }
+let currentEditUserId = null;
 async function addUser(){
   const email=document.getElementById('newUserEmail').value.trim().toLowerCase();
   const pin=document.getElementById('newUserPin').value.trim();
   const financialScope=document.getElementById('newUserFinScope').value;
   if(!email || !email.includes('@') || !email.includes('.')){ showToast('اكتب إيميل صحيح'); return; }
-  if(data.users.some(u=>(u.email||'').toLowerCase()===email)){ showToast('يوجد مستخدم بنفس الإيميل ده بالفعل'); return; }
+  if(data.users.some(u=>u.id!==currentEditUserId && (u.email||'').toLowerCase()===email)){ showToast('يوجد مستخدم بنفس الإيميل ده بالفعل'); return; }
   if(!/^[0-9]{4,}$/.test(pin)){ showToast('الرقم السري لازم 4 أرقام على الأقل'); return; }
   const permissions = Array.from(document.querySelectorAll('.newuser-perm-check:checked')).map(el=>el.value);
   if(permissions.length===0){ showToast('اختر صلاحية واحدة على الأقل'); return; }
-  data.users.push({id:uid(), email, pin, financialScope, permissions});
-  document.getElementById('newUserEmail').value='';
-  document.getElementById('newUserPin').value='';
-  renderNewUserPermsChecklist();
+  if(currentEditUserId){
+    const u=data.users.find(x=>x.id===currentEditUserId);
+    const otherManagers = data.users.filter(x=>x.id!==currentEditUserId && (x.permissions||[]).includes('manage_users'));
+    if(u && (u.permissions||[]).includes('manage_users') && !permissions.includes('manage_users') && otherManagers.length===0){
+      showToast('لازم يفضل مستخدم واحد على الأقل معاه صلاحية إدارة المستخدمين'); return;
+    }
+    if(u) Object.assign(u, {email, pin, financialScope, permissions});
+    showToast('تم تعديل المستخدم');
+    cancelUserEdit();
+  } else {
+    data.users.push({id:uid(), email, pin, financialScope, permissions});
+    showToast('تم إضافة المستخدم');
+    document.getElementById('newUserEmail').value='';
+    document.getElementById('newUserPin').value='';
+    document.getElementById('newUserFinScope').value='all';
+    renderNewUserPermsChecklist();
+  }
   await persist();
   renderUsersList();
-  showToast('تم إضافة المستخدم');
+}
+function editUser(id){
+  const u=data.users.find(x=>x.id===id); if(!u) return;
+  currentEditUserId=id;
+  document.getElementById('newUserEmail').value=u.email;
+  document.getElementById('newUserPin').value=u.pin;
+  document.getElementById('newUserFinScope').value=u.financialScope||'all';
+  renderNewUserPermsChecklist();
+  const perms=u.permissions||[];
+  document.querySelectorAll('.newuser-perm-check').forEach(el=>{ el.checked = perms.includes(el.value); });
+  document.getElementById('addUserBtn').textContent='💾 حفظ تعديل المستخدم';
+  document.getElementById('cancelUserEditBtn').style.display='block';
+}
+function cancelUserEdit(){
+  currentEditUserId=null;
+  document.getElementById('newUserEmail').value='';
+  document.getElementById('newUserPin').value='';
+  document.getElementById('newUserFinScope').value='all';
+  renderNewUserPermsChecklist();
+  document.getElementById('addUserBtn').textContent='+ إضافة مستخدم';
+  document.getElementById('cancelUserEditBtn').style.display='none';
 }
 async function removeUser(id){
   const managers = data.users.filter(u=>(u.permissions||[]).includes('manage_users'));
@@ -1099,6 +1289,7 @@ async function removeUser(id){
   if(target && (target.permissions||[]).includes('manage_users') && managers.length<=1){ showToast('لازم يفضل مستخدم واحد على الأقل معاه صلاحية إدارة المستخدمين'); return; }
   if(!confirm('حذف المستخدم ده؟')) return;
   data.users = data.users.filter(u=>u.id!==id);
+  if(currentEditUserId===id) cancelUserEdit();
   await persist();
   renderUsersList();
   showToast('تم حذف المستخدم');
@@ -1112,6 +1303,12 @@ function openAddModal(){
   document.getElementById('f_name').value='';
   document.getElementById('f_phone').value='';
   document.getElementById('f_email').value='';
+  document.getElementById('f_nationality').value='egyptian';
+  document.getElementById('f_isCanadian').checked=false;
+  document.getElementById('f_instituteCurrency').value='usd';
+  document.getElementById('f_ministryFee').value = data.ministryFeeSetting ? data.ministryFeeSetting.value : 0;
+  document.getElementById('f_ministryFee').dataset.userEdited='';
+  document.getElementById('f_instituteFeeUSD').value=0;
   document.getElementById('f_college').value=data.colleges[0]?.id||'';
   document.getElementById('f_unitCount').value=0;
   document.getElementById('f_instituteFee').value=0;
@@ -1128,6 +1325,7 @@ function openAddModal(){
   document.getElementById('f_instFirstDate').value=defDate.toISOString().slice(0,10);
   document.getElementById('f_applyInstFee').checked=true;
   onCollegeChange();
+  toggleNationalityFields();
   toggleInstallmentFields();
   document.getElementById('studentOverlay').classList.add('open');
 }
@@ -1140,6 +1338,12 @@ function openEditModal(id){
   document.getElementById('f_name').value=s.name;
   document.getElementById('f_phone').value=s.phone||'';
   document.getElementById('f_email').value=s.email||'';
+  document.getElementById('f_nationality').value=s.nationality||'egyptian';
+  document.getElementById('f_isCanadian').checked=!!s.isCanadian;
+  document.getElementById('f_instituteCurrency').value=s.instituteCurrency||'usd';
+  document.getElementById('f_ministryFee').value=s.ministryFee||0;
+  document.getElementById('f_ministryFee').dataset.userEdited='1';
+  document.getElementById('f_instituteFeeUSD').value=s.instituteFeeUSD||0;
   document.getElementById('f_college').value=s.collegeId||'';
   const c=getCollege(s.collegeId);
   document.getElementById('f_unitLabel').textContent = c && c.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
@@ -1156,6 +1360,7 @@ function openEditModal(id){
   document.getElementById('f_instFirstDate').value=s.installmentFirstDate ? s.installmentFirstDate.slice(0,10) : new Date().toISOString().slice(0,10);
   document.getElementById('f_instInterval').value=s.installmentInterval||30;
   document.getElementById('f_applyInstFee').checked=!!s.installmentFeeApplied;
+  toggleNationalityFields();
   toggleInstallmentFields();
   document.getElementById('studentOverlay').classList.add('open');
 }
@@ -1166,11 +1371,18 @@ async function saveStudent(){
   if(!name){ showToast('اكتب اسم الطالب'); return; }
   if(!collegeId){ showToast('اختار الكلية'); return; }
 
-  const unitCount = Number(document.getElementById('f_unitCount').value)||0;
-  const instituteFee = Number(document.getElementById('f_instituteFee').value)||0;
+  const nationality = document.getElementById('f_nationality').value;
+  const isCanadian = nationality==='egyptian' && document.getElementById('f_isCanadian').checked;
+  const instituteCurrency = isCanadian ? document.getElementById('f_instituteCurrency').value : 'usd';
+  const usd = nationality==='foreign' || (isCanadian && instituteCurrency==='usd');
+  const ministryFee = nationality==='egyptian' ? (Number(document.getElementById('f_ministryFee').value)||0) : 0;
+  const instituteFeeUSD = usd ? (Number(document.getElementById('f_instituteFeeUSD').value)||0) : 0;
+
+  const unitCount = usd ? 0 : (Number(document.getElementById('f_unitCount').value)||0);
+  const instituteFee = usd ? 0 : (Number(document.getElementById('f_instituteFee').value)||0);
   const companyFeeAmount = Number(document.getElementById('f_companyFee').value)||0;
   const associationFeeAmount = Number(document.getElementById('f_associationFee').value)||0;
-  const discountIds = getSelectedDiscountIds();
+  const discountIds = usd ? [] : getSelectedDiscountIds();
 
   const paymentMethod = document.getElementById('f_paymentMethod').value;
   let planData = { paymentMethod:'cash', installmentFee:0, installmentFeeApplied:false, installmentCount:0, installmentFirstDate:null, installmentInterval:0, installments:[] };
@@ -1184,7 +1396,7 @@ async function saveStudent(){
   if(paymentMethod==='installment'){
     const apply = document.getElementById('f_applyInstFee').checked;
     const feeAmt = apply ? (data.installmentFeeSetting.type==='percent'? instituteAfterDiscount*Number(data.installmentFeeSetting.value)/100 : Number(data.installmentFeeSetting.value)) : 0;
-    const grand = instituteAfterDiscount+feeAmt+companyFeeAmount+associationFeeAmount;
+    const grand = instituteAfterDiscount+feeAmt+companyFeeAmount+associationFeeAmount+ministryFee;
     const count = Math.max(Number(document.getElementById('f_instCount').value)||1,1);
     const firstDateStr = document.getElementById('f_instFirstDate').value || new Date().toISOString().slice(0,10);
     const interval = Number(document.getElementById('f_instInterval').value)||30;
@@ -1204,6 +1416,7 @@ async function saveStudent(){
     code:document.getElementById('f_code').value.trim(), name,
     phone:document.getElementById('f_phone').value.trim(),
     email:document.getElementById('f_email').value.trim(),
+    nationality, isCanadian, instituteCurrency, ministryFee, instituteFeeUSD,
     collegeId, unitCount, instituteFee, companyFeeAmount, associationFeeAmount, discountIds,
     ...planData
   };
@@ -1214,7 +1427,7 @@ async function saveStudent(){
   } else {
     const s={ id:uid(), registeredAt:new Date().toISOString(), ...baseFields, payments:[] };
     const initial=Number(document.getElementById('f_initialPay').value)||0;
-    if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, method:'Cash', note:'دفعة أولى'});
+    if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, currency:'EGP', method:'Cash', note:'دفعة أولى'});
     data.students.push(s);
   }
   await persist();
@@ -1247,12 +1460,17 @@ function openDrawer(id){
   document.getElementById('d_email').textContent=s.email||'—';
 
   const pb = partyBreakdown(s);
+  const usd = isStudentUsd(s);
   const companyCard = document.getElementById('d_companyTotal').closest('.party-card');
   const assocCard = document.getElementById('d_assocTotal').closest('.party-card');
-  const instCard = document.getElementById('d_instituteTotal').closest('.party-card');
+  const instCard = document.getElementById('d_instituteCardEgp');
+  const ministryCard = document.getElementById('d_ministryCard');
+  const usdCard = document.getElementById('d_instituteCardUsd');
   companyCard.style.display = (scope==='all'||scope==='company') ? 'block' : 'none';
   assocCard.style.display = (scope==='all'||scope==='association') ? 'block' : 'none';
-  instCard.style.display = (scope==='all'||scope==='institute') ? 'block' : 'none';
+  instCard.style.display = (scope==='all'||scope==='institute') ? (usd?'none':'block') : 'none';
+  ministryCard.style.display = (s.nationality==='egyptian' && (scope==='all'||scope==='institute')) ? 'block' : 'none';
+  usdCard.style.display = (usd && (scope==='all'||scope==='institute')) ? 'block' : 'none';
   document.getElementById('d_companyTotal').textContent=fmt(pb.companyTotal)+' ج.م';
   document.getElementById('d_companyPaid').textContent=fmt(pb.companyPaid)+' ج.م';
   document.getElementById('d_companyRemaining').textContent=fmt(pb.companyRemaining)+' ج.م';
@@ -1262,17 +1480,25 @@ function openDrawer(id){
   document.getElementById('d_instituteTotal').textContent=fmt(pb.instituteTotal)+' ج.م';
   document.getElementById('d_institutePaid').textContent=fmt(pb.institutePaid)+' ج.م';
   document.getElementById('d_instituteRemaining').textContent=fmt(pb.instituteRemaining)+' ج.م';
+  document.getElementById('d_ministryTotal').textContent=fmt(pb.ministryTotal)+' ج.م';
+  document.getElementById('d_ministryPaid').textContent=fmt(pb.ministryPaid)+' ج.م';
+  document.getElementById('d_ministryRemaining').textContent=fmt(pb.ministryRemaining)+' ج.م';
+  document.getElementById('d_instituteTotalUsd').textContent=fmt(instituteUsdTotal(s))+' $';
+  document.getElementById('d_institutePaidUsd').textContent=fmt(paidAmountUsd(s))+' $';
+  document.getElementById('d_instituteRemainingUsd').textContent=fmt(instituteUsdRemaining(s))+' $';
 
   document.getElementById('d_unitLabel').textContent = college && college.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
   document.getElementById('d_unitCount').textContent = s.unitCount||0;
-  document.getElementById('d_instituteBase').textContent = fmt(s.instituteFee||0)+' ج.م';
+  document.getElementById('d_instituteBase').textContent = usd ? (fmt(s.instituteFeeUSD||0)+' $') : (fmt(s.instituteFee||0)+' ج.م');
 
   const instFeeRow=document.getElementById('d_instFeeRow');
   if(s.installmentFee>0){ instFeeRow.style.display='flex'; document.getElementById('d_instFee').textContent=fmt(s.installmentFee)+' ج.م'; }
   else instFeeRow.style.display='none';
 
   const discountsListEl=document.getElementById('d_discountsList');
-  if(discountIds.length===0){
+  if(usd){
+    discountsListEl.innerHTML='<div class="d-row"><span>مصاريف المعهد بالدولار — الخصومات مش متاحة عليها حاليًا</span><b>—</b></div>';
+  } else if(discountIds.length===0){
     discountsListEl.innerHTML='<div class="d-row"><span>بدون خصومات</span><b>—</b></div>';
   } else {
     const base=Number(s.instituteFee||0);
@@ -1284,20 +1510,22 @@ function openDrawer(id){
     }).join('') + `<div class="d-row"><span><b>إجمالي الخصم</b></span><b>${fmt(discountAmount(s))} ج.م</b></div>`;
   }
 
-  document.getElementById('d_total').textContent=fmt(studentTotal(s))+' ج.م';
-  document.getElementById('d_paid').textContent=fmt(paidAmount(s))+' ج.م';
+  document.getElementById('d_total').textContent=fmt(studentTotal(s))+' ج.م'+(usd?` + ${fmt(instituteUsdTotal(s))} $`:'');
+  document.getElementById('d_paid').textContent=fmt(paidAmount(s))+' ج.م'+(usd?` + ${fmt(paidAmountUsd(s))} $`:'');
 
   const r=remaining(s);
+  const usdRem = usd ? instituteUsdRemaining(s) : 0;
   const box=document.getElementById('d_statusBox');
   box.className='status-box';
-  if(paidAmount(s)===0 && r>0){
+  if(isFullyPaid(s) && (paidAmount(s)>0 || paidAmountUsd(s)>0)){
+    box.classList.add('status-clear');
+    document.getElementById('d_statusAmt').textContent='مكتمل السداد';
+    document.getElementById('d_statusLbl').textContent='لا يوجد مستحقات';
+  } else if(r>0.001 || usdRem>0.001){
     box.classList.add('status-due');
-    document.getElementById('d_statusAmt').textContent='عليه '+fmt(r)+' ج.م';
-    document.getElementById('d_statusLbl').textContent='لم يبدأ الدفع';
-  } else if(r>0.001){
-    box.classList.add('status-due');
-    document.getElementById('d_statusAmt').textContent='عليه '+fmt(r)+' ج.م';
-    document.getElementById('d_statusLbl').textContent='متبقي من إجمالي المطلوب';
+    const parts=[]; if(r>0.001) parts.push(fmt(r)+' ج.م'); if(usdRem>0.001) parts.push(fmt(usdRem)+' $');
+    document.getElementById('d_statusAmt').textContent='عليه '+parts.join(' + ');
+    document.getElementById('d_statusLbl').textContent = (paidAmount(s)===0 && paidAmountUsd(s)===0) ? 'لم يبدأ الدفع' : 'متبقي من إجمالي المطلوب';
   } else if(r<-0.001){
     box.classList.add('status-credit');
     document.getElementById('d_statusAmt').textContent='له '+fmt(-r)+' ج.م';
@@ -1308,9 +1536,14 @@ function openDrawer(id){
     document.getElementById('d_statusLbl').textContent='لا يوجد مستحقات';
   }
 
+  document.getElementById('f_payForWrap').style.display = usd ? 'block' : 'none';
+  document.getElementById('f_payFor').value='egp';
   document.getElementById('f_payAmount').value='';
+  document.getElementById('f_payAmountUsd').value='';
+  document.getElementById('f_payRate').value='';
   document.getElementById('f_payMethod').value='Cash';
   document.getElementById('f_payNote').value='';
+  togglePayCurrencyFields();
   renderPayList(s);
 
   const instSection=document.getElementById('d_installmentSection');
@@ -1337,26 +1570,49 @@ function closeDrawer(){
   document.getElementById('scrim').classList.remove('open');
   document.getElementById('drawer').classList.remove('open');
 }
+function togglePayCurrencyFields(){
+  const payFor = document.getElementById('f_payFor').value;
+  const isUsdPay = payFor==='usd';
+  document.getElementById('f_payEgpFields').style.display = isUsdPay ? 'none':'block';
+  document.getElementById('f_payUsdFields').style.display = isUsdPay ? 'block':'none';
+}
 function renderPayList(s){
   const payments=s.payments||[];
   const list=document.getElementById('payList');
   if(payments.length===0){ list.innerHTML='<div class="pay-empty">لسه مفيش دفعات مسجلة</div>'; return; }
   list.innerHTML=payments.slice().reverse().map(p=>{
-    const isRefund = p.amount<0;
+    const isUsdPay = p.currency==='USD';
+    const amtVal = isUsdPay ? Number(p.amountUsd||p.amount||0) : Number(p.amount||0);
+    const isRefund = amtVal<0;
     const tag = isRefund ? ' (استرداد)' : '';
-    return `<div class="pay-row"><span>${new Date(p.date).toLocaleDateString('ar-EG')} ${p.method?'· '+escapeHtml(p.method):''}${p.note?' · '+escapeHtml(p.note):''}${tag}</span><span class="amt" style="color:${isRefund?'var(--bad)':'var(--good)'}">${isRefund?'-':''}${fmt(Math.abs(p.amount))} ج.م</span></div>`;
+    const amtText = isUsdPay ? `${isRefund?'-':''}${fmt(Math.abs(amtVal))} $${p.rate?` (@ ${fmt(p.rate)})`:''}` : `${isRefund?'-':''}${fmt(Math.abs(amtVal))} ج.م`;
+    return `<div class="pay-row"><span>${new Date(p.date).toLocaleDateString('ar-EG')} ${p.method?'· '+escapeHtml(p.method):''}${p.note?' · '+escapeHtml(p.note):''}${tag}</span><span class="amt" style="color:${isRefund?'var(--bad)':'var(--good)'}">${amtText}</span></div>`;
   }).join('');
 }
 async function addPayment(){
-  const amount=Number(document.getElementById('f_payAmount').value)||0;
-  if(amount===0){ showToast('اكتب مبلغ صحيح (رقم سالب = استرداد)'); return; }
   const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
+  const usd = isStudentUsd(s);
+  const payFor = usd ? document.getElementById('f_payFor').value : 'egp';
   s.payments=s.payments||[];
-  s.payments.push({date:new Date().toISOString(), amount, method:document.getElementById('f_payMethod').value, note:document.getElementById('f_payNote').value.trim()});
-  await persist();
-  openDrawer(s.id);
-  render();
-  showToast(amount<0 ? 'تم تسجيل الاسترداد' : 'تم تسجيل الدفعة');
+  if(payFor==='usd'){
+    const amountUsd=Number(document.getElementById('f_payAmountUsd').value)||0;
+    const rate=Number(document.getElementById('f_payRate').value)||0;
+    if(amountUsd===0){ showToast('اكتب مبلغ دولار صحيح (رقم سالب = استرداد)'); return; }
+    if(rate<=0){ showToast('اكتب سعر الدولار وقت الدفع'); return; }
+    s.payments.push({date:new Date().toISOString(), currency:'USD', amountUsd, rate, amount: Math.round(amountUsd*rate*100)/100, method:document.getElementById('f_payMethod').value, note:document.getElementById('f_payNote').value.trim()});
+    await persist();
+    openDrawer(s.id);
+    render();
+    showToast(amountUsd<0 ? 'تم تسجيل الاسترداد' : 'تم تسجيل الدفعة');
+  } else {
+    const amount=Number(document.getElementById('f_payAmount').value)||0;
+    if(amount===0){ showToast('اكتب مبلغ صحيح (رقم سالب = استرداد)'); return; }
+    s.payments.push({date:new Date().toISOString(), currency:'EGP', amount, method:document.getElementById('f_payMethod').value, note:document.getElementById('f_payNote').value.trim()});
+    await persist();
+    openDrawer(s.id);
+    render();
+    showToast(amount<0 ? 'تم تسجيل الاسترداد' : 'تم تسجيل الدفعة');
+  }
 }
 
 function buildShareText(s){
@@ -1539,10 +1795,15 @@ async function exportStudentsToExcel(studentsList, filenameBase){
   const columns = [
     {header:'Student Code', key:'code', width:14},
     {header:'Name', key:'name', width:24},
+    {header:'Nationality', key:'nationality', width:12},
+    {header:'Canadian Program', key:'canadian', width:14},
     {header:'Registration Date', key:'regDate', width:16},
     {header:'Payment Method', key:'payMethod', width:18},
-    {header:'Amount Paid', key:'paid', width:14},
-    {header:'Remaining', key:'remaining', width:14},
+    {header:'Amount Paid (EGP)', key:'paid', width:16},
+    {header:'Remaining (EGP)', key:'remaining', width:16},
+    {header:'Institute Fee USD', key:'instituteFeeUsd', width:16},
+    {header:'USD Paid', key:'paidUsd', width:12},
+    {header:'USD Remaining', key:'remainingUsd', width:14},
     {header:'Payment Plan', key:'planType', width:14},
     {header:'College', key:'college', width:18},
     {header:'Fee Type', key:'feeType', width:12},
@@ -1550,6 +1811,7 @@ async function exportStudentsToExcel(studentsList, filenameBase){
     {header:'Institute Fee (Base)', key:'instituteFee', width:16},
     {header:'Company Fee', key:'companyFee', width:14},
     {header:'Association Fee', key:'associationFee', width:14},
+    {header:'Ministry Fee', key:'ministryFee', width:14},
     {header:'Discounts', key:'discounts', width:22},
     {header:'Total Discount', key:'discountTotal', width:14},
     {header:'Installment Fee', key:'instFee', width:14},
@@ -1568,13 +1830,17 @@ async function exportStudentsToExcel(studentsList, filenameBase){
     const payMethods = Array.from(new Set((s.payments||[]).map(p=>p.method||'Cash'))).join(', ');
     const notes = (s.payments||[]).filter(p=>p.note).map(p=>p.note).join('; ');
     ws.addRow({
-      code:s.code||'', name:s.name, regDate: s.registeredAt ? s.registeredAt.slice(0,10) : '',
+      code:s.code||'', name:s.name,
+      nationality: s.nationality==='foreign' ? 'Foreign' : 'Egyptian',
+      canadian: s.isCanadian ? 'Yes' : 'No',
+      regDate: s.registeredAt ? s.registeredAt.slice(0,10) : '',
       payMethod: payMethods || '—',
       paid: paidAmount(s), remaining: remaining(s),
+      instituteFeeUsd: s.instituteFeeUSD||0, paidUsd: paidAmountUsd(s), remainingUsd: instituteUsdRemaining(s),
       planType: s.paymentMethod==='installment' ? 'Installment' : 'Cash',
       college: college?college.name:'', feeType: college? (college.feeType==='hour'?'Per Hour':'Per Subject') : '',
       unitCount: s.unitCount||0, instituteFee: s.instituteFee||0,
-      companyFee: s.companyFeeAmount||0, associationFee: s.associationFeeAmount||0,
+      companyFee: s.companyFeeAmount||0, associationFee: s.associationFeeAmount||0, ministryFee: ministryFeeOf(s),
       discounts: discountNames, discountTotal: discountAmount(s), instFee: s.installmentFee||0,
       total: studentTotal(s), penalty: totalPenalties(s), phone: s.phone||'', email: s.email||'',
       status: payStatus(s)==='Paid'?'Fully Paid':payStatus(s)==='Partial'?'Balance Due':'Not Paid',
@@ -1589,7 +1855,7 @@ async function exportStudentsToExcel(studentsList, filenameBase){
     cell.alignment = { horizontal:'center', vertical:'middle' };
     cell.border = { bottom:{style:'medium', color:{argb:'FFB8912F'}} };
   });
-  const moneyCols = ['instituteFee','companyFee','associationFee','paid','remaining','discountTotal','instFee','total','penalty'];
+  const moneyCols = ['instituteFee','companyFee','associationFee','ministryFee','paid','remaining','instituteFeeUsd','paidUsd','remainingUsd','discountTotal','instFee','total','penalty'];
   ws.eachRow((row, rowNumber)=>{
     if(rowNumber===1) return;
     const bg = rowNumber%2===0 ? 'FFF2F3F6' : 'FFFFFFFF';
