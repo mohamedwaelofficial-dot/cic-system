@@ -877,6 +877,14 @@ function payStatus(s){
   if(anyPaid) return 'Partial';
   return 'NotStarted';
 }
+function natBadge(s){
+  if(s.nationality==='foreign') return ' <span class="badge" style="margin-inline-start:4px;background:#eef2ff;color:#4338ca;">وافد $</span>';
+  if(s.nationality==='egyptian' && s.isCanadian){
+    const cur = (s.instituteCurrency||'usd')==='usd' ? '$' : 'ج.م';
+    return ` <span class="badge" style="margin-inline-start:4px;background:#fef3c7;color:#92400e;">كندي ${cur}</span>`;
+  }
+  return '';
+}
 function statusCell(s){
   const r=remaining(s);
   const usd = isStudentUsd(s);
@@ -912,7 +920,7 @@ function render(){
     tr.onclick=()=>openDrawer(s.id);
     tr.innerHTML=`
       <td>${escapeHtml(s.code||'—')}</td>
-      <td class="name-cell">${escapeHtml(s.name)}${s.paymentMethod==='installment' ? ' <span class="badge b-warn" style="margin-inline-start:4px;">تقسيط</span>' : ''}</td>
+      <td class="name-cell">${escapeHtml(s.name)}${natBadge(s)}${s.paymentMethod==='installment' ? ' <span class="badge b-warn" style="margin-inline-start:4px;">تقسيط</span>' : ''}</td>
       <td>${escapeHtml(college?college.name:'—')}</td>
       <td>${escapeHtml(s.phone||'—')}</td>
       <td>${fmt(studentTotal(s))}</td>
@@ -1483,7 +1491,7 @@ function openDrawer(id){
   const discountIds = s.discountIds || [];
   const scope = currentUser ? (currentUser.financialScope||'all') : 'all';
 
-  document.getElementById('d_name').textContent=s.name;
+  document.getElementById('d_name').innerHTML=escapeHtml(s.name)+natBadge(s);
   document.getElementById('d_code').textContent='كود: '+(s.code||'—');
   const createdByEl = document.getElementById('d_createdBy');
   if(hasPermission('manage_users') && s.createdBy){
