@@ -3,2192 +3,910 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام MOHAMED'S STUDENT MANAGEMENT CIC</title>
+<title>خزنة الكاش — Mohamed Wael</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 <style>
   :root{
-    --ink:#131c2e; --ink-soft:#5c6579; --paper:#e6e9f0; --panel:#ffffff; --line:#cfd4e0;
-    --brand:#1d3f72; --brand-soft:#e7edf7; --gold:#b8912f; --gold-soft:#f6efdc;
-    --canada:#d52b1e; --good:#1f7a4d; --good-soft:#e2f3ea; --warn:#b07d17; --warn-soft:#faf0d9;
-    --bad:#b23a2a; --bad-soft:#fbe7e3;
-    --shadow: 0 1px 3px rgba(19,28,46,.08), 0 8px 20px -10px rgba(19,28,46,.25);
+    --bg:#0A0A0C;
+    --bg-2:#101014;
+    --panel:#15151A;
+    --panel-2:#1B1B21;
+    --line:rgba(212,175,55,0.14);
+    --line-strong:rgba(212,175,55,0.30);
+    --gold:#D4AF37;
+    --gold-bright:#F0D584;
+    --ink:#F3F1EA;
+    --ink-soft:#8E8A80;
+    --ink-faint:#5C5952;
+    --good:#6FCB9F;
+    --bad:#E2685C;
+    --radius:18px;
+    --radius-sm:11px;
+    --display:'Cormorant Garamond', serif;
+    --sans:'Cairo', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --shadow: 0 14px 40px rgba(0,0,0,0.45);
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Tajawal',sans-serif;}
-  h1,h2,h3{font-family:'Cairo',sans-serif;}
-  .wrap{max-width:1240px;margin:0 auto;padding:22px 20px 90px;}
-
-  .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);border-bottom:3px solid var(--brand);border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);}
-  .brand{display:flex;align-items:center;gap:12px;}
-  .logo-badge{width:48px;height:32px;border-radius:6px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.08);}
-  .logo-badge svg{display:block;width:100%;height:100%;}
-  .topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.2px;}
-  .topbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
-
-  .btn{border:none;border-radius:9px;padding:9px 15px;font-family:'Tajawal';font-weight:700;font-size:13px;cursor:pointer;}
-  .btn-brand{background:var(--brand);color:#fff;}
-  .btn-ghost{background:var(--panel);border:1px solid var(--line);color:var(--ink);}
-  .btn-ghost:hover{border-color:var(--brand);}
-  .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:7px;}
-  .btn-danger{background:var(--bad-soft);color:var(--bad);}
-  .btn-block{width:100%;}
-
-  .corner-btn{position:fixed;bottom:18px;left:18px;z-index:40;border-radius:24px;padding:10px 16px;box-shadow:0 6px 18px rgba(0,0,0,.2);}
-  .settings-corner{position:fixed;top:18px;left:18px;z-index:40;border-radius:24px;padding:10px 16px;box-shadow:0 6px 18px rgba(0,0,0,.15);}
-
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
-  .kpi{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);}
-  .kpi .n{font-family:'Cairo';font-size:19px;font-weight:800;}
-  .kpi .l{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
-  .kpi.good{border-top-color:var(--good);}
-  .kpi.good .n{color:var(--good);}
-  .kpi.bad{border-top-color:var(--bad);}
-  .kpi.bad .n{color:var(--bad);}
-
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
-  .search{flex:1;min-width:220px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-family:'Tajawal';font-size:14px;}
-  .search:focus{outline:none;border-color:var(--brand);}
-  select{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:'Tajawal';font-size:13px;}
-
-  .table-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13.5px;}
-  thead th{text-align:right;padding:11px 13px;font-size:11px;color:var(--ink-soft);background:#eceff5;border-bottom:2px solid var(--brand);font-weight:700;white-space:nowrap;}
-  tbody td{padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap;}
-  tbody tr{cursor:pointer;}
-  tbody tr:hover{background:#f7f9ff;}
-  .name-cell{font-weight:700;}
-  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-  .b-good{background:var(--good-soft);color:var(--good);}
-  .b-warn{background:var(--warn-soft);color:var(--warn);}
-  .b-bad{background:var(--bad-soft);color:var(--bad);}
-  .empty{padding:50px 20px;text-align:center;color:var(--ink-soft);}
-
-  .scrim{position:fixed;inset:0;background:rgba(19,28,46,.4);display:none;z-index:55;}
-  .scrim.open{display:block;}
-  .drawer{
-    position:fixed;top:0;right:0;height:100vh;width:50vw;min-width:420px;max-width:96vw;background:#fff;
-    box-shadow:-8px 0 30px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .25s ease;
-    z-index:60;overflow-y:auto;padding:26px;
+  body{
+    margin:0; background:
+      radial-gradient(1000px 500px at 12% -8%, rgba(212,175,55,0.055), transparent 60%),
+      radial-gradient(800px 460px at 100% 4%, rgba(212,175,55,0.035), transparent 55%),
+      var(--bg);
+    color:var(--ink); font-family:var(--sans); min-height:100vh; padding-bottom:70px;
+    -webkit-font-smoothing:antialiased;
   }
-  .drawer.open{transform:translateX(0);}
-  .drawer-close{position:absolute;top:16px;left:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-soft);}
-  .d-name{font-size:20px;font-weight:800;margin:0 0 2px;padding-left:30px;font-family:'Cairo';}
-  .d-code{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
-  .d-section{margin-bottom:20px;}
-  .d-section h4{font-size:12.5px;color:var(--brand);margin:0 0 8px;font-weight:800;letter-spacing:.3px;padding-bottom:6px;border-bottom:2px solid var(--brand-soft);}
-  .d-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:6px 0;border-bottom:1px dashed var(--line);}
-  .d-row:last-child{border-bottom:none;}
-  .d-row b{font-weight:700;}
-  .status-box{border-radius:10px;padding:16px;text-align:center;margin-bottom:16px;}
-  .status-box .amt{font-family:'Cairo';font-size:26px;font-weight:800;}
-  .status-box .lbl{font-size:13px;margin-top:2px;}
-  .status-due{background:var(--bad-soft);color:var(--bad);}
-  .status-credit{background:var(--warn-soft);color:var(--warn);}
-  .status-clear{background:var(--good-soft);color:var(--good);}
+  ::selection{ background:var(--gold); color:#0A0A0C; }
+  .num{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
 
-  .party-card{background:#f2f4f8;border:1px solid var(--line);border-right:4px solid var(--brand);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
-  .party-card .pt{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;}
-  .party-card .pr{display:flex;justify-content:space-between;font-size:13px;padding:2px 0;}
-
-  .pay-list{border:1px solid var(--line);border-radius:9px;margin-bottom:10px;max-height:170px;overflow-y:auto;}
-  .pay-row{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;font-size:12.5px;border-bottom:1px solid var(--line);}
-  .pay-row:last-child{border-bottom:none;}
-  .pay-row .amt{font-weight:700;white-space:nowrap;}
-  .pay-empty{padding:14px;text-align:center;color:var(--ink-soft);font-size:12px;}
-
-  .field{margin-bottom:11px;}
-  .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px;font-weight:600;}
-  .field input, .field select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:'Tajawal';font-size:14px;background:#fbfbfd;}
-  .field input:focus, .field select:focus{outline:none;border-color:var(--brand);background:#fff;}
-  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-  .fee-hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
-  .share-row{display:flex;gap:8px;margin-top:6px;}
-  .share-row .btn{flex:1;}
-  .divider{border:none;border-top:1px solid var(--line);margin:16px 0;}
-
-  .overlay{position:fixed;inset:0;background:rgba(19,28,46,.45);display:none;align-items:center;justify-content:center;z-index:70;padding:20px;}
-  .overlay.open{display:flex;}
-  .modal{background:#fff;border-radius:14px;padding:24px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
-  .modal.modal-lg{max-width:50vw;min-width:420px;}
-  .modal h2{margin:0 0 16px;font-size:18px;}
-  .modal-actions{display:flex;gap:9px;margin-top:16px;}
-  .modal-actions .btn{flex:1;}
-
-  .settings-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
-  .tab-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 13px;font-family:'Tajawal';font-size:12.5px;cursor:pointer;font-weight:700;}
-  .tab-btn.active{background:var(--brand);color:#fff;border-color:var(--brand);}
-  .settings-list{border:1px solid var(--line);border-radius:9px;margin-bottom:12px;max-height:190px;overflow-y:auto;}
-  .settings-item{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-size:13px;}
-  .settings-item:last-child{border-bottom:none;}
-  .settings-item .del{cursor:pointer;color:var(--bad);font-size:12px;border:none;background:none;font-weight:700;}
-  .settings-empty{padding:16px;text-align:center;color:var(--ink-soft);font-size:12.5px;}
-
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:100;max-width:90vw;text-align:center;}
-  .toast.show{opacity:1;}
-
-  @media(max-width:900px){
-    .kpis{grid-template-columns:repeat(2,1fr);}
-    .drawer{width:100%;min-width:0;}
-    .modal, .modal.modal-lg{max-width:94vw;min-width:0;}
+  /* ---- Header ---- */
+  header.top{
+    padding:30px 28px 24px; display:flex; align-items:center; justify-content:space-between; gap:20px;
+    border-bottom:1px solid var(--line); flex-wrap:wrap;
   }
+  .brand{ display:flex; align-items:center; gap:16px; }
+  .monogram{
+    width:50px; height:50px; border-radius:50%; border:1.5px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+    font-family:var(--display); font-weight:700; font-size:19px; color:var(--gold-bright);
+    background:radial-gradient(circle at 35% 30%, rgba(212,175,55,0.14), transparent 70%);
+    letter-spacing:0.5px;
+  }
+  .brand h1{ font-family:var(--sans); font-size:19px; margin:0; color:var(--ink); font-weight:700; letter-spacing:0.2px; }
+  .brand .owner{ font-size:11px; color:var(--gold-bright); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:3px; font-weight:600; }
+
+  .header-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .pending-pill{
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:999px; padding:10px 22px;
+    display:flex; align-items:center; gap:9px; font-size:14px;
+  }
+  .pending-pill .lbl{ font-size:11.5px; color:var(--ink-soft); }
+  .pending-pill b{ color:var(--gold-bright); font-size:17px; }
+
+  .wrap{ max-width:1200px; margin:0 auto; padding:28px 28px; display:grid; grid-template-columns:1fr; gap:24px; }
+  @media(min-width:980px){ .wrap{ grid-template-columns: 1.15fr 0.85fr; align-items:start; } }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:24px;
+    box-shadow:var(--shadow);
+  }
+  .card h2{ font-size:15px; margin:0 0 18px; color:var(--ink); font-weight:700; display:flex; align-items:center; gap:9px;
+    text-transform:uppercase; letter-spacing:0.6px; }
+  .card h2 .ic{ font-size:16px; }
+  .card + .card{ margin-top:22px; }
+
+  .form-row{ display:grid; grid-template-columns:1fr; gap:13px; }
+  @media(min-width:640px){ .form-row.cols4{ grid-template-columns: 1.5fr 1fr 1fr 0.85fr; } }
+  label{ display:block; font-size:11.5px; color:var(--ink-soft); margin-bottom:6px; font-weight:600; }
+  select, input{
+    width:100%; background:var(--bg-2); border:1px solid var(--line); color:var(--ink);
+    border-radius:var(--radius-sm); padding:11px 13px; font-size:14px; font-family:var(--sans); outline:none;
+  }
+  input[type=number], input.num-input{ font-family:var(--mono); }
+  select:focus, input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.10); }
+  .field{ display:flex; flex-direction:column; }
+
+  .btn{
+    border:none; border-radius:var(--radius-sm); padding:12px 20px; font-size:13.5px; font-weight:700; cursor:pointer;
+    font-family:var(--sans); transition:transform .12s ease, filter .12s ease, opacity .12s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-gold{ background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#1A1305; }
+  .btn-gold:hover{ filter:brightness(1.08); }
+  .btn-ghost{ background:transparent; border:1px solid var(--line-strong); color:var(--ink); }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--gold-bright); }
+  .btn-danger{ background:transparent; border:1px solid rgba(226,104,92,0.4); color:var(--bad); }
+  .btn-block{ width:100%; }
+  .btn-sm{ padding:8px 14px; font-size:12px; }
+  .btn-icon{ padding:8px 10px; font-size:13px; }
+  .btn[disabled]{ opacity:0.35; cursor:not-allowed; }
+
+  .cat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:18px; }
+  @media(min-width:640px){ .cat-grid{ grid-template-columns:repeat(3,1fr); } }
+  .cat-card{ background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px; }
+  .cat-card .ic{ font-size:17px; }
+  .cat-card .lbl{ font-size:11.5px; color:var(--ink-soft); margin:7px 0 4px; font-weight:600; }
+  .cat-card .amt{ font-size:16px; color:var(--gold-bright); }
+
+  .entry-list{ margin-top:18px; display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; }
+  .entry-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:11px 13px;
+  }
+  .entry-row .meta{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .entry-row .cat{ font-size:13.5px; color:var(--ink); font-weight:600; }
+  .entry-row .amt{ color:var(--gold-bright); font-size:14.5px; white-space:nowrap; }
+  .entry-empty{ text-align:center; color:var(--ink-faint); padding:34px 10px; font-size:13px; }
+  .del-btn{ background:none; border:none; color:var(--bad); cursor:pointer; font-size:15px; padding:2px 6px; opacity:0.75; }
+  .del-btn:hover{ opacity:1; }
+
+  .grand-bar{
+    display:flex; align-items:center; justify-content:space-between; margin-top:18px; padding:16px 18px;
+    background:linear-gradient(135deg, rgba(212,175,55,0.10), rgba(212,175,55,0.02)); border:1px solid var(--gold); border-radius:var(--radius-sm);
+  }
+  .grand-bar .lbl{ font-size:12px; color:var(--ink-soft); font-weight:600; }
+  .grand-bar .val{ font-size:23px; color:var(--gold-bright); font-weight:700; }
+
+  .history-item{ border:1px solid var(--line); border-radius:var(--radius-sm); margin-bottom:10px; overflow:hidden; }
+  .history-head{
+    display:flex; align-items:center; justify-content:space-between; padding:13px 15px; cursor:pointer;
+    background:var(--panel-2);
+  }
+  .history-head:hover{ background:#212128; }
+  .history-head .date{ font-weight:700; font-size:13.5px; }
+  .history-head .time{ font-size:11px; color:var(--ink-soft); margin-inline-start:6px; }
+  .history-head .total{ color:var(--gold-bright); font-size:14px; }
+  .history-body{ display:none; padding:13px 15px; background:var(--bg-2); }
+  .history-body.open{ display:block; }
+  .history-body .d-row{ display:flex; justify-content:space-between; font-size:12.5px; padding:5px 0; border-bottom:1px dashed var(--line); }
+  .history-body .d-row:last-child{ border-bottom:none; }
+  .history-note{ margin-top:9px; font-size:12px; color:var(--ink-soft); font-style:italic; }
+  .history-empty{ text-align:center; color:var(--ink-faint); padding:34px 10px; font-size:13px; }
+
+  .filter-row{ display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .filter-row .field{ flex:1; min-width:120px; }
+
+  .overlay{
+    position:fixed; inset:0; background:rgba(3,3,4,0.78); display:none; align-items:center; justify-content:center;
+    z-index:100; padding:20px; backdrop-filter:blur(3px);
+  }
+  .overlay.open{ display:flex; }
+  .modal{
+    background:var(--panel); border:1px solid var(--gold); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:28px; max-width:460px; width:100%; max-height:85vh; overflow-y:auto;
+  }
+  .modal h3{ margin:0 0 16px; color:var(--ink); font-size:17px; font-weight:700; }
+  .modal .d-row{ display:flex; justify-content:space-between; font-size:13.5px; padding:7px 0; border-bottom:1px dashed var(--line); }
+  .modal .d-row.grand{ border-bottom:none; margin-top:9px; padding-top:11px; border-top:1px solid var(--gold); font-weight:700; font-size:15px; }
+  .modal-actions{ display:flex; gap:10px; margin-top:20px; }
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0;
+    background:var(--gold-bright); color:#1A1305; padding:12px 24px; border-radius:999px; font-weight:700;
+    font-size:13.5px; transition:all .25s ease; z-index:200; pointer-events:none; box-shadow:0 10px 28px rgba(0,0,0,0.5);
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .stamp-overlay{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:150;
+    background:rgba(3,3,4,0.6); pointer-events:none;
+  }
+  .stamp-overlay.show{ display:flex; }
+  .stamp{
+    width:180px; height:180px; border-radius:50%; border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;
+    color:var(--gold-bright); font-family:var(--display); font-weight:700; font-size:20px; line-height:1.35;
+    transform:scale(0) rotate(-14deg); opacity:0; background:rgba(212,175,55,0.05);
+    box-shadow:0 0 44px rgba(212,175,55,0.25), inset 0 0 30px rgba(212,175,55,0.10);
+  }
+  .stamp.animate{ animation:stampIn .55s cubic-bezier(.2,1.4,.4,1) forwards; }
+  @keyframes stampIn{
+    0%{ transform:scale(0) rotate(-14deg); opacity:0; }
+    60%{ transform:scale(1.1) rotate(-3deg); opacity:1; }
+    100%{ transform:scale(1) rotate(-6deg); opacity:1; }
+  }
+
+  .footer-actions{ display:flex; gap:9px; flex-wrap:wrap; margin-top:4px; }
+
+  /* Category manager rows */
+  .catrow{ display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:8px; }
+  .catrow .ic-badge{ font-size:16px; width:30px; text-align:center; }
+  .catrow .name{ flex:1; font-size:13.5px; font-weight:600; }
+  .catrow .acts{ display:flex; gap:6px; }
+  .catrow .acts button{ background:none; border:none; cursor:pointer; font-size:14px; opacity:0.75; }
+  .catrow .acts button:hover{ opacity:1; }
+
+  .sig-footer{
+    text-align:center; margin-top:36px; padding-top:20px; border-top:1px solid var(--line);
+    color:var(--ink-faint); font-size:11.5px; letter-spacing:0.4px;
+  }
+  .sig-footer b{ color:var(--gold); font-weight:700; }
 </style>
 </head>
 <body>
+
+<header class="top">
+  <div class="brand">
+    <div class="monogram">MW</div>
+    <div>
+      <div class="owner">Mohamed Wael</div>
+      <h1>خزنة الكاش — نظام تحصيل الجامعة</h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="pending-pill">
+      <span class="lbl">معلّق لسه:</span>
+      <b class="num" id="headerPending">0</b>
+      <span class="lbl">ج.م</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="openCategoryModal()">🗂️ إدارة البنود</button>
+    <button class="btn btn-ghost btn-sm" onclick="openSyncModal()" id="syncBtn">☁️ الاتصال</button>
+  </div>
+</header>
+
 <div class="wrap">
-
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo-badge">
-        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="40" height="24" fill="#FFFFFF"/>
-          <rect x="0" y="0" width="10" height="24" fill="#D52B1E"/>
-          <rect x="30" y="0" width="10" height="24" fill="#D52B1E"/>
-          <path d="M20 4.5 L21.3 8 L24.5 6.8 L23.2 10 L25.8 10.4 L22.6 12.3 L23.1 15.5 L20 14.1 L16.9 15.5 L17.4 12.3 L14.2 10.4 L16.8 10 L15.5 6.8 L18.7 8 Z M19.1 14.4 H20.9 L20.9 18.5 L22.3 19 H17.7 L19.1 18.5 Z" fill="#D52B1E"/>
-        </svg>
-      </div>
-      <div>
-        <h1>MOHAMED'S STUDENT MANAGEMENT CIC</h1>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <span id="currentUserLabel" style="font-size:12px;color:var(--ink-soft);align-self:center;margin-inline-end:4px;"></span>
-      <button class="btn btn-ghost" data-perm="import" id="importBtn">📥 استيراد إكسل</button>
-      <button class="btn btn-ghost" data-perm="export" id="exportBtn">📤 تصدير إكسل</button>
-      <button class="btn btn-ghost" data-perm="export" id="dailyReportBtn">📊 تقرير يومي</button>
-      <button class="btn btn-ghost" data-perm="cash_ledger" id="cashLedgerBtn">💰 دفتر الكاش</button>
-      <input type="file" id="importFile" accept=".xlsx,.xls" style="display:none;">
-      <button class="btn btn-brand" data-perm="add" id="addBtn">+ تسجيل طالب</button>
-    </div>
-  </div>
-
-  <div id="mainContentArea">
-    <div class="kpis">
-      <div class="kpi"><div class="n" id="kpiTotal">0</div><div class="l">إجمالي الطلاب</div></div>
-      <div class="kpi"><div class="n" id="kpiExpected">0</div><div class="l">إجمالي المطلوب (ج.م)</div></div>
-      <div class="kpi good"><div class="n" id="kpiCollected">0</div><div class="l">إجمالي المحصّل (ج.م)</div></div>
-      <div class="kpi bad"><div class="n" id="kpiOutstanding">0</div><div class="l">إجمالي المتبقي (ج.م)</div></div>
-    </div>
-
-    <div class="toolbar">
-      <input class="search" id="searchInput" placeholder="ابحث بالاسم أو الكود أو الهاتف..." />
-      <select id="filterCollege"><option value="">كل الكليات</option></select>
-      <select id="filterStatus">
-        <option value="">كل الحالات</option>
-        <option value="Paid">مكتمل السداد</option>
-        <option value="Partial">عليه فلوس</option>
-        <option value="NotStarted">لم يبدأ الدفع</option>
-      </select>
-    </div>
-
-    <div class="table-card">
-      <table>
-        <thead>
-          <tr><th>الكود</th><th>الاسم</th><th>الكلية</th><th>الهاتف</th><th>الإجمالي المطلوب</th><th>المدفوع</th><th>الموقف</th></tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div class="empty" id="emptyState" style="display:none;">
-        <h3>لسه مفيش طلاب مسجلين</h3>
-        <div>ابدأ بإعداد الكليات من ⚙️ الإعدادات، ثم سجّل أول طالب</div>
-      </div>
-    </div>
-  </div>
-  <div class="empty" id="noViewMessage" style="display:none;">
-    <h3>لا يوجد صلاحية مشاهدة</h3>
-    <div>حسابك لا يملك صلاحية "مشاهدة الطلاب". تواصل مع المسؤول.</div>
-  </div>
-
-  <div style="text-align:center;padding:26px 20px 6px;color:var(--ink-soft);font-size:11.5px;border-top:1px solid var(--line);margin-top:30px;">
-    © <span id="footerYear"></span> MOHAMED'S STUDENT MANAGEMENT CIC — جميع الحقوق محفوظة لمحمد وائل. أي استخدام أو نسخ أو إعادة توزيع لهذا النظام دون إذن ممنوع منعًا باتًا.
-  </div>
-</div>
-
-<button class="btn btn-ghost settings-corner" id="settingsBtn">⚙️ الإعدادات</button>
-<button class="btn btn-ghost corner-btn" id="logoutBtn">🔒 تسجيل الخروج</button>
-
-<div class="scrim" id="scrim"></div>
-<div class="drawer" id="drawer">
-  <button class="drawer-close" id="drawerClose">✕</button>
-  <div class="d-name" id="d_name"></div>
-  <div class="d-code" id="d_code"></div>
-  <div class="d-code" id="d_createdBy" style="display:none;color:var(--brand);"></div>
-
-  <div class="status-box" id="d_statusBox">
-    <div class="amt" id="d_statusAmt">0 ج.م</div>
-    <div class="lbl" id="d_statusLbl">الموقف المالي</div>
-  </div>
-
-  <div class="d-section">
-    <h4>بيانات الطالب</h4>
-    <div class="d-row"><span>الكلية</span><b id="d_college">—</b></div>
-    <div class="d-row"><span>طريقة الاحتساب</span><b id="d_feeTypeLabel">—</b></div>
-    <div class="d-row"><span>طريقة السداد</span><b id="d_paymentMethod">كاش</b></div>
-    <div class="d-row"><span>الهاتف</span><b id="d_phone">—</b></div>
-    <div class="d-row"><span>الإيميل</span><b id="d_email">—</b></div>
-  </div>
-
-  <div class="d-section">
-    <h4>تفصيل المصاريف حسب الجهة (الشركة والجمعية تُسدد أولًا، ثم الباقي للمعهد)</h4>
-    <div class="party-card">
-      <div class="pt">🏢 الشركة</div>
-      <div class="pr"><span>الإجمالي</span><b id="d_companyTotal">0</b></div>
-      <div class="pr"><span>المدفوع</span><b id="d_companyPaid">0</b></div>
-      <div class="pr"><span>المتبقي</span><b id="d_companyRemaining">0</b></div>
-    </div>
-    <div class="party-card">
-      <div class="pt">🤝 الجمعية</div>
-      <div class="pr"><span>الإجمالي</span><b id="d_assocTotal">0</b></div>
-      <div class="pr"><span>المدفوع</span><b id="d_assocPaid">0</b></div>
-      <div class="pr"><span>المتبقي</span><b id="d_assocRemaining">0</b></div>
-    </div>
-    <div class="party-card" id="d_instituteCardEgp">
-      <div class="pt">🎓 المعهد (بعد الخصم)</div>
-      <div class="pr"><span>الإجمالي</span><b id="d_instituteTotal">0</b></div>
-      <div class="pr"><span>المدفوع</span><b id="d_institutePaid">0</b></div>
-      <div class="pr"><span>المتبقي</span><b id="d_instituteRemaining">0</b></div>
-    </div>
-    <div class="party-card" id="d_ministryCard" style="display:none;">
-      <div class="pt">🏛️ رسوم الوزارة</div>
-      <div class="pr"><span>الإجمالي</span><b id="d_ministryTotal">0</b></div>
-      <div class="pr"><span>المدفوع</span><b id="d_ministryPaid">0</b></div>
-      <div class="pr"><span>المتبقي</span><b id="d_ministryRemaining">0</b></div>
-    </div>
-    <div class="party-card" id="d_instituteCardUsd" style="display:none;border-right-color:var(--canada);">
-      <div class="pt">🎓 المعهد (دولار — برنامج كندي/وافد)</div>
-      <div class="pr"><span>الإجمالي</span><b id="d_instituteTotalUsd">0</b></div>
-      <div class="pr"><span>المدفوع</span><b id="d_institutePaidUsd">0</b></div>
-      <div class="pr"><span>المتبقي</span><b id="d_instituteRemainingUsd">0</b></div>
-    </div>
-  </div>
-
-  <div class="d-section">
-    <h4>تفاصيل حساب المعهد</h4>
-    <div class="d-row"><span id="d_unitLabel">عدد الوحدات</span><b id="d_unitCount">0</b></div>
-    <div class="d-row"><span>مصاريف المعهد الأساسية</span><b id="d_instituteBase">0</b></div>
-    <div style="margin:8px 0;">
-      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin-bottom:4px;">الخصومات المطبقة (على مصاريف المعهد فقط)</div>
-      <div id="d_discountsList"></div>
-    </div>
-    <div class="d-row" id="d_instFeeRow" style="display:none;"><span>رسوم التقسيط</span><b id="d_instFee">0</b></div>
-    <div class="d-row"><span><b>الإجمالي المطلوب (كل الجهات)</b></span><b id="d_total">0</b></div>
-    <div class="d-row"><span>إجمالي المدفوع</span><b id="d_paid">0</b></div>
-  </div>
-
-  <div class="d-section" id="d_installmentSection" style="display:none;">
-    <h4>خطة التقسيط</h4>
-    <div id="d_installmentList"></div>
-    <div class="d-row" id="d_penaltyRow" style="display:none;"><span>إجمالي الغرامات المستحقة</span><b id="d_penaltyTotal" style="color:var(--bad);">0</b></div>
-  </div>
-
-  <div class="d-section" data-perm="payments">
-    <h4>سجل الدفعات</h4>
-    <div class="pay-list" id="payList"></div>
-    <div class="field" id="f_payForWrap" style="display:none;">
-      <label>الدفعة دي لـ</label>
-      <select id="f_payFor" onchange="togglePayCurrencyFields()">
-        <option value="egp">باقي الرسوم (جنيه — شركة/جمعية/وزارة)</option>
-        <option value="usd">مصاريف المعهد (دولار)</option>
-      </select>
-    </div>
-    <div id="f_payEgpFields">
-      <div class="field"><input id="f_payAmount" type="number" placeholder="مبلغ الدفعة بالجنيه (سالب = استرداد)" /></div>
-    </div>
-    <div id="f_payUsdFields" style="display:none;">
-      <div class="field-row">
-        <div class="field"><input id="f_payAmountUsd" type="number" placeholder="المبلغ بالعملة الأجنبية (سالب = استرداد)" /></div>
-        <div class="field"><input id="f_payRate" type="number" placeholder="سعر الصرف وقت الدفع" /></div>
-      </div>
-    </div>
-    <div class="field">
-      <select id="f_payMethod">
-        <option value="Cash">كاش</option>
-        <option value="Vodafone Cash">فودافون كاش</option>
-        <option value="InstaPay">انستاباي</option>
-        <option value="Bank Transfer">تحويل بنكي</option>
-        <option value="Card">فيزا/بطاقة</option>
-        <option value="Other">أخرى</option>
-      </select>
-    </div>
-    <div class="field"><input id="f_payNote" placeholder="ملاحظة (اختياري)" /></div>
-    <button class="btn btn-brand btn-block btn-sm" onclick="addPayment()">تسجيل الدفعة</button>
-  </div>
-
-  <div class="d-section" data-perm="share">
-    <h4>مشاركة بيانات الطالب</h4>
-    <div class="share-row">
-      <button class="btn btn-ghost btn-sm" onclick="openShareWaModal()">📱 واتساب</button>
-      <button class="btn btn-ghost btn-sm" onclick="openShareEmailModal()">✉️ إيميل</button>
-    </div>
-  </div>
-
-  <hr class="divider">
-  <div class="share-row">
-    <button class="btn btn-ghost btn-sm" data-perm="edit" onclick="openEditModal(currentDetailId)">✏️ تعديل</button>
-    <button class="btn btn-danger btn-sm" data-perm="delete" onclick="deleteStudent(currentDetailId)">🗑️ حذف الطالب</button>
-  </div>
-</div>
-
-<div class="overlay" id="studentOverlay">
-  <div class="modal modal-lg">
-    <h2 id="studentModalTitle">تسجيل طالب جديد</h2>
-    <div class="field-row">
-      <div class="field"><label>كود الطالب</label><input id="f_code" /></div>
-      <div class="field"><label>اسم الطالب</label><input id="f_name" /></div>
-    </div>
-    <div class="field-row">
-      <div class="field"><label>رقم الهاتف</label><input id="f_phone" /></div>
-      <div class="field"><label>الإيميل (اختياري)</label><input id="f_email" /></div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>الجنسية</label>
-        <select id="f_nationality">
-          <option value="egyptian">مصري</option>
-          <option value="foreign">وافد</option>
-        </select>
-      </div>
-      <div class="field" id="f_canadianWrap">
-        <label>&nbsp;</label>
-        <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:var(--ink);padding:9px 0;">
-          <input type="checkbox" id="f_isCanadian" style="width:auto;">
-          برنامج كندي
-        </label>
-      </div>
-    </div>
-    <div class="field" id="canadianExtraWrap" style="display:none;">
-      <label>مصاريف النظام الكندي (إضافية فوق مصاريف المعهد العادية)</label>
-      <div class="field-row">
-        <div class="field"><input id="f_canadianFeeAmount" type="number" min="0" placeholder="المبلغ" /></div>
+  <!-- MAIN COLUMN -->
+  <div>
+    <div class="card">
+      <h2><span class="ic">💵</span> تسجيل مبلغ جديد</h2>
+      <div class="form-row cols4">
         <div class="field">
-          <select id="f_canadianCurrency">
-            <option value="usd">دولار أمريكي</option>
-            <option value="cad">دولار كندي</option>
-          </select>
+          <label>البند</label>
+          <select id="f_category"></select>
+        </div>
+        <div class="field">
+          <label>المبلغ (ج.م)</label>
+          <input id="f_amount" type="number" min="0" placeholder="0" class="num-input">
+        </div>
+        <div class="field">
+          <label>التاريخ</label>
+          <input id="f_date" type="date">
+        </div>
+        <div class="field" style="justify-content:flex-end;">
+          <button class="btn btn-gold btn-block" onclick="addEntry()">+ إضافة</button>
         </div>
       </div>
-      <div class="fee-hint" style="margin-bottom:10px;">المبلغ ده بيتضاف فوق مصاريف المعهد العادية (بالجنيه)، ومصاريف المعهد وخصوماتها بتفضل زي أي طالب مصري عادي.</div>
+      <div class="field" style="margin-top:12px;">
+        <label>ملاحظة (اختياري)</label>
+        <input id="f_note" placeholder="مثال: اسم الطالب أو تفاصيل سريعة">
+      </div>
+
+      <div class="cat-grid" id="catGrid"></div>
+
+      <div class="grand-bar">
+        <span class="lbl">إجمالي المعلّق (لسه معايا)</span>
+        <span class="val num" id="grandPending">0 ج.م</span>
+      </div>
+
+      <div class="entry-list" id="entryList"></div>
+
+      <button class="btn btn-gold btn-block" style="margin-top:18px;" id="handoverBtn" onclick="openHandoverModal()">🔒 تسليم الخزنة</button>
     </div>
-    <div class="field" id="ministryFeeWrap">
-      <label>رسوم الوزارة (مبلغ ثابت — للمصريين فقط)</label>
-      <input id="f_ministryFee" type="number" />
+  </div>
+
+  <!-- SIDE COLUMN -->
+  <div>
+    <div class="card">
+      <h2><span class="ic">📜</span> سجل التسليمات</h2>
+      <div class="filter-row">
+        <div class="field"><label>من تاريخ</label><input id="filterFrom" type="date"></div>
+        <div class="field"><label>إلى تاريخ</label><input id="filterTo" type="date"></div>
+      </div>
+      <div id="historyList"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic">⚙️</span> نسخ احتياطي وتصدير</h2>
+      <div class="footer-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openExportModal()">📊 تصدير إكسل</button>
+        <button class="btn btn-ghost btn-sm" onclick="downloadBackup()">⬇️ نسخة احتياطية</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('restoreFile').click()">⬆️ استعادة نسخة</button>
+        <input type="file" id="restoreFile" accept="application/json" style="display:none;" onchange="restoreBackup(event)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sig-footer">نظام خاص بـ <b>Mohamed Wael</b> — لإدارة تحصيلات الجامعة</div>
+
+<!-- Handover confirm modal -->
+<div class="overlay" id="handoverOverlay">
+  <div class="modal">
+    <h3>تأكيد تسليم الخزنة</h3>
+    <div id="handoverBreakdown"></div>
+    <div class="field" style="margin-top:16px;">
+      <label>ملاحظة على التسليم (اختياري)</label>
+      <input id="handoverNote" placeholder="مثال: اتسلم للأستاذ / في الخزنة الرئيسية">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-block" onclick="closeHandoverModal()">إلغاء</button>
+      <button class="btn btn-gold btn-block" onclick="confirmHandover()">تأكيد التسليم</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category manager modal -->
+<div class="overlay" id="categoryOverlay">
+  <div class="modal" style="max-width:480px;">
+    <h3>🗂️ إدارة بنود التحصيل</h3>
+    <div id="categoryListWrap"></div>
+    <div class="field-row" style="display:grid;grid-template-columns:0.7fr 1.3fr;gap:10px;margin-top:14px;">
+      <div class="field"><label>أيقونة (إيموجي)</label><input id="newCatIcon" placeholder="💰" maxlength="4"></div>
+      <div class="field"><label>اسم البند</label><input id="newCatName" placeholder="مثال: رسوم كذا"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-block" id="catCancelBtn" style="display:none;" onclick="cancelCatEdit()">إلغاء التعديل</button>
+      <button class="btn btn-gold btn-block" id="catSaveBtn" onclick="saveCategory()">+ إضافة بند</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export range modal -->
+<div class="overlay" id="exportOverlay">
+  <div class="modal" style="max-width:440px;">
+    <h3>📊 تصدير إكسل</h3>
+    <div class="field">
+      <label>من تاريخ (سيب فاضي = من الأول)</label>
+      <input id="exportFrom" type="date">
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>إلى تاريخ (سيب فاضي = لحد النهاردة)</label>
+      <input id="exportTo" type="date">
+    </div>
+    <div class="footer-actions" style="margin-top:10px;">
+      <button class="btn btn-ghost btn-sm" onclick="setExportRange('today')">النهاردة</button>
+      <button class="btn btn-ghost btn-sm" onclick="setExportRange('week')">آخر 7 أيام</button>
+      <button class="btn btn-ghost btn-sm" onclick="setExportRange('month')">الشهر ده</button>
+      <button class="btn btn-ghost btn-sm" onclick="setExportRange('all')">كل الفترات</button>
+    </div>
+    <div style="margin-top:16px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);">
+        <input type="checkbox" id="exportIncludeHandovers" checked style="width:auto;"> ورقة التسليمات
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);margin-top:7px;">
+        <input type="checkbox" id="exportIncludeEntries" checked style="width:auto;"> ورقة كل الحركات (تفصيلي)
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-block" onclick="closeExportModal()">إلغاء</button>
+      <button class="btn btn-gold btn-block" onclick="exportExcelReport()">تنزيل</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sync setup modal -->
+<div class="overlay" id="syncOverlay">
+  <div class="modal" style="max-width:520px;">
+    <h3>☁️ ربط جوجل شيت (نسخة سحابية)</h3>
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:14px;">
+      من غير ربط، البيانات بتتخزن على المتصفح بس. اربط جوجل شيت عشان البيانات تتحفظ سحابيًا وتفتح نفس البيانات من أي جهاز.
+      <ol style="padding-inline-start:18px; margin:10px 0;">
+        <li>افتح Google Sheet جديد فاضي.</li>
+        <li>من القائمة: Extensions ← Apps Script.</li>
+        <li>امسح أي كود موجود، والصق كود Apps Script اللي معاك.</li>
+        <li>Deploy ← New deployment ← Type: Web app ← Execute as: Me ← Who has access: Anyone.</li>
+        <li>اضغط Deploy وانسخ الرابط اللي يخلص بـ <span class="num">/exec</span> وحطه هنا تحت.</li>
+      </ol>
     </div>
     <div class="field">
-      <label>الكلية</label>
-      <select id="f_college"></select>
-      <div class="fee-hint" id="feeHint">—</div>
-    </div>
-    <div id="egpInstituteBlock">
-      <div class="field">
-        <label id="f_unitLabel">عدد الوحدات</label>
-        <input id="f_unitCount" type="number" min="0" value="0" />
-        <div class="fee-hint" id="unitCalcHint"></div>
-      </div>
-    </div>
-    <div id="usdInstituteBlock" style="display:none;">
-      <div class="field"><label>مصاريف المعهد (دولار)</label><input id="f_instituteFeeUSD" type="number" min="0" value="0" /></div>
-      <div class="fee-hint" style="margin-bottom:10px;">مصاريف المعهد بتتسجل بالدولار، والتحويل للجنيه بيحصل مع كل دفعة على حسب سعر الصرف وقتها.</div>
-    </div>
-    <div class="field-row-3">
-      <div class="field" id="instituteFeeEgpWrap"><label>مصاريف المعهد (قابلة للتعديل)</label><input id="f_instituteFee" type="number" /></div>
-      <div class="field"><label>رسوم الشركة (قابلة للتعديل)</label><input id="f_companyFee" type="number" /></div>
-      <div class="field"><label>رسوم الجمعية (قابلة للتعديل)</label><input id="f_associationFee" type="number" /></div>
-    </div>
-    <div class="fee-hint" style="margin-bottom:10px;">القيم دي بتتحسب أوتوماتيك من إعدادات الكلية، بس تقدر تعدلها يدوي لو محتاج تظبطها لحالة معينة.</div>
-    <div class="field" id="discountBlockWrap">
-      <label>الخصومات (تنطبق على مصاريف المعهد — تقدر تختار أكتر من خصم)</label>
-      <input id="f_discountSearch" placeholder="ابحث في الخصومات..." oninput="renderDiscountChecklist(this.value)" style="margin-bottom:6px;" />
-      <div class="settings-list" id="f_discount" style="max-height:170px;"></div>
-      <div class="fee-hint" id="discountHint"></div>
-    </div>
-    <div class="field"><label>دفعة مبدئية الآن (اختياري)</label><input id="f_initialPay" type="number" /></div>
-    <div class="field">
-      <label>طريقة السداد</label>
-      <select id="f_paymentMethod">
-        <option value="cash">كاش</option>
-        <option value="installment">تقسيط</option>
-      </select>
-    </div>
-    <div id="installmentFields" style="display:none;">
-      <div class="field-row">
-        <div class="field"><label>عدد الأقساط</label><input id="f_instCount" type="number" min="2" value="3" /></div>
-        <div class="field"><label>تاريخ أول قسط</label><input id="f_instFirstDate" type="date" /></div>
-      </div>
-      <div class="field"><label>الفاصل بين كل قسط (أيام)</label><input id="f_instInterval" type="number" value="30" /></div>
-      <div class="field" style="display:flex;align-items:center;gap:8px;">
-        <input type="checkbox" id="f_applyInstFee" checked style="width:auto;">
-        <label style="margin:0;" for="f_applyInstFee">تطبيق رسوم التقسيط المحددة في الإعدادات</label>
-      </div>
-      <div class="fee-hint" id="instFeeHint"></div>
+      <label>رابط Google Apps Script (/exec)</label>
+      <input id="syncUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeStudentModal()">إلغاء</button>
-      <button class="btn btn-brand" onclick="saveStudent()">حفظ</button>
+      <button class="btn btn-ghost btn-block" onclick="closeSyncModal()">إلغاء</button>
+      <button class="btn btn-gold btn-block" onclick="saveSyncUrl()">حفظ وربط</button>
     </div>
+    <div id="syncStatusMsg" style="margin-top:12px;font-size:12.5px;color:var(--ink-soft);"></div>
   </div>
 </div>
 
-<div class="overlay" id="settingsOverlay">
-  <div class="modal">
-    <h2>الإعدادات</h2>
-    <div class="settings-tabs">
-      <button class="tab-btn active" id="tabColleges" data-perm="settings_colleges" onclick="switchTab('colleges')">الكليات والرسوم</button>
-      <button class="tab-btn" id="tabDiscounts" data-perm="settings_discounts" onclick="switchTab('discounts')">الخصومات</button>
-      <button class="tab-btn" id="tabInstallment" data-perm="settings_installments" onclick="switchTab('installment')">التقسيط والغرامات</button>
-      <button class="tab-btn" id="tabBackup" data-perm="backups" onclick="switchTab('backup')">النسخ الاحتياطي</button>
-      <button class="tab-btn" id="tabUsers" data-perm="manage_users" onclick="switchTab('users')">المستخدمين</button>
-    </div>
-
-    <div id="panelColleges">
-      <div class="settings-list" id="collegesList"></div>
-      <div class="field"><input id="newCollegeName" placeholder="اسم الكلية" /></div>
-      <div class="field">
-        <label>طريقة احتساب مصاريف المعهد</label>
-        <select id="newCollegeFeeType">
-          <option value="subject">بالمادة (يُسجّل عدد المواد لكل طالب)</option>
-          <option value="hour">بالساعة (يُسجّل عدد الساعات لكل طالب)</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="field"><input id="newCollegeUnitPrice" type="number" placeholder="سعر المادة/الساعة (ج.م)" /></div>
-        <div class="field"><input id="newCollegeCompanyFee" type="number" placeholder="رسوم الشركة (ج.م)" /></div>
-      </div>
-      <div class="field"><input id="newCollegeAssociationFee" type="number" placeholder="رسوم الجمعية (ج.م)" /></div>
-      <div class="share-row">
-        <button class="btn btn-brand btn-block btn-sm" id="addCollegeBtn" onclick="addCollege()">+ إضافة كلية</button>
-        <button class="btn btn-ghost btn-sm" id="cancelCollegeEditBtn" style="display:none;flex:0 0 auto;" onclick="cancelCollegeEdit()">إلغاء التعديل</button>
-      </div>
-      <div class="fee-hint" style="margin-top:8px;">تعديل بيانات كلية موجودة بيغيّر السعر الافتراضي للطلاب الجدد بس — مش بيغيّر مصاريف الطلاب المسجلين بالفعل (لازم تعدّلها من صفحة الطالب نفسه لو محتاج).</div>
-    </div>
-
-    <div id="panelDiscounts" style="display:none;">
-      <input id="discountSettingsSearch" placeholder="ابحث في الخصومات..." oninput="renderSettingsLists()" style="margin-bottom:8px;" />
-      <div class="settings-list" id="discountsList"></div>
-      <div class="field-row">
-        <div class="field"><input id="newDiscountName" placeholder="اسم الخصم" /></div>
-        <div class="field"><select id="newDiscountType"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت</option></select></div>
-      </div>
-      <div class="field"><input id="newDiscountValue" type="number" placeholder="القيمة" /></div>
-      <div class="share-row">
-        <button class="btn btn-brand btn-block btn-sm" id="addDiscountBtn" onclick="addDiscount()">+ إضافة خصم</button>
-        <button class="btn btn-ghost btn-sm" id="cancelDiscountEditBtn" style="display:none;flex:0 0 auto;" onclick="cancelDiscountEdit()">إلغاء التعديل</button>
-      </div>
-    </div>
-
-    <div id="panelInstallment" style="display:none;">
-      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin:4px 0 6px;">رسوم الوزارة الافتراضية (مبلغ ثابت بالجنيه — بتتطبق تلقائيًا على كل طالب مصري عند التسجيل)</div>
-      <div class="field"><input id="ministryFeeDefault" type="number" placeholder="مثال: 500" /></div>
-      <button class="btn btn-brand btn-block btn-sm" onclick="saveMinistryFeeSetting()">حفظ رسوم الوزارة</button>
-      <hr class="divider">
-      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin:4px 0 6px;">رسوم التقسيط (تُضاف تلقائيًا على مصاريف المعهد عند اختيار التقسيط)</div>
-      <div class="field-row">
-        <div class="field"><select id="instFeeType"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت</option></select></div>
-        <div class="field"><input id="instFeeValue" type="number" placeholder="القيمة" /></div>
-      </div>
-      <button class="btn btn-brand btn-block btn-sm" onclick="saveInstallmentFeeSetting()">حفظ رسوم التقسيط</button>
-      <hr class="divider">
-      <div style="font-size:12px;color:var(--ink-soft);font-weight:700;margin:4px 0 6px;">الغرامة على القسط المتأخر</div>
-      <div class="field-row">
-        <div class="field"><select id="penaltyType"><option value="percent">نسبة % من القسط</option><option value="fixed">مبلغ ثابت لكل قسط</option></select></div>
-        <div class="field"><input id="penaltyValue" type="number" placeholder="القيمة" /></div>
-      </div>
-      <div class="field"><label>مهلة السماح قبل تطبيق الغرامة (أيام)</label><input id="penaltyGrace" type="number" placeholder="مثال: 7" /></div>
-      <button class="btn btn-brand btn-block btn-sm" onclick="savePenaltySetting()">حفظ إعدادات الغرامة</button>
-    </div>
-
-    <div id="panelBackup" style="display:none;">
-      <div class="fee-hint" id="syncStatusInfo" style="margin-bottom:6px;font-weight:700;"></div>
-      <div class="fee-hint" id="lastSavedInfo" style="margin-bottom:10px;">لسه معملش حفظ</div>
-      <button class="btn btn-brand btn-block btn-sm" onclick="downloadBackupNow()">⬇️ تنزيل نسخة احتياطية الآن (.json)</button>
-      <div class="fee-hint" style="margin:8px 0;">احتفظ بالملف ده في مكان خارج المتصفح (إيميل، جوجل درايف...) — دي النسخة الوحيدة المضمونة حتى لو اتمسحت بيانات المتصفح.</div>
-      <hr class="divider">
-      <label style="display:block;font-size:12px;color:var(--ink-soft);font-weight:700;margin-bottom:6px;">استعادة من ملف نسخة احتياطية</label>
-      <input type="file" id="restoreFileInput" accept=".json" />
-      <div class="fee-hint" style="margin:14px 0 6px;font-weight:700;color:var(--ink);">نسخ احتياطية تلقائية يومية (آخر 30 يوم)</div>
-      <div class="settings-list" id="backupList"></div>
-    </div>
-
-    <div id="panelUsers" style="display:none;">
-      <div class="settings-list" id="usersList"></div>
-      <div class="field-row">
-        <div class="field"><input id="newUserEmail" type="email" placeholder="user@example.com" /></div>
-        <div class="field"><input id="newUserPin" type="password" placeholder="الرقم السري (4 أرقام على الأقل)" /></div>
-      </div>
-      <div class="field">
-        <label>نطاق الرؤية المالية</label>
-        <select id="newUserFinScope">
-          <option value="all">الكل (كل التفاصيل المالية)</option>
-          <option value="institute">المعهد فقط</option>
-          <option value="company">الشركة فقط</option>
-          <option value="association">الجمعية فقط</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>الصلاحيات</label>
-        <div style="display:flex;gap:8px;margin-bottom:6px;">
-          <button type="button" class="btn btn-ghost btn-sm" style="flex:1;" onclick="setAllNewUserPerms(true)">تحديد الكل</button>
-          <button type="button" class="btn btn-ghost btn-sm" style="flex:1;" onclick="setAllNewUserPerms(false)">إلغاء الكل</button>
-        </div>
-        <div class="settings-list" id="newUserPermsList" style="max-height:220px;"></div>
-      </div>
-      <button class="btn btn-brand btn-block btn-sm" id="addUserBtn" onclick="addUser()">+ إضافة مستخدم</button>
-      <button class="btn btn-ghost btn-block btn-sm" id="cancelUserEditBtn" style="display:none;margin-top:6px;" onclick="cancelUserEdit()">إلغاء التعديل</button>
-      <div class="fee-hint" style="margin-top:10px;">الرقم السري ده وسيلة لمنع الأخطاء العرضية من الموظفين — مش حماية حقيقية. أي حد يوصل مباشرة للملف أو تخزين المتصفح يقدر يتخطاها.</div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-ghost btn-block" onclick="closeSettings()">تم</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay open" id="loginOverlay" style="z-index:200;">
-  <div class="modal">
-    <h2>تسجيل الدخول — MOHAMED'S STUDENT MANAGEMENT CIC</h2>
-    <div class="field">
-      <label>الإيميل</label>
-      <input id="loginEmailInput" type="email" placeholder="you@example.com" />
-    </div>
-    <div class="field">
-      <label>الرقم السري</label>
-      <input id="loginPinInput" type="password" placeholder="ادخل الرقم السري" />
-    </div>
-    <div class="fee-hint" id="loginError" style="color:var(--bad);"></div>
-    <div class="modal-actions">
-      <button class="btn btn-brand btn-block" onclick="attemptLogin()">دخول</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="shareWaOverlay">
-  <div class="modal">
-    <h2>مشاركة عبر واتساب</h2>
-    <div class="field"><label>رقم الهاتف (بمفتاح الدولة)</label><input id="waPhoneInput" placeholder="مثال: 201xxxxxxxxx" /></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeWaModal()">إلغاء</button>
-      <button class="btn btn-brand" onclick="sendWhatsApp()">إرسال</button>
-    </div>
-  </div>
-</div>
-<div class="overlay" id="shareEmailOverlay">
-  <div class="modal">
-    <h2>مشاركة عبر البريد الإلكتروني</h2>
-    <div class="field"><label>البريد الإلكتروني (للمرجع)</label><input id="emailInput" placeholder="example@mail.com" /></div>
-    <div class="field">
-      <label>نص الرسالة</label>
-      <textarea id="emailMessageBox" rows="8" readonly style="width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:'Tajawal';font-size:13px;background:#fbfbfd;resize:vertical;"></textarea>
-    </div>
-    <div class="fee-hint">الزرار التاني بيحاول يفتح تطبيق البريد عندك مباشرة بالرسالة جاهزة</div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeEmailModal()">إغلاق</button>
-      <button class="btn btn-ghost" onclick="copyEmailMessage()">نسخ الرسالة</button>
-      <a id="mailtoLink" class="btn btn-brand" style="text-decoration:none;display:flex;align-items:center;justify-content:center;" target="_blank" rel="noopener">فتح البريد</a>
-    </div>
-  </div>
-</div>
-
-<!-- Daily student registration report -->
-<div class="overlay" id="dailyReportOverlay">
-  <div class="modal">
-    <h2>التقرير اليومي — طلاب مسجلين حسب التاريخ</h2>
-    <div class="field"><label>اختر التاريخ</label><input id="reportDateInput" type="date" /></div>
-    <div class="fee-hint" id="reportCountHint"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeDailyReportModal()">إلغاء</button>
-      <button class="btn btn-brand" onclick="exportDailyReport()">📤 تصدير تقرير اليوم ده</button>
-    </div>
-  </div>
-</div>
-
-<!-- Cash Ledger -->
-<div class="overlay" id="cashLedgerOverlay">
-  <div class="modal modal-lg">
-    <h2>دفتر الكاش اليومي</h2>
-    <div class="field-row">
-      <div class="field"><label>عرض معاملات يوم</label><input id="ledgerDateInput" type="date" /></div>
-      <div class="field"><label>أو ابحث بكود الطالب (في كل الأيام)</label><input id="ledgerStudentSearch" placeholder="اكتب كود الطالب..." /></div>
-    </div>
-
-    <div class="party-card">
-      <div class="pr"><span>إجمالي المقبوض (In)</span><b id="ledgerTotalIn" style="color:var(--good);">0</b></div>
-      <div class="pr"><span>إجمالي المنصرف (Out)</span><b id="ledgerTotalOut" style="color:var(--bad);">0</b></div>
-      <div class="pr"><span><b>الصافي</b></span><b id="ledgerNet">0</b></div>
-    </div>
-
-    <div class="settings-list" id="ledgerEntriesList" style="max-height:240px;"></div>
-
-    <hr class="divider">
-    <h3 style="font-size:14px;margin:0 0 10px;">تسجيل معاملة جديدة</h3>
-    <div class="field-row">
-      <div class="field"><label>البند</label><select id="ledgerCategory"></select></div>
-      <div class="field">
-        <label>الاتجاه</label>
-        <select id="ledgerDirection">
-          <option value="in">قبض (وارد لعندي)</option>
-          <option value="out">صرف (خارج مني)</option>
-        </select>
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field"><label>المبلغ</label><input id="ledgerAmount" type="number" /></div>
-      <div class="field"><label>كود الطالب (اختياري)</label><input id="ledgerStudentCode" list="studentCodesList" placeholder="اكتب أو اختار من القائمة" /></div>
-    </div>
-    <datalist id="studentCodesList"></datalist>
-    <div class="field"><label>ملاحظة (اختياري)</label><input id="ledgerNote" /></div>
-    <button class="btn btn-brand btn-block btn-sm" onclick="addLedgerEntry()">+ تسجيل المعاملة</button>
-
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeCashLedger()">إغلاق</button>
-      <button class="btn btn-brand" onclick="exportLedgerDay()">📤 تصدير يوم الكاش ده إكسل</button>
-    </div>
-  </div>
+<div class="stamp-overlay" id="stampOverlay">
+  <div class="stamp" id="stampEl">تم التسليم<br>✓</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-let data = { batchName:"دفعة جديدة", colleges:[], discounts:[], students:[], installmentFeeSetting:{type:'percent',value:0}, penaltySetting:{type:'percent',value:0,grace:0}, ministryFeeSetting:{value:0} };
-let currentEditId = null;
-let currentDetailId = null;
-const STORAGE_KEY = "revenue-batch-data-en-v1";
+const DEFAULT_CATEGORIES = [
+  {key:'business', label:'معهد - بزنس', icon:'💼'},
+  {key:'cs', label:'معهد - كمبيوتر ساينس', icon:'💻'},
+  {key:'engineering', label:'معهد - هندسة', icon:'⚙️'},
+  {key:'company', label:'الشركة', icon:'🏢'},
+  {key:'association', label:'الجمعية', icon:'🤝'},
+  {key:'test', label:'رسوم التيست', icon:'📝'},
+];
+const STORAGE_KEY = 'cic_cash_treasury_v1';
+const SYNC_URL_KEY = 'cash_treasury_sync_url';
 
-const SYNC_URL = "https://script.google.com/macros/s/AKfycbyIAqNBbaogwgV3qwh0QdTH80oUFa-hR9lgNkdhTRj2wI_npA2gDWTr6UCHqpzAsV0xnw/exec";
-const SYNC_CONFIGURED = !!(SYNC_URL && SYNC_URL.indexOf('http') === 0);
+let data = { entries: [], handovers: [], categories: null };
+
+function uid(){ return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function fmt(n){ return Math.round(Number(n)||0).toLocaleString('en-US'); }
+function todayStr(){ return localDateStr(new Date()); }
+function localDateStr(d){
+  const dt = (d instanceof Date) ? d : new Date(d);
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth()+1).padStart(2,'0');
+  const day = String(dt.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function CATEGORIES(){ return (data.categories && data.categories.length) ? data.categories : DEFAULT_CATEGORIES; }
+function catLabel(key){ const c=CATEGORIES().find(c=>c.key===key); return c?c.label:'بند محذوف'; }
+function catIcon(key){ const c=CATEGORIES().find(c=>c.key===key); return c?c.icon:'❔'; }
+
+function getSyncUrl(){ try{ return localStorage.getItem(SYNC_URL_KEY)||''; }catch(e){ return ''; } }
+function isSyncConfigured(){ const u=getSyncUrl(); return !!(u && u.indexOf('http')===0); }
 
 const LocalOnlyStore = {
   async get(key){ try{ const value = localStorage.getItem(key); return value===null ? null : { key, value }; }catch(e){ return null; } },
-  async set(key, value){ try{ localStorage.setItem(key, value); return { key, value }; }catch(e){ return null; } },
-  async delete(key){ try{ localStorage.removeItem(key); return { key, deleted:true }; }catch(e){ return null; } },
-  async list(prefix){ try{ const keys = Object.keys(localStorage).filter(k => !prefix || k.startsWith(prefix)); return { keys, prefix }; }catch(e){ return { keys:[] }; } }
+  async set(key, value){ try{ localStorage.setItem(key, value); return { key, value }; }catch(e){ return null; } }
 };
 const SheetSyncStore = {
   async _call(payload){
     try{
-      const res = await fetch(SYNC_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
+      const res = await fetch(getSyncUrl(), { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
       if(!res.ok) return null;
       return await res.json();
     }catch(e){ return null; }
   },
   async get(key){ const result = await this._call({ action:'get', key }); if(!result || result.value===undefined || result.value===null) return null; return { key, value: result.value }; },
-  async set(key, value){ const result = await this._call({ action:'set', key, value }); return result ? { key, value } : null; },
-  async delete(key){ return await this._call({ action:'delete', key }); },
-  async list(prefix){ const result = await this._call({ action:'list', prefix }); return (result && result.keys) ? { keys: result.keys, prefix } : { keys: [] }; }
+  async set(key, value){ const result = await this._call({ action:'set', key, value }); return result ? { key, value } : null; }
 };
-const AppStore = SYNC_CONFIGURED ? SheetSyncStore : LocalOnlyStore;
+function getStore(){ return isSyncConfigured() ? SheetSyncStore : LocalOnlyStore; }
 
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-function fmt(n){ return (Math.round((n||0)*100)/100).toLocaleString('en-US'); }
-function escapeHtml(str){ return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-const ALL_PERMISSIONS = [
-  {key:'view', label:'مشاهدة الطلاب (البحث وعرض التفاصيل)'},
-  {key:'add', label:'إضافة طلاب (تسجيل جديد)'},
-  {key:'edit', label:'تعديل بيانات الطلاب'},
-  {key:'delete', label:'حذف الطلاب'},
-  {key:'payments', label:'تسجيل الدفعات والمستردات'},
-  {key:'share', label:'مشاركة بيانات الطالب (واتساب/إيميل)'},
-  {key:'settings_colleges', label:'إدارة الكليات والرسوم'},
-  {key:'settings_discounts', label:'إدارة الخصومات'},
-  {key:'settings_installments', label:'إدارة التقسيط والغرامات'},
-  {key:'import', label:'استيراد من إكسل'},
-  {key:'export', label:'تصدير إلى إكسل'},
-  {key:'backups', label:'إدارة النسخ الاحتياطية'},
-  {key:'manage_users', label:'إدارة المستخدمين والصلاحيات'},
-  {key:'cash_ledger', label:'دفتر الكاش اليومي (تسجيل ومراجعة المعاملات النقدية)'},
-];
-
-const DEFAULT_DISCOUNTS = [
-  {name:'خصم التسجيل المبكر (19 يوليو – 1 أغسطس 2026)', type:'percent', value:10},
-  {name:'خصم التسجيل المبكر – عبر تطبيق CIC', type:'percent', value:15},
-  {name:'خصم يوم الأسرة المفتوح (Open Day)', type:'percent', value:10},
-  {name:'خصم السداد خلال 3 أيام عمل من إعلان النتيجة', type:'percent', value:25},
-  {name:'منحة رياضية – بطولة عالمية – المركز الأول', type:'percent', value:100},
-  {name:'منحة رياضية – بطولة عالمية – المركز الثاني', type:'percent', value:75},
-  {name:'منحة رياضية – بطولة عالمية – المركز الثالث', type:'percent', value:50},
-  {name:'منحة رياضية – بطولة محلية – المركز الأول', type:'percent', value:30},
-  {name:'منحة رياضية – بطولة محلية – المركز الثاني', type:'percent', value:20},
-  {name:'منحة رياضية – بطولة محلية – المركز الثالث', type:'percent', value:10},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – العشرة الأوائل', type:'percent', value:100},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 90-100%', type:'percent', value:50},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 80-90%', type:'percent', value:40},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 70-80%', type:'percent', value:30},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (القاهرة الجديدة) – 65-70%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – العشرة الأوائل', type:'percent', value:100},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 90-100%', type:'percent', value:40},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 80-90%', type:'percent', value:30},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 70-80%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مشترك – إدارة أعمال (الشيخ زايد) – 65-70%', type:'percent', value:10},
-  {name:'منحة تفوق دراسي – مشترك – هندسة – العشرة الأوائل', type:'percent', value:100},
-  {name:'منحة تفوق دراسي – مشترك – هندسة – 90-100%', type:'percent', value:50},
-  {name:'منحة تفوق دراسي – مشترك – هندسة – 80-90%', type:'percent', value:40},
-  {name:'منحة تفوق دراسي – مشترك – هندسة – 70-80%', type:'percent', value:30},
-  {name:'منحة تفوق دراسي – مشترك – هندسة – 65-70%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مشترك – إعلام – العشرة الأوائل', type:'percent', value:100},
-  {name:'منحة تفوق دراسي – مشترك – إعلام – 90-100%', type:'percent', value:50},
-  {name:'منحة تفوق دراسي – مشترك – إعلام – 80-90%', type:'percent', value:40},
-  {name:'منحة تفوق دراسي – مشترك – إعلام – 70-80%', type:'percent', value:30},
-  {name:'منحة تفوق دراسي – مشترك – إعلام – 65-70%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (القاهرة الجديدة) – 90-100%', type:'percent', value:30},
-  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (القاهرة الجديدة) – 80-90%', type:'percent', value:25},
-  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (القاهرة الجديدة) – 70-80%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (الشيخ زايد) – 90-100%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (الشيخ زايد) – 80-90%', type:'percent', value:15},
-  {name:'منحة تفوق دراسي – مصري – إدارة أعمال (الشيخ زايد) – 70-80%', type:'percent', value:10},
-  {name:'منحة تفوق دراسي – مصري – هندسة – 90-100%', type:'percent', value:30},
-  {name:'منحة تفوق دراسي – مصري – هندسة – 80-90%', type:'percent', value:25},
-  {name:'منحة تفوق دراسي – مصري – هندسة – 70-80%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مصري – حاسب آلي (الشيخ زايد) – 90-100%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مصري – حاسب آلي (الشيخ زايد) – 80-90%', type:'percent', value:15},
-  {name:'منحة تفوق دراسي – مصري – حاسب آلي (الشيخ زايد) – 70-80%', type:'percent', value:10},
-  {name:'منحة تفوق دراسي – مصري – إعلام – 90-100%', type:'percent', value:30},
-  {name:'منحة تفوق دراسي – مصري – إعلام – 80-90%', type:'percent', value:25},
-  {name:'منحة تفوق دراسي – مصري – إعلام – 70-80%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مصري – حاسب آلي (القاهرة الجديدة) – 90-100%', type:'percent', value:20},
-  {name:'منحة تفوق دراسي – مصري – حاسب آلي (القاهرة الجديدة) – 80-90%', type:'percent', value:15},
-  {name:'منحة تفوق دراسي – مصري – حاسب آلي (القاهرة الجديدة) – 70-80%', type:'percent', value:10},
-  {name:'مساعدة مالية – وفاة أحد الوالدين (البرنامج المصري)', type:'percent', value:10},
-  {name:'مساعدة مالية – تسجيل مبكر (البرنامج المصري)', type:'percent', value:10},
-  {name:'مساعدة مالية – موظف حكومي/قطاع عام (الأب) – مشترك', type:'percent', value:20},
-  {name:'مساعدة مالية – القوات المسلحة والشرطة – مشترك', type:'percent', value:20},
-  {name:'مساعدة مالية – عضو هيئة تدريس بجامعة حكومية – مشترك', type:'percent', value:20},
-  {name:'مساعدة مالية – وفاة الأب – مشترك', type:'percent', value:20},
-  {name:'مساعدة مالية – أخ/أخت خريج من CIC – مشترك', type:'percent', value:20},
-  {name:'مساعدة مالية – تسجيل مبكر – مشترك', type:'percent', value:10},
-];
-
-let lastSavedAt = null;
 async function loadData(){
   try{
-    const res = await AppStore.get(STORAGE_KEY);
-    if(res && res.value) data = Object.assign(data, JSON.parse(res.value));
-  }catch(e){}
-  data.colleges = (data.colleges||[]).map(c=>{
-    if(c.feeType) return c;
-    return { id:c.id, name:c.name, feeType:'subject', unitPrice: Number(c.fee||0), companyFee:0, associationFee:0 };
-  });
-  if(!data.discounts || data.discounts.length===0){
-    data.discounts = DEFAULT_DISCOUNTS.map(d=>({ id:uid(), name:d.name, type:d.type, value:d.value }));
-    await persist();
-  }
-  if(data.users && data.users.length){
-    let migrated=false;
-    data.users = data.users.map(u=>{
-      if(u.email && u.permissions) return u;
-      migrated=true;
-      const legacyFullAccess = u.role==='admin';
-      return {
-        id: u.id || uid(),
-        email: u.email || ((u.name||'user').toLowerCase().replace(/[^a-z0-9]+/g,'.') + '@cic.local'),
-        pin: u.pin || '1234',
-        financialScope: u.financialScope || 'all',
-        permissions: u.permissions || (legacyFullAccess ? ALL_PERMISSIONS.map(p=>p.key) : ['view','add','edit','payments','share','export'])
-      };
-    });
-    if(migrated) await persist();
-  }
-  if(!data.users || data.users.length===0){
-    data.users = [{ id:uid(), email:'admin@cic.local', pin:'1234', financialScope:'all', permissions: ALL_PERMISSIONS.map(p=>p.key) }];
-    await persist();
-  }
-  refreshCollegeSelects();
-  refreshDiscountSelects();
-  render();
-  maybeCreateDailyBackup();
-}
-async function persist(){
-  try{ await AppStore.set(STORAGE_KEY, JSON.stringify(data)); lastSavedAt = new Date(); }
-  catch(e){ showToast('حصل خطأ في الحفظ'); }
-}
-function showToast(msg){
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2400);
-}
-
-function getCollege(id){ return data.colleges.find(c=>c.id===id); }
-function getDiscount(id){ return data.discounts.find(d=>d.id===id); }
-
-function isStudentUsd(s){ return s.nationality==='foreign'; }
-function hasForeignPortion(s){ return s.nationality==='foreign' || (s.nationality==='egyptian' && !!s.isCanadian); }
-function fxCode(s){
-  if(s.nationality==='foreign') return 'USD';
-  if(s.isCanadian) return (s.canadianCurrency||'usd')==='cad' ? 'CAD' : 'USD';
-  return 'USD';
-}
-function fxSymbol(s){ return fxCode(s)==='CAD' ? 'C$' : '$'; }
-function ministryFeeOf(s){ return s.nationality==='egyptian' ? Number(s.ministryFee||0) : 0; }
-function discountAmount(s){
-  if(isStudentUsd(s)) return 0;
-  const ids = s.discountIds || [];
-  const base = Number(s.instituteFee||0);
-  return ids.reduce((sum,id)=>{
-    const d=getDiscount(id); if(!d) return sum;
-    return sum + (d.type==='percent' ? base*Number(d.value)/100 : Number(d.value));
-  },0);
-}
-function studentInstituteTotal(s){ return isStudentUsd(s) ? 0 : Math.max(Number(s.instituteFee||0) - discountAmount(s), 0); }
-function studentTotal(s){
-  return studentInstituteTotal(s) + Number(s.installmentFee||0) + Number(s.companyFeeAmount||0) + Number(s.associationFeeAmount||0) + ministryFeeOf(s);
-}
-function paidAmount(s){ return (s.payments||[]).filter(p=>p.currency!=='USD').reduce((a,p)=>a+p.amount,0); }
-function paidAmountUsd(s){ return (s.payments||[]).filter(p=>p.currency==='USD').reduce((a,p)=>a+Number(p.amountUsd||p.amount||0),0); }
-function instituteUsdTotal(s){
-  if(s.nationality==='foreign') return Number(s.instituteFeeUSD||0);
-  if(s.nationality==='egyptian' && s.isCanadian) return Number(s.canadianFeeAmount||0);
-  return 0;
-}
-function instituteUsdRemaining(s){ return instituteUsdTotal(s) - paidAmountUsd(s); }
-
-function partyBreakdown(s){
-  const companyTotal = Number(s.companyFeeAmount||0);
-  const assocTotal = Number(s.associationFeeAmount||0);
-  const ministryTotal = ministryFeeOf(s);
-  const instituteTotal = studentInstituteTotal(s) + Number(s.installmentFee||0);
-  let pool = paidAmount(s);
-  const companyPaid = Math.max(Math.min(pool, companyTotal), 0); pool -= companyPaid;
-  const assocPaid = Math.max(Math.min(pool, assocTotal), 0); pool -= assocPaid;
-  const ministryPaid = Math.max(Math.min(pool, ministryTotal), 0); pool -= ministryPaid;
-  const institutePaid = Math.max(Math.min(pool, instituteTotal), 0); pool -= institutePaid;
-  return {
-    companyTotal, companyPaid, companyRemaining: Math.max(companyTotal-companyPaid,0),
-    assocTotal, assocPaid, assocRemaining: Math.max(assocTotal-assocPaid,0),
-    ministryTotal, ministryPaid, ministryRemaining: Math.max(ministryTotal-ministryPaid,0),
-    instituteTotal, institutePaid, instituteRemaining: Math.max(instituteTotal-institutePaid,0),
-  };
-}
-
-function allocateInstallments(s){
-  if(!s.installments || s.installments.length===0) return [];
-  const sorted = s.installments.slice().sort((a,b)=> new Date(a.dueDate)-new Date(b.dueDate));
-  let pool = paidAmount(s);
-  const today = new Date();
-  const grace = Number((data.penaltySetting&&data.penaltySetting.grace)||0);
-  return sorted.map(inst=>{
-    let status;
-    if(pool >= inst.amount - 0.001){ status='مدفوع'; pool -= inst.amount; }
-    else if(pool > 0.001){ status='جزئي'; pool=0; }
-    else { status='لم يبدأ'; }
-    const due=new Date(inst.dueDate);
-    const graceDate=new Date(due); graceDate.setDate(graceDate.getDate()+grace);
-    const overdue = status!=='مدفوع' && today>graceDate;
-    let penalty=0;
-    if(overdue && data.penaltySetting && Number(data.penaltySetting.value)>0){
-      penalty = data.penaltySetting.type==='percent' ? inst.amount*Number(data.penaltySetting.value)/100 : Number(data.penaltySetting.value);
+    const result = await getStore().get(STORAGE_KEY);
+    if(result && result.value){ const parsed = JSON.parse(result.value); data.entries = parsed.entries||[]; data.handovers = parsed.handovers||[]; data.categories = parsed.categories||null; }
+    else if(isSyncConfigured()){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){ const parsed = JSON.parse(raw); data.entries = parsed.entries||[]; data.handovers = parsed.handovers||[]; data.categories = parsed.categories||null; await saveData(); }
     }
-    return Object.assign({}, inst, { status: overdue? 'متأخر':status, penalty });
-  });
+  }catch(e){ console.error('load error', e); }
+  if(!data.categories || !data.categories.length){ data.categories = DEFAULT_CATEGORIES.map(c=>({...c})); }
+  updateSyncBtn();
 }
-function totalPenalties(s){ return allocateInstallments(s).reduce((sum,i)=>sum+i.penalty,0); }
-function remaining(s){ return studentTotal(s) + totalPenalties(s) - paidAmount(s); }
-function isFullyPaid(s){ return remaining(s)<=0.001 && (!hasForeignPortion(s) || instituteUsdRemaining(s)<=0.001); }
-function payStatus(s){
-  const r=remaining(s);
-  const anyPaid = paidAmount(s)>0 || paidAmountUsd(s)>0;
-  if(isFullyPaid(s) && anyPaid) return 'Paid';
-  if(anyPaid) return 'Partial';
-  return 'NotStarted';
+
+let syncTimer = null;
+let syncInFlight = false;
+let syncPendingAgain = false;
+async function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }catch(e){ showToast('فشل الحفظ محليًا — جرب تصدير نسخة احتياطية'); console.error(e); return; }
+  if(isSyncConfigured()) scheduleCloudSync();
 }
-function natBadge(s){
-  if(s.nationality==='foreign') return ' <span class="badge" style="margin-inline-start:4px;background:#eef2ff;color:#4338ca;">وافد $</span>';
-  if(s.nationality==='egyptian' && s.isCanadian){
-    return ` <span class="badge" style="margin-inline-start:4px;background:#fef3c7;color:#92400e;">كندي ${fxSymbol(s)}</span>`;
+function scheduleCloudSync(){
+  clearTimeout(syncTimer);
+  setSyncIndicator('pending');
+  syncTimer = setTimeout(runCloudSync, 700);
+}
+async function runCloudSync(){
+  if(syncInFlight){ syncPendingAgain = true; return; }
+  syncInFlight = true;
+  setSyncIndicator('saving');
+  const snapshot = JSON.stringify(data);
+  const result = await getStore().set(STORAGE_KEY, snapshot);
+  syncInFlight = false;
+  if(!result){ setSyncIndicator('error'); showToast('تعذّر الحفظ على جوجل شيت — البيانات محفوظة محليًا بس دلوقتي'); }
+  else{ setSyncIndicator('saved'); }
+  if(syncPendingAgain){ syncPendingAgain=false; scheduleCloudSync(); }
+}
+function setSyncIndicator(state){
+  const btn=document.getElementById('syncBtn');
+  if(!isSyncConfigured()){ btn.textContent='☁️ الاتصال'; return; }
+  if(state==='pending' || state==='saving'){ btn.textContent='☁️ بيتزامن...'; }
+  else if(state==='error'){ btn.textContent='⚠️ فشل التزامن'; }
+  else{ btn.textContent='☁️ متصل بجوجل شيت'; }
+}
+function updateSyncBtn(){
+  const btn=document.getElementById('syncBtn');
+  btn.textContent = isSyncConfigured() ? '☁️ متصل بجوجل شيت' : '☁️ الاتصال';
+  btn.style.color = isSyncConfigured() ? 'var(--good)' : '';
+  btn.style.borderColor = isSyncConfigured() ? 'var(--good)' : '';
+}
+function openSyncModal(){
+  document.getElementById('syncUrlInput').value = getSyncUrl();
+  document.getElementById('syncStatusMsg').textContent='';
+  document.getElementById('syncOverlay').classList.add('open');
+}
+function closeSyncModal(){ document.getElementById('syncOverlay').classList.remove('open'); }
+async function saveSyncUrl(){
+  const url = document.getElementById('syncUrlInput').value.trim();
+  if(url && url.indexOf('http')!==0){ showToast('الرابط لازم يبدأ بـ https'); return; }
+  document.getElementById('syncStatusMsg').textContent='بيتأكد من الاتصال...';
+  try{ localStorage.setItem(SYNC_URL_KEY, url); }catch(e){}
+  if(url){
+    const result = await SheetSyncStore.get(STORAGE_KEY);
+    if(result===null){
+      const testSet = await SheetSyncStore.set(STORAGE_KEY, JSON.stringify(data));
+      if(!testSet){
+        document.getElementById('syncStatusMsg').textContent='مش قادر يوصل للرابط ده. تأكد إن الـ Deployment نوعه Web app والوصول Anyone.';
+        return;
+      }
+    }
   }
-  return '';
+  updateSyncBtn();
+  await loadData();
+  render();
+  closeSyncModal();
+  showToast(url ? 'تم الربط بنجاح' : 'تم إلغاء الربط — البيانات محلية بس دلوقتي');
 }
-function statusCell(s){
-  const r=remaining(s);
-  const hasFx = hasForeignPortion(s);
-  const usdRem = hasFx ? instituteUsdRemaining(s) : 0;
-  const sym = fxSymbol(s);
-  if(hasFx && (r>0.001 || usdRem>0.001)){
-    const parts=[]; if(r>0.001) parts.push(fmt(r)+' ج.م'); if(usdRem>0.001) parts.push(fmt(usdRem)+' '+sym);
-    return `<span class="badge b-bad">عليه ${parts.join(' + ')}</span>`;
+
+function pendingEntries(){ return data.entries.filter(e=>!e.handoverId); }
+function categoryTotals(list){
+  const t={}; CATEGORIES().forEach(c=>t[c.key]=0);
+  list.forEach(e=>{ t[e.category]=(t[e.category]||0)+Number(e.amount); });
+  return t;
+}
+function grandTotal(list){ return list.reduce((a,e)=>a+Number(e.amount),0); }
+
+function populateCategorySelect(){
+  const sel=document.getElementById('f_category');
+  const prev = sel.value;
+  sel.innerHTML = CATEGORIES().map(c=>`<option value="${c.key}">${c.icon} ${c.label}</option>`).join('');
+  if(CATEGORIES().some(c=>c.key===prev)) sel.value = prev;
+}
+
+/* ---------- Category manager ---------- */
+let editingCatKey = null;
+function openCategoryModal(){
+  cancelCatEdit();
+  renderCategoryManagerList();
+  document.getElementById('categoryOverlay').classList.add('open');
+}
+function closeCategoryModal(){ document.getElementById('categoryOverlay').classList.remove('open'); populateCategorySelect(); render(); }
+function renderCategoryManagerList(){
+  const wrap=document.getElementById('categoryListWrap');
+  wrap.innerHTML = CATEGORIES().map(c=>{
+    const inUse = data.entries.some(e=>e.category===c.key);
+    return `<div class="catrow">
+      <span class="ic-badge">${c.icon}</span>
+      <span class="name">${escapeHtml(c.label)}${inUse?' <span style="color:var(--ink-faint);font-size:11px;">(مستخدم)</span>':''}</span>
+      <span class="acts">
+        <button onclick="startEditCat('${c.key}')" title="تعديل">✏️</button>
+        <button onclick="deleteCategory('${c.key}')" title="حذف">🗑️</button>
+      </span>
+    </div>`;
+  }).join('');
+}
+function startEditCat(key){
+  const c = CATEGORIES().find(c=>c.key===key); if(!c) return;
+  editingCatKey = key;
+  document.getElementById('newCatIcon').value = c.icon;
+  document.getElementById('newCatName').value = c.label;
+  document.getElementById('catSaveBtn').textContent = '💾 حفظ التعديل';
+  document.getElementById('catCancelBtn').style.display = 'block';
+}
+function cancelCatEdit(){
+  editingCatKey = null;
+  document.getElementById('newCatIcon').value='';
+  document.getElementById('newCatName').value='';
+  document.getElementById('catSaveBtn').textContent = '+ إضافة بند';
+  document.getElementById('catCancelBtn').style.display = 'none';
+}
+async function saveCategory(){
+  const icon = document.getElementById('newCatIcon').value.trim() || '💰';
+  const label = document.getElementById('newCatName').value.trim();
+  if(!label){ showToast('اكتب اسم البند'); return; }
+  if(editingCatKey){
+    const c = data.categories.find(c=>c.key===editingCatKey);
+    if(c){ c.icon=icon; c.label=label; }
+  } else {
+    if(CATEGORIES().some(c=>c.label===label)){ showToast('في بند بنفس الاسم ده بالفعل'); return; }
+    data.categories = CATEGORIES().slice();
+    data.categories.push({ key: uid(), label, icon });
   }
-  if(r>0.001) return `<span class="badge b-bad">عليه ${fmt(r)} ج.م</span>`;
-  if(r<-0.001) return `<span class="badge b-warn">له ${fmt(-r)} ج.م</span>`;
-  return '<span class="badge b-good">مكتمل السداد</span>';
+  await saveData();
+  cancelCatEdit();
+  renderCategoryManagerList();
+  populateCategorySelect();
+  render();
+  showToast('تم الحفظ');
+}
+async function deleteCategory(key){
+  const inUse = data.entries.some(e=>e.category===key);
+  const msg = inUse
+    ? 'البند ده مستخدم في حركات سابقة. لو حذفته، الحركات دي هتفضل موجودة بس هتتعرض باسم "بند محذوف". متأكد؟'
+    : 'حذف البند ده؟';
+  if(!confirm(msg)) return;
+  data.categories = CATEGORIES().filter(c=>c.key!==key);
+  if(data.categories.length===0){ data.categories = DEFAULT_CATEGORIES.map(c=>({...c})); showToast('لازم يفضل بند واحد على الأقل — رجعنا البنود الأساسية'); }
+  await saveData();
+  renderCategoryManagerList();
+  populateCategorySelect();
+  render();
+}
+
+async function addEntry(){
+  const category=document.getElementById('f_category').value;
+  const amount=Number(document.getElementById('f_amount').value)||0;
+  const date=document.getElementById('f_date').value || todayStr();
+  const note=document.getElementById('f_note').value.trim();
+  if(amount<=0){ showToast('اكتب مبلغ أكبر من صفر'); return; }
+  data.entries.push({ id:uid(), date, category, amount, note, createdAt:new Date().toISOString(), handoverId:null });
+  await saveData();
+  document.getElementById('f_amount').value='';
+  document.getElementById('f_note').value='';
+  document.getElementById('f_amount').focus();
+  render();
+  showToast('تم تسجيل المبلغ');
+}
+
+async function deleteEntry(id){
+  if(!confirm('حذف المبلغ ده؟')) return;
+  data.entries = data.entries.filter(e=>e.id!==id);
+  await saveData(); render();
+}
+
+function renderCatGrid(){
+  const pending = pendingEntries();
+  const totals = categoryTotals(pending);
+  document.getElementById('catGrid').innerHTML = CATEGORIES().map(c=>`
+    <div class="cat-card">
+      <span class="ic">${c.icon}</span>
+      <div class="lbl">${escapeHtml(c.label)}</div>
+      <div class="amt num">${fmt(totals[c.key])} ج.م</div>
+    </div>
+  `).join('');
+}
+
+function renderEntryList(){
+  const pending = pendingEntries().slice().sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+  const list=document.getElementById('entryList');
+  if(pending.length===0){
+    list.innerHTML='<div class="entry-empty">مفيش مبالغ معلّقة حاليًا — سجّل أول مبلغ فوق</div>';
+    return;
+  }
+  list.innerHTML = pending.map(e=>`
+    <div class="entry-row">
+      <div>
+        <div class="cat">${catIcon(e.category)} ${escapeHtml(catLabel(e.category))}</div>
+        <div class="meta">${e.date}${e.note?' · '+escapeHtml(e.note):''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="amt num">${fmt(e.amount)} ج.م</span>
+        <button class="del-btn" onclick="deleteEntry('${e.id}')" title="حذف">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderGrandBar(){
+  const total = grandTotal(pendingEntries());
+  document.getElementById('grandPending').textContent = fmt(total)+' ج.م';
+  document.getElementById('headerPending').textContent = fmt(total);
+  document.getElementById('handoverBtn').disabled = total<=0;
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+let openHistoryIds = new Set();
+function renderHistory(){
+  const from = document.getElementById('filterFrom').value;
+  const to = document.getElementById('filterTo').value;
+  let list = data.handovers.slice().sort((a,b)=> new Date(b.handedOverAt)-new Date(a.handedOverAt));
+  if(from) list = list.filter(h=>localDateStr(h.handedOverAt) >= from);
+  if(to) list = list.filter(h=>localDateStr(h.handedOverAt) <= to);
+  const el=document.getElementById('historyList');
+  if(list.length===0){ el.innerHTML='<div class="history-empty">مفيش تسليمات مسجلة لسه</div>'; return; }
+  el.innerHTML = list.map(h=>{
+    const dt = new Date(h.handedOverAt);
+    const dateStr = dt.toLocaleDateString('ar-EG');
+    const timeStr = dt.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+    const isOpen = openHistoryIds.has(h.id);
+    const rows = CATEGORIES().map(c=> h.totals[c.key]>0 ? `<div class="d-row"><span>${c.icon} ${escapeHtml(c.label)}</span><span class="num">${fmt(h.totals[c.key])} ج.م</span></div>` : '').join('');
+    return `
+    <div class="history-item">
+      <div class="history-head" onclick="toggleHistory('${h.id}')">
+        <span><span class="date">${dateStr}</span><span class="time">${timeStr}</span></span>
+        <span class="total num">${fmt(h.total)} ج.م</span>
+      </div>
+      <div class="history-body ${isOpen?'open':''}" id="hbody-${h.id}">
+        ${rows}
+        ${h.note ? `<div class="history-note">"${escapeHtml(h.note)}"</div>` : ''}
+        <div class="footer-actions" style="margin-top:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="editHandover('${h.id}')">✏️ تعديل (يرجّعه معلّق)</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteHandover('${h.id}')">🗑️ حذف نهائي</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleHistory(id){
+  if(openHistoryIds.has(id)) openHistoryIds.delete(id); else openHistoryIds.add(id);
+  renderHistory();
+}
+async function editHandover(id){
+  const h = data.handovers.find(x=>x.id===id); if(!h) return;
+  if(!confirm('هيرجّع كل مبالغ التسليم ده لقائمة "المعلّق" فوق عشان تعدّل فيها براحتك، وتقدر تسلّمها تاني بعد كده. تكمل؟')) return;
+  data.entries.forEach(e=>{ if(e.handoverId===id) e.handoverId=null; });
+  data.handovers = data.handovers.filter(x=>x.id!==id);
+  await saveData();
+  render();
+  showToast('رجعت المبالغ للقائمة المعلّقة — عدّل واضغط تسليم الخزنة تاني');
+}
+async function deleteHandover(id){
+  if(!confirm('حذف التسليم ده نهائيًا هيمسح معاه كل المبالغ اللي كانت جواه، والعملية دي مش هترجع. متأكد؟')) return;
+  data.entries = data.entries.filter(e=>e.handoverId!==id);
+  data.handovers = data.handovers.filter(x=>x.id!==id);
+  await saveData();
+  render();
+  showToast('تم حذف التسليم نهائيًا');
 }
 
 function render(){
-  const q=document.getElementById('searchInput').value.trim().toLowerCase();
-  const fCollege=document.getElementById('filterCollege').value;
-  const fStatus=document.getElementById('filterStatus').value;
+  renderCatGrid();
+  renderEntryList();
+  renderGrandBar();
+  renderHistory();
+}
 
-  let list=data.students.filter(s=>{
-    if(q && !(s.name.toLowerCase().includes(q)||(s.code||'').toLowerCase().includes(q)||(s.phone||'').includes(q))) return false;
-    if(fCollege && s.collegeId!==fCollege) return false;
-    if(fStatus && payStatus(s)!==fStatus) return false;
+function openHandoverModal(){
+  const pending = pendingEntries();
+  if(pending.length===0){ showToast('مفيش مبالغ معلّقة للتسليم'); return; }
+  const totals = categoryTotals(pending);
+  const total = grandTotal(pending);
+  const rows = CATEGORIES().map(c=> totals[c.key]>0 ? `<div class="d-row"><span>${c.icon} ${escapeHtml(c.label)}</span><span class="num">${fmt(totals[c.key])} ج.م</span></div>` : '').join('');
+  document.getElementById('handoverBreakdown').innerHTML = rows + `<div class="d-row grand"><span>الإجمالي</span><span class="num">${fmt(total)} ج.م</span></div>`;
+  document.getElementById('handoverNote').value='';
+  document.getElementById('handoverOverlay').classList.add('open');
+}
+function closeHandoverModal(){ document.getElementById('handoverOverlay').classList.remove('open'); }
+
+async function confirmHandover(){
+  const pending = pendingEntries();
+  if(pending.length===0){ closeHandoverModal(); return; }
+  const id=uid();
+  const totals=categoryTotals(pending);
+  const total=grandTotal(pending);
+  const note=document.getElementById('handoverNote').value.trim();
+  data.handovers.push({ id, handedOverAt:new Date().toISOString(), totals, total, note, entryIds:pending.map(e=>e.id) });
+  pending.forEach(e=>e.handoverId=id);
+  await saveData();
+  closeHandoverModal();
+  render();
+  playStamp();
+}
+
+function playStamp(){
+  const overlay=document.getElementById('stampOverlay');
+  const stamp=document.getElementById('stampEl');
+  overlay.classList.add('show');
+  stamp.classList.remove('animate'); void stamp.offsetWidth; stamp.classList.add('animate');
+  setTimeout(()=>{ overlay.classList.remove('show'); }, 1300);
+}
+
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+function openExportModal(){
+  document.getElementById('exportFrom').value='';
+  document.getElementById('exportTo').value='';
+  document.getElementById('exportIncludeHandovers').checked=true;
+  document.getElementById('exportIncludeEntries').checked=true;
+  document.getElementById('exportOverlay').classList.add('open');
+}
+function closeExportModal(){ document.getElementById('exportOverlay').classList.remove('open'); }
+function setExportRange(range){
+  const today = todayStr();
+  if(range==='today'){ document.getElementById('exportFrom').value=today; document.getElementById('exportTo').value=today; }
+  else if(range==='week'){ const d=new Date(); d.setDate(d.getDate()-6); document.getElementById('exportFrom').value=localDateStr(d); document.getElementById('exportTo').value=today; }
+  else if(range==='month'){ const d=new Date(); d.setDate(1); document.getElementById('exportFrom').value=localDateStr(d); document.getElementById('exportTo').value=today; }
+  else if(range==='all'){ document.getElementById('exportFrom').value=''; document.getElementById('exportTo').value=''; }
+}
+
+async function exportExcelReport(){
+  if(typeof ExcelJS==='undefined'){ showToast('مكتبة الإكسل لسه بتحمّل، جرب تاني بعد شوية'); return; }
+  const from = document.getElementById('exportFrom').value;
+  const to = document.getElementById('exportTo').value;
+  const includeHandovers = document.getElementById('exportIncludeHandovers').checked;
+  const includeEntries = document.getElementById('exportIncludeEntries').checked;
+  if(!includeHandovers && !includeEntries){ showToast('اختار ورقة واحدة على الأقل'); return; }
+
+  const handoversInRange = data.handovers.filter(h=>{
+    const d = localDateStr(h.handedOverAt);
+    if(from && d<from) return false;
+    if(to && d>to) return false;
+    return true;
+  });
+  const entriesInRange = data.entries.filter(e=>{
+    if(from && e.date<from) return false;
+    if(to && e.date>to) return false;
     return true;
   });
 
-  const tbody=document.getElementById('tbody');
-  tbody.innerHTML='';
-  document.getElementById('emptyState').style.display = data.students.length===0 ? 'block':'none';
+  const wb = new ExcelJS.Workbook();
+  const sheets = [];
 
-  list.forEach(s=>{
-    const college=getCollege(s.collegeId);
-    const tr=document.createElement('tr');
-    tr.onclick=()=>openDrawer(s.id);
-    tr.innerHTML=`
-      <td>${escapeHtml(s.code||'—')}</td>
-      <td class="name-cell">${escapeHtml(s.name)}${natBadge(s)}${s.paymentMethod==='installment' ? ' <span class="badge b-warn" style="margin-inline-start:4px;">تقسيط</span>' : ''}</td>
-      <td>${escapeHtml(college?college.name:'—')}</td>
-      <td>${escapeHtml(s.phone||'—')}</td>
-      <td>${fmt(studentTotal(s))}</td>
-      <td>${fmt(paidAmount(s))}</td>
-      <td>${statusCell(s)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-  renderKPIs();
-}
-function renderKPIs(){
-  const total=data.students.length;
-  const expected=data.students.reduce((a,s)=>a+studentTotal(s),0);
-  const collected=data.students.reduce((a,s)=>a+paidAmount(s),0);
-  const outstanding=data.students.reduce((a,s)=>a+Math.max(remaining(s),0),0);
-  document.getElementById('kpiTotal').textContent=total;
-  document.getElementById('kpiExpected').textContent=fmt(expected);
-  document.getElementById('kpiCollected').textContent=fmt(collected);
-  document.getElementById('kpiOutstanding').textContent=fmt(outstanding);
-}
-
-function refreshCollegeSelects(){
-  const fSel=document.getElementById('filterCollege');
-  const mSel=document.getElementById('f_college');
-  fSel.innerHTML='<option value="">كل الكليات</option>';
-  mSel.innerHTML='';
-  data.colleges.forEach(c=>{
-    fSel.innerHTML+=`<option value="${c.id}">${escapeHtml(c.name)}</option>`;
-    const unitLabel = c.feeType==='hour' ? 'ج.م/ساعة' : 'ج.م/مادة';
-    mSel.innerHTML+=`<option value="${c.id}">${escapeHtml(c.name)} — ${fmt(c.unitPrice)} ${unitLabel}</option>`;
-  });
-  refreshFormPreview();
-}
-let selectedDiscountIds = new Set();
-function refreshDiscountSelects(){
-  const searchEl=document.getElementById('f_discountSearch');
-  if(searchEl) searchEl.value='';
-  renderDiscountChecklist('');
-}
-function renderDiscountChecklist(filterText){
-  const container=document.getElementById('f_discount');
-  if(data.discounts.length===0){ container.innerHTML='<div class="settings-empty">لا توجد خصومات مضافة</div>'; return; }
-  const ft=(filterText||'').toLowerCase();
-  const filtered = data.discounts.filter(d=> !ft || d.name.toLowerCase().includes(ft));
-  if(filtered.length===0){ container.innerHTML='<div class="settings-empty">لا توجد نتائج مطابقة</div>'; return; }
-  container.innerHTML=filtered.map(d=>{
-    const label = d.type==='percent' ? `${d.name} (${d.value}%)` : `${d.name} (${fmt(d.value)} ج.م)`;
-    const checked = selectedDiscountIds.has(d.id) ? 'checked' : '';
-    return `<label class="settings-item" style="cursor:pointer;"><span>${escapeHtml(label)}</span><input type="checkbox" class="discount-check" value="${d.id}" ${checked} onchange="toggleDiscountSelection('${d.id}', this.checked)"></label>`;
-  }).join('');
-}
-function toggleDiscountSelection(id, isChecked){
-  if(isChecked) selectedDiscountIds.add(id); else selectedDiscountIds.delete(id);
-  refreshFormPreview();
-}
-function getSelectedDiscountIds(){ return Array.from(selectedDiscountIds); }
-
-document.getElementById('f_college').addEventListener('change', onCollegeChange);
-document.getElementById('f_unitCount').addEventListener('input', refreshFormPreview);
-document.getElementById('f_paymentMethod').addEventListener('change', toggleInstallmentFields);
-document.getElementById('f_instCount').addEventListener('input', refreshFormPreview);
-document.getElementById('f_applyInstFee').addEventListener('change', refreshFormPreview);
-document.getElementById('emailInput').addEventListener('input', updateMailtoLink);
-document.getElementById('f_nationality').addEventListener('change', toggleNationalityFields);
-document.getElementById('f_isCanadian').addEventListener('change', toggleNationalityFields);
-function toggleNationalityFields(){
-  const nat = document.getElementById('f_nationality').value;
-  const isCanadian = nat==='egyptian' && document.getElementById('f_isCanadian').checked;
-  const isForeign = nat==='foreign';
-  document.getElementById('f_canadianWrap').style.display = nat==='egyptian' ? 'block' : 'none';
-  document.getElementById('canadianExtraWrap').style.display = isCanadian ? 'block' : 'none';
-  document.getElementById('ministryFeeWrap').style.display = nat==='egyptian' ? 'block' : 'none';
-  if(nat==='egyptian' && !document.getElementById('f_ministryFee').dataset.userEdited){
-    document.getElementById('f_ministryFee').value = data.ministryFeeSetting ? data.ministryFeeSetting.value : 0;
-  }
-  document.getElementById('egpInstituteBlock').style.display = isForeign ? 'none':'block';
-  document.getElementById('usdInstituteBlock').style.display = isForeign ? 'block':'none';
-  document.getElementById('instituteFeeEgpWrap').style.display = isForeign ? 'none':'block';
-  document.getElementById('discountBlockWrap').style.display = isForeign ? 'none':'block';
-  refreshFormPreview();
-}
-document.addEventListener('input', (e)=>{
-  if(e.target && e.target.id==='f_ministryFee'){ e.target.dataset.userEdited='1'; }
-});
-function toggleInstallmentFields(){
-  const method=document.getElementById('f_paymentMethod').value;
-  document.getElementById('installmentFields').style.display = method==='installment' ? 'block':'none';
-  refreshFormPreview();
-}
-function onCollegeChange(){
-  const c=getCollege(document.getElementById('f_college').value);
-  document.getElementById('f_unitLabel').textContent = c && c.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
-  if(c){
-    document.getElementById('f_companyFee').value = c.companyFee||0;
-    document.getElementById('f_associationFee').value = c.associationFee||0;
-  }
-  refreshFormPreview();
-}
-function computeInstituteBase(){
-  const c=getCollege(document.getElementById('f_college').value);
-  const count = Number(document.getElementById('f_unitCount').value)||0;
-  return c ? Number(c.unitPrice||0)*count : 0;
-}
-function refreshFormPreview(){
-  const c=getCollege(document.getElementById('f_college').value);
-  const usd = document.getElementById('f_nationality').value==='foreign';
-  const unitLabel = c && c.feeType==='hour' ? 'ساعة' : 'مادة';
-  document.getElementById('feeHint').textContent = c ? `سعر ال${unitLabel}: ${fmt(c.unitPrice)} ج.م` : 'اختر الكلية أولًا';
-  const base = usd ? 0 : computeInstituteBase();
-  document.getElementById('unitCalcHint').textContent = (c && !usd) ? `مصاريف المعهد الأساسية: ${fmt(base)} ج.م` : '';
-  if(!usd && !document.getElementById('f_instituteFee').dataset.userEdited){
-    document.getElementById('f_instituteFee').value = base;
-  }
-  const instituteFeeVal = Number(document.getElementById('f_instituteFee').value)||0;
-  const ids=getSelectedDiscountIds();
-  const totalDisc = usd ? 0 : ids.reduce((sum,id)=>{
-    const d=getDiscount(id); if(!d) return sum;
-    return sum + (d.type==='percent' ? instituteFeeVal*Number(d.value)/100 : Number(d.value));
-  },0);
-  document.getElementById('discountHint').textContent = totalDisc>0 ? `إجمالي الخصم (من مصاريف المعهد): ${fmt(totalDisc)} ج.م` : '';
-
-  if(document.getElementById('f_paymentMethod').value==='installment'){
-    const instituteAfterDiscount = Math.max(instituteFeeVal-totalDisc,0);
-    const apply=document.getElementById('f_applyInstFee').checked;
-    const feeAmt = apply ? (data.installmentFeeSetting.type==='percent'? instituteAfterDiscount*Number(data.installmentFeeSetting.value)/100 : Number(data.installmentFeeSetting.value)) : 0;
-    const company = Number(document.getElementById('f_companyFee').value)||0;
-    const assoc = Number(document.getElementById('f_associationFee').value)||0;
-    const grand = instituteAfterDiscount+feeAmt+company+assoc;
-    const count=Number(document.getElementById('f_instCount').value)||1;
-    document.getElementById('instFeeHint').textContent = `الإجمالي شامل كل الجهات ورسوم التقسيط: ${fmt(grand)} ج.م — تقريبًا ${fmt(grand/count)} ج.م لكل قسط`;
-  }
-}
-document.addEventListener('input', (e)=>{
-  if(e.target && e.target.id==='f_instituteFee'){ e.target.dataset.userEdited='1'; }
-});
-
-function openSettings(){
-  document.getElementById('settingsOverlay').classList.add('open');
-  cancelCollegeEdit();
-  cancelDiscountEdit();
-  renderSettingsLists();
-  document.getElementById('instFeeType').value = data.installmentFeeSetting.type;
-  document.getElementById('instFeeValue').value = data.installmentFeeSetting.value;
-  document.getElementById('ministryFeeDefault').value = data.ministryFeeSetting ? data.ministryFeeSetting.value : 0;
-  document.getElementById('penaltyType').value = data.penaltySetting.type;
-  document.getElementById('penaltyValue').value = data.penaltySetting.value;
-  document.getElementById('penaltyGrace').value = data.penaltySetting.grace;
-  const tabOrder = [['colleges','settings_colleges'],['discounts','settings_discounts'],['installment','settings_installments'],['backup','backups'],['users','manage_users']];
-  const firstAllowed = tabOrder.find(([tab,perm])=>hasPermission(perm));
-  switchTab(firstAllowed ? firstAllowed[0] : 'colleges');
-}
-function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('open'); }
-function switchTab(tab){
-  document.getElementById('tabColleges').classList.toggle('active', tab==='colleges');
-  document.getElementById('tabDiscounts').classList.toggle('active', tab==='discounts');
-  document.getElementById('tabInstallment').classList.toggle('active', tab==='installment');
-  document.getElementById('tabBackup').classList.toggle('active', tab==='backup');
-  document.getElementById('tabUsers').classList.toggle('active', tab==='users');
-  document.getElementById('panelColleges').style.display = tab==='colleges'?'block':'none';
-  document.getElementById('panelDiscounts').style.display = tab==='discounts'?'block':'none';
-  document.getElementById('panelInstallment').style.display = tab==='installment'?'block':'none';
-  document.getElementById('panelBackup').style.display = tab==='backup'?'block':'none';
-  document.getElementById('panelUsers').style.display = tab==='users'?'block':'none';
-  if(tab==='backup'){
-    document.getElementById('lastSavedInfo').textContent = lastSavedAt ? ('آخر حفظ: '+lastSavedAt.toLocaleString('ar-EG')) : 'لسه معملش حفظ';
-    document.getElementById('syncStatusInfo').innerHTML = SYNC_CONFIGURED
-      ? '🟢 المزامنة السحابية: متصلة — البيانات بتتزامن على أي جهاز بيفتح نفس الملف'
-      : '🟡 المزامنة السحابية: غير مفعّلة — البيانات بتتحفظ على هذا المتصفح فقط';
-    renderBackupList();
-  }
-  if(tab==='users'){ cancelUserEdit(); renderUsersList(); }
-}
-
-let currentEditCollegeId = null;
-async function addCollege(){
-  const name=document.getElementById('newCollegeName').value.trim();
-  const feeType=document.getElementById('newCollegeFeeType').value;
-  const unitPrice=Number(document.getElementById('newCollegeUnitPrice').value)||0;
-  const companyFee=Number(document.getElementById('newCollegeCompanyFee').value)||0;
-  const associationFee=Number(document.getElementById('newCollegeAssociationFee').value)||0;
-  if(!name){ showToast('اكتب اسم الكلية'); return; }
-  if(currentEditCollegeId){
-    const c=getCollege(currentEditCollegeId);
-    if(c){ Object.assign(c, {name, feeType, unitPrice, companyFee, associationFee}); }
-    showToast('تم تعديل الكلية');
-    cancelCollegeEdit();
-  } else {
-    data.colleges.push({id:uid(), name, feeType, unitPrice, companyFee, associationFee});
-    showToast('تم إضافة الكلية');
-    document.getElementById('newCollegeName').value='';
-    document.getElementById('newCollegeUnitPrice').value='';
-    document.getElementById('newCollegeCompanyFee').value='';
-    document.getElementById('newCollegeAssociationFee').value='';
-  }
-  await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
-}
-function editCollege(id){
-  const c=getCollege(id); if(!c) return;
-  currentEditCollegeId=id;
-  document.getElementById('newCollegeName').value=c.name;
-  document.getElementById('newCollegeFeeType').value=c.feeType;
-  document.getElementById('newCollegeUnitPrice').value=c.unitPrice;
-  document.getElementById('newCollegeCompanyFee').value=c.companyFee;
-  document.getElementById('newCollegeAssociationFee').value=c.associationFee;
-  document.getElementById('addCollegeBtn').textContent='💾 حفظ تعديل الكلية';
-  document.getElementById('cancelCollegeEditBtn').style.display='inline-block';
-}
-function cancelCollegeEdit(){
-  currentEditCollegeId=null;
-  document.getElementById('newCollegeName').value='';
-  document.getElementById('newCollegeFeeType').value='subject';
-  document.getElementById('newCollegeUnitPrice').value='';
-  document.getElementById('newCollegeCompanyFee').value='';
-  document.getElementById('newCollegeAssociationFee').value='';
-  document.getElementById('addCollegeBtn').textContent='+ إضافة كلية';
-  document.getElementById('cancelCollegeEditBtn').style.display='none';
-}
-async function removeCollege(id){
-  if(!confirm('حذف الكلية دي؟')) return;
-  data.colleges=data.colleges.filter(c=>c.id!==id);
-  if(currentEditCollegeId===id) cancelCollegeEdit();
-  await persist(); renderSettingsLists(); refreshCollegeSelects(); render();
-}
-let currentEditDiscountId = null;
-async function addDiscount(){
-  const name=document.getElementById('newDiscountName').value.trim();
-  const type=document.getElementById('newDiscountType').value;
-  const value=Number(document.getElementById('newDiscountValue').value)||0;
-  if(!name){ showToast('اكتب اسم الخصم'); return; }
-  if(currentEditDiscountId){
-    const d=data.discounts.find(x=>x.id===currentEditDiscountId);
-    if(d){ Object.assign(d, {name, type, value}); }
-    showToast('تم تعديل الخصم');
-    cancelDiscountEdit();
-  } else {
-    data.discounts.push({id:uid(),name,type,value});
-    showToast('تم إضافة الخصم');
-    document.getElementById('newDiscountName').value='';
-    document.getElementById('newDiscountValue').value='';
-  }
-  await persist(); renderSettingsLists(); refreshDiscountSelects(); render();
-}
-function editDiscount(id){
-  const d=data.discounts.find(x=>x.id===id); if(!d) return;
-  currentEditDiscountId=id;
-  document.getElementById('newDiscountName').value=d.name;
-  document.getElementById('newDiscountType').value=d.type;
-  document.getElementById('newDiscountValue').value=d.value;
-  document.getElementById('addDiscountBtn').textContent='💾 حفظ تعديل الخصم';
-  document.getElementById('cancelDiscountEditBtn').style.display='inline-block';
-}
-function cancelDiscountEdit(){
-  currentEditDiscountId=null;
-  document.getElementById('newDiscountName').value='';
-  document.getElementById('newDiscountType').value='percent';
-  document.getElementById('newDiscountValue').value='';
-  document.getElementById('addDiscountBtn').textContent='+ إضافة خصم';
-  document.getElementById('cancelDiscountEditBtn').style.display='none';
-}
-async function removeDiscount(id){
-  if(!confirm('حذف الخصم ده؟')) return;
-  data.discounts=data.discounts.filter(d=>d.id!==id);
-  if(currentEditDiscountId===id) cancelDiscountEdit();
-  await persist(); renderSettingsLists(); refreshDiscountSelects(); render();
-}
-function renderSettingsLists(){
-  const cList=document.getElementById('collegesList');
-  cList.innerHTML = data.colleges.length===0 ? '<div class="settings-empty">لا توجد كليات مضافة</div>' :
-    data.colleges.map(c=>{
-      const unitLabel = c.feeType==='hour' ? 'ج.م/ساعة' : 'ج.م/مادة';
-      return `<div class="settings-item"><span>${escapeHtml(c.name)} — ${fmt(c.unitPrice)} ${unitLabel} · شركة ${fmt(c.companyFee)} · جمعية ${fmt(c.associationFee)}</span><span style="display:flex;gap:10px;"><button class="del" style="color:var(--brand);" onclick="editCollege('${c.id}')">تعديل</button><button class="del" onclick="removeCollege('${c.id}')">حذف</button></span></div>`;
-    }).join('');
-  const dList=document.getElementById('discountsList');
-  const searchEl=document.getElementById('discountSettingsSearch');
-  const ft=searchEl ? searchEl.value.toLowerCase() : '';
-  const filteredDiscounts = data.discounts.filter(d=> !ft || d.name.toLowerCase().includes(ft));
-  dList.innerHTML = filteredDiscounts.length===0 ? `<div class="settings-empty">${data.discounts.length===0?'لا توجد خصومات مضافة':'لا توجد نتائج مطابقة'}</div>` :
-    filteredDiscounts.map(d=>`<div class="settings-item"><span>${escapeHtml(d.name)} — ${d.type==='percent'?d.value+'%':fmt(d.value)+' ج.م'}</span><span style="display:flex;gap:10px;"><button class="del" style="color:var(--brand);" onclick="editDiscount('${d.id}')">تعديل</button><button class="del" onclick="removeDiscount('${d.id}')">حذف</button></span></div>`).join('');
-}
-async function saveInstallmentFeeSetting(){
-  data.installmentFeeSetting = { type: document.getElementById('instFeeType').value, value: Number(document.getElementById('instFeeValue').value)||0 };
-  await persist(); render(); showToast('تم حفظ رسوم التقسيط');
-}
-async function saveMinistryFeeSetting(){
-  data.ministryFeeSetting = { value: Number(document.getElementById('ministryFeeDefault').value)||0 };
-  await persist(); render(); showToast('تم حفظ رسوم الوزارة');
-}
-async function savePenaltySetting(){
-  data.penaltySetting = { type: document.getElementById('penaltyType').value, value: Number(document.getElementById('penaltyValue').value)||0, grace: Number(document.getElementById('penaltyGrace').value)||0 };
-  await persist(); render(); showToast('تم حفظ إعدادات الغرامة');
-}
-
-let currentUser = null;
-function hasPermission(key){ return !!(currentUser && (currentUser.permissions||[]).includes(key)); }
-function attemptLogin(){
-  const email=document.getElementById('loginEmailInput').value.trim().toLowerCase();
-  const pin=document.getElementById('loginPinInput').value.trim();
-  const user=data.users.find(u=>(u.email||'').toLowerCase()===email);
-  if(!user || user.pin!==pin){ document.getElementById('loginError').textContent='الإيميل أو الرقم السري غير صحيح.'; return; }
-  currentUser=user;
-  document.getElementById('loginOverlay').classList.remove('open');
-  document.getElementById('loginEmailInput').value='';
-  document.getElementById('loginPinInput').value='';
-  document.getElementById('loginError').textContent='';
-  applyPermissions();
-}
-function logout(){
-  currentUser=null;
-  document.getElementById('loginEmailInput').value='';
-  document.getElementById('loginPinInput').value='';
-  document.getElementById('loginError').textContent='';
-  document.getElementById('loginOverlay').classList.add('open');
-}
-function applyPermissions(){
-  document.querySelectorAll('[data-perm]').forEach(el=>{ el.style.display = hasPermission(el.getAttribute('data-perm')) ? '' : 'none'; });
-  const anySettingsAccess = ['settings_colleges','settings_discounts','settings_installments','backups','manage_users'].some(hasPermission);
-  const settingsBtn = document.getElementById('settingsBtn');
-  if(settingsBtn) settingsBtn.style.display = anySettingsAccess ? '' : 'none';
-  document.getElementById('currentUserLabel').textContent = currentUser ? currentUser.email : '';
-  document.getElementById('mainContentArea').style.display = hasPermission('view') ? '' : 'none';
-  document.getElementById('noViewMessage').style.display = hasPermission('view') ? 'none' : 'block';
-}
-function permsSummary(perms){
-  if(!perms || perms.length===0) return 'بدون صلاحيات';
-  if(perms.length===ALL_PERMISSIONS.length) return 'صلاحية كاملة';
-  return perms.map(k=>{ const p=ALL_PERMISSIONS.find(x=>x.key===k); return p ? p.label.split('(')[0].trim() : k; }).join('، ');
-}
-function scopeLabel(scope){
-  return scope==='institute' ? 'المعهد فقط' : scope==='company' ? 'الشركة فقط' : scope==='association' ? 'الجمعية فقط' : 'الكل';
-}
-function renderUsersList(){
-  const el=document.getElementById('usersList');
-  if(!el) return;
-  el.innerHTML = (!data.users || data.users.length===0) ? '<div class="settings-empty">لا يوجد مستخدمين</div>' :
-    data.users.map(u=>`<div class="settings-item"><span>${escapeHtml(u.email)} — ${escapeHtml(permsSummary(u.permissions))} — نطاق: ${scopeLabel(u.financialScope)}</span><span style="display:flex;gap:10px;"><button class="del" style="color:var(--brand);" onclick="editUser('${u.id}')">تعديل</button><button class="del" onclick="removeUser('${u.id}')">حذف</button></span></div>`).join('');
-}
-function renderNewUserPermsChecklist(){
-  const el=document.getElementById('newUserPermsList');
-  if(!el) return;
-  el.innerHTML = ALL_PERMISSIONS.map(p=>`<label class="settings-item" style="cursor:pointer;"><span>${escapeHtml(p.label)}</span><input type="checkbox" class="newuser-perm-check" value="${p.key}"></label>`).join('');
-}
-function setAllNewUserPerms(checked){ document.querySelectorAll('.newuser-perm-check').forEach(el=>{ el.checked=checked; }); }
-let currentEditUserId = null;
-async function addUser(){
-  const email=document.getElementById('newUserEmail').value.trim().toLowerCase();
-  const pin=document.getElementById('newUserPin').value.trim();
-  const financialScope=document.getElementById('newUserFinScope').value;
-  if(!email || !email.includes('@') || !email.includes('.')){ showToast('اكتب إيميل صحيح'); return; }
-  if(data.users.some(u=>u.id!==currentEditUserId && (u.email||'').toLowerCase()===email)){ showToast('يوجد مستخدم بنفس الإيميل ده بالفعل'); return; }
-  if(!/^[0-9]{4,}$/.test(pin)){ showToast('الرقم السري لازم 4 أرقام على الأقل'); return; }
-  const permissions = Array.from(document.querySelectorAll('.newuser-perm-check:checked')).map(el=>el.value);
-  if(permissions.length===0){ showToast('اختر صلاحية واحدة على الأقل'); return; }
-  if(currentEditUserId){
-    const u=data.users.find(x=>x.id===currentEditUserId);
-    const otherManagers = data.users.filter(x=>x.id!==currentEditUserId && (x.permissions||[]).includes('manage_users'));
-    if(u && (u.permissions||[]).includes('manage_users') && !permissions.includes('manage_users') && otherManagers.length===0){
-      showToast('لازم يفضل مستخدم واحد على الأقل معاه صلاحية إدارة المستخدمين'); return;
-    }
-    if(u) Object.assign(u, {email, pin, financialScope, permissions});
-    showToast('تم تعديل المستخدم');
-    cancelUserEdit();
-  } else {
-    data.users.push({id:uid(), email, pin, financialScope, permissions});
-    showToast('تم إضافة المستخدم');
-    document.getElementById('newUserEmail').value='';
-    document.getElementById('newUserPin').value='';
-    document.getElementById('newUserFinScope').value='all';
-    renderNewUserPermsChecklist();
-  }
-  await persist();
-  renderUsersList();
-}
-function editUser(id){
-  const u=data.users.find(x=>x.id===id); if(!u) return;
-  currentEditUserId=id;
-  document.getElementById('newUserEmail').value=u.email;
-  document.getElementById('newUserPin').value=u.pin;
-  document.getElementById('newUserFinScope').value=u.financialScope||'all';
-  renderNewUserPermsChecklist();
-  const perms=u.permissions||[];
-  document.querySelectorAll('.newuser-perm-check').forEach(el=>{ el.checked = perms.includes(el.value); });
-  document.getElementById('addUserBtn').textContent='💾 حفظ تعديل المستخدم';
-  document.getElementById('cancelUserEditBtn').style.display='block';
-}
-function cancelUserEdit(){
-  currentEditUserId=null;
-  document.getElementById('newUserEmail').value='';
-  document.getElementById('newUserPin').value='';
-  document.getElementById('newUserFinScope').value='all';
-  renderNewUserPermsChecklist();
-  document.getElementById('addUserBtn').textContent='+ إضافة مستخدم';
-  document.getElementById('cancelUserEditBtn').style.display='none';
-}
-async function removeUser(id){
-  const managers = data.users.filter(u=>(u.permissions||[]).includes('manage_users'));
-  const target = data.users.find(u=>u.id===id);
-  if(target && (target.permissions||[]).includes('manage_users') && managers.length<=1){ showToast('لازم يفضل مستخدم واحد على الأقل معاه صلاحية إدارة المستخدمين'); return; }
-  if(!confirm('حذف المستخدم ده؟')) return;
-  data.users = data.users.filter(u=>u.id!==id);
-  if(currentEditUserId===id) cancelUserEdit();
-  await persist();
-  renderUsersList();
-  showToast('تم حذف المستخدم');
-}
-
-function openAddModal(){
-  if(data.colleges.length===0){ showToast('ضيف الكليات وأسعارها الأول من الإعدادات ⚙️'); openSettings(); return; }
-  currentEditId=null;
-  document.getElementById('studentModalTitle').textContent='تسجيل طالب جديد';
-  document.getElementById('f_code').value='';
-  document.getElementById('f_name').value='';
-  document.getElementById('f_phone').value='';
-  document.getElementById('f_email').value='';
-  document.getElementById('f_nationality').value='egyptian';
-  document.getElementById('f_isCanadian').checked=false;
-  document.getElementById('f_canadianFeeAmount').value=0;
-  document.getElementById('f_canadianCurrency').value='usd';
-  document.getElementById('f_ministryFee').value = data.ministryFeeSetting ? data.ministryFeeSetting.value : 0;
-  document.getElementById('f_ministryFee').dataset.userEdited='';
-  document.getElementById('f_instituteFeeUSD').value=0;
-  document.getElementById('f_college').value=data.colleges[0]?.id||'';
-  document.getElementById('f_unitCount').value=0;
-  document.getElementById('f_instituteFee').value=0;
-  document.getElementById('f_instituteFee').dataset.userEdited='';
-  document.getElementById('f_companyFee').value=data.colleges[0]?.companyFee||0;
-  document.getElementById('f_associationFee').value=data.colleges[0]?.associationFee||0;
-  selectedDiscountIds = new Set();
-  refreshDiscountSelects();
-  document.getElementById('f_initialPay').value='';
-  document.getElementById('f_paymentMethod').value='cash';
-  document.getElementById('f_instCount').value=3;
-  document.getElementById('f_instInterval').value=30;
-  const defDate=new Date(); defDate.setDate(defDate.getDate()+30);
-  document.getElementById('f_instFirstDate').value=defDate.toISOString().slice(0,10);
-  document.getElementById('f_applyInstFee').checked=true;
-  onCollegeChange();
-  toggleNationalityFields();
-  toggleInstallmentFields();
-  document.getElementById('studentOverlay').classList.add('open');
-}
-function openEditModal(id){
-  const s=data.students.find(x=>x.id===id); if(!s) return;
-  currentEditId=id;
-  closeDrawer();
-  document.getElementById('studentModalTitle').textContent='تعديل بيانات الطالب';
-  document.getElementById('f_code').value=s.code||'';
-  document.getElementById('f_name').value=s.name;
-  document.getElementById('f_phone').value=s.phone||'';
-  document.getElementById('f_email').value=s.email||'';
-  document.getElementById('f_nationality').value=s.nationality||'egyptian';
-  document.getElementById('f_isCanadian').checked=!!s.isCanadian;
-  document.getElementById('f_canadianFeeAmount').value=s.canadianFeeAmount||0;
-  document.getElementById('f_canadianCurrency').value=s.canadianCurrency||'usd';
-  document.getElementById('f_ministryFee').value=s.ministryFee||0;
-  document.getElementById('f_ministryFee').dataset.userEdited='1';
-  document.getElementById('f_instituteFeeUSD').value=s.instituteFeeUSD||0;
-  document.getElementById('f_college').value=s.collegeId||'';
-  const c=getCollege(s.collegeId);
-  document.getElementById('f_unitLabel').textContent = c && c.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
-  document.getElementById('f_unitCount').value=s.unitCount||0;
-  document.getElementById('f_instituteFee').value=s.instituteFee||0;
-  document.getElementById('f_instituteFee').dataset.userEdited='1';
-  document.getElementById('f_companyFee').value=s.companyFeeAmount||0;
-  document.getElementById('f_associationFee').value=s.associationFeeAmount||0;
-  selectedDiscountIds = new Set(s.discountIds || []);
-  refreshDiscountSelects();
-  document.getElementById('f_initialPay').value='';
-  document.getElementById('f_paymentMethod').value=s.paymentMethod||'cash';
-  document.getElementById('f_instCount').value=s.installmentCount||3;
-  document.getElementById('f_instFirstDate').value=s.installmentFirstDate ? s.installmentFirstDate.slice(0,10) : new Date().toISOString().slice(0,10);
-  document.getElementById('f_instInterval').value=s.installmentInterval||30;
-  document.getElementById('f_applyInstFee').checked=!!s.installmentFeeApplied;
-  toggleNationalityFields();
-  toggleInstallmentFields();
-  document.getElementById('studentOverlay').classList.add('open');
-}
-function closeStudentModal(){ document.getElementById('studentOverlay').classList.remove('open'); }
-async function saveStudent(){
-  const name=document.getElementById('f_name').value.trim();
-  const collegeId=document.getElementById('f_college').value;
-  if(!name){ showToast('اكتب اسم الطالب'); return; }
-  if(!collegeId){ showToast('اختار الكلية'); return; }
-
-  const nationality = document.getElementById('f_nationality').value;
-  const isCanadian = nationality==='egyptian' && document.getElementById('f_isCanadian').checked;
-  const canadianFeeAmount = isCanadian ? (Number(document.getElementById('f_canadianFeeAmount').value)||0) : 0;
-  const canadianCurrency = isCanadian ? document.getElementById('f_canadianCurrency').value : 'usd';
-  const isForeign = nationality==='foreign';
-  const ministryFee = nationality==='egyptian' ? (Number(document.getElementById('f_ministryFee').value)||0) : 0;
-  const instituteFeeUSD = isForeign ? (Number(document.getElementById('f_instituteFeeUSD').value)||0) : 0;
-
-  const unitCount = isForeign ? 0 : (Number(document.getElementById('f_unitCount').value)||0);
-  const instituteFee = isForeign ? 0 : (Number(document.getElementById('f_instituteFee').value)||0);
-  const companyFeeAmount = Number(document.getElementById('f_companyFee').value)||0;
-  const associationFeeAmount = Number(document.getElementById('f_associationFee').value)||0;
-  const discountIds = isForeign ? [] : getSelectedDiscountIds();
-
-  const paymentMethod = document.getElementById('f_paymentMethod').value;
-  let planData = { paymentMethod:'cash', installmentFee:0, installmentFeeApplied:false, installmentCount:0, installmentFirstDate:null, installmentInterval:0, installments:[] };
-
-  const discTotal = discountIds.reduce((sum,id)=>{
-    const d=getDiscount(id); if(!d) return sum;
-    return sum + (d.type==='percent' ? instituteFee*Number(d.value)/100 : Number(d.value));
-  },0);
-  const instituteAfterDiscount = Math.max(instituteFee-discTotal,0);
-
-  if(paymentMethod==='installment'){
-    const apply = document.getElementById('f_applyInstFee').checked;
-    const feeAmt = apply ? (data.installmentFeeSetting.type==='percent'? instituteAfterDiscount*Number(data.installmentFeeSetting.value)/100 : Number(data.installmentFeeSetting.value)) : 0;
-    const grand = instituteAfterDiscount+feeAmt+companyFeeAmount+associationFeeAmount+ministryFee;
-    const count = Math.max(Number(document.getElementById('f_instCount').value)||1,1);
-    const firstDateStr = document.getElementById('f_instFirstDate').value || new Date().toISOString().slice(0,10);
-    const interval = Number(document.getElementById('f_instInterval').value)||30;
-    const perAmount = Math.floor((grand/count)*100)/100;
-    const installments=[]; let runningTotal=0;
-    for(let i=0;i<count;i++){
-      const d=new Date(firstDateStr); d.setDate(d.getDate()+interval*i);
-      let amt = perAmount;
-      if(i===count-1) amt = Math.round((grand-runningTotal)*100)/100;
-      runningTotal += amt;
-      installments.push({ id:uid(), dueDate:d.toISOString(), amount:amt });
-    }
-    planData = { paymentMethod:'installment', installmentFee:feeAmt, installmentFeeApplied:apply, installmentCount:count, installmentFirstDate:firstDateStr, installmentInterval:interval, installments };
-  }
-
-  const baseFields = {
-    code:document.getElementById('f_code').value.trim(), name,
-    phone:document.getElementById('f_phone').value.trim(),
-    email:document.getElementById('f_email').value.trim(),
-    nationality, isCanadian, canadianFeeAmount, canadianCurrency, ministryFee, instituteFeeUSD,
-    collegeId, unitCount, instituteFee, companyFeeAmount, associationFeeAmount, discountIds,
-    ...planData
-  };
-
-  if(currentEditId){
-    const s=data.students.find(x=>x.id===currentEditId);
-    Object.assign(s, baseFields);
-  } else {
-    const s={ id:uid(), registeredAt:new Date().toISOString(), createdBy: currentUser ? currentUser.email : '', ...baseFields, payments:[] };
-    const initial=Number(document.getElementById('f_initialPay').value)||0;
-    if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, currency:'EGP', method:'Cash', note:'دفعة أولى'});
-    data.students.push(s);
-  }
-  await persist();
-  closeStudentModal();
-  render();
-  showToast('تم الحفظ بنجاح');
-}
-async function deleteStudent(id){
-  if(!confirm('متأكد إنك عايز تحذف الطالب ده؟')) return;
-  data.students=data.students.filter(x=>x.id!==id);
-  await persist();
-  closeDrawer();
-  render();
-  showToast('تم الحذف');
-}
-
-function openDrawer(id){
-  currentDetailId=id;
-  const s=data.students.find(x=>x.id===id); if(!s) return;
-  const college=getCollege(s.collegeId);
-  const discountIds = s.discountIds || [];
-  const scope = currentUser ? (currentUser.financialScope||'all') : 'all';
-
-  document.getElementById('d_name').innerHTML=escapeHtml(s.name)+natBadge(s);
-  document.getElementById('d_code').textContent='كود: '+(s.code||'—');
-  const createdByEl = document.getElementById('d_createdBy');
-  if(hasPermission('manage_users') && s.createdBy){
-    createdByEl.textContent='سجّله: '+s.createdBy;
-    createdByEl.style.display='block';
-  } else {
-    createdByEl.style.display='none';
-  }
-  document.getElementById('d_college').textContent=college?college.name:'—';
-  document.getElementById('d_feeTypeLabel').textContent = college ? (college.feeType==='hour' ? 'بالساعة' : 'بالمادة') : '—';
-  document.getElementById('d_paymentMethod').textContent = s.paymentMethod==='installment' ? 'تقسيط' : 'كاش';
-  document.getElementById('d_phone').textContent=s.phone||'—';
-  document.getElementById('d_email').textContent=s.email||'—';
-
-  const pb = partyBreakdown(s);
-  const usd = isStudentUsd(s);
-  const fx = hasForeignPortion(s);
-  const sym = fxSymbol(s);
-  const companyCard = document.getElementById('d_companyTotal').closest('.party-card');
-  const assocCard = document.getElementById('d_assocTotal').closest('.party-card');
-  const instCard = document.getElementById('d_instituteCardEgp');
-  const ministryCard = document.getElementById('d_ministryCard');
-  const usdCard = document.getElementById('d_instituteCardUsd');
-  companyCard.style.display = (scope==='all'||scope==='company') ? 'block' : 'none';
-  assocCard.style.display = (scope==='all'||scope==='association') ? 'block' : 'none';
-  instCard.style.display = (scope==='all'||scope==='institute') ? (usd?'none':'block') : 'none';
-  ministryCard.style.display = (s.nationality==='egyptian' && (scope==='all'||scope==='institute')) ? 'block' : 'none';
-  usdCard.style.display = (fx && (scope==='all'||scope==='institute')) ? 'block' : 'none';
-  usdCard.querySelector('.pt').textContent = usd ? '🎓 المعهد (دولار — وافد)' : `🎓 مصاريف النظام الكندي (${sym})`;
-  document.getElementById('d_companyTotal').textContent=fmt(pb.companyTotal)+' ج.م';
-  document.getElementById('d_companyPaid').textContent=fmt(pb.companyPaid)+' ج.م';
-  document.getElementById('d_companyRemaining').textContent=fmt(pb.companyRemaining)+' ج.م';
-  document.getElementById('d_assocTotal').textContent=fmt(pb.assocTotal)+' ج.م';
-  document.getElementById('d_assocPaid').textContent=fmt(pb.assocPaid)+' ج.م';
-  document.getElementById('d_assocRemaining').textContent=fmt(pb.assocRemaining)+' ج.م';
-  document.getElementById('d_instituteTotal').textContent=fmt(pb.instituteTotal)+' ج.م';
-  document.getElementById('d_institutePaid').textContent=fmt(pb.institutePaid)+' ج.م';
-  document.getElementById('d_instituteRemaining').textContent=fmt(pb.instituteRemaining)+' ج.م';
-  document.getElementById('d_ministryTotal').textContent=fmt(pb.ministryTotal)+' ج.م';
-  document.getElementById('d_ministryPaid').textContent=fmt(pb.ministryPaid)+' ج.م';
-  document.getElementById('d_ministryRemaining').textContent=fmt(pb.ministryRemaining)+' ج.م';
-  document.getElementById('d_instituteTotalUsd').textContent=fmt(instituteUsdTotal(s))+' '+sym;
-  document.getElementById('d_institutePaidUsd').textContent=fmt(paidAmountUsd(s))+' '+sym;
-  document.getElementById('d_instituteRemainingUsd').textContent=fmt(instituteUsdRemaining(s))+' '+sym;
-
-  document.getElementById('d_unitLabel').textContent = college && college.feeType==='hour' ? 'عدد الساعات' : 'عدد المواد';
-  document.getElementById('d_unitCount').textContent = s.unitCount||0;
-  document.getElementById('d_instituteBase').textContent = usd ? (fmt(s.instituteFeeUSD||0)+' $') : (fmt(s.instituteFee||0)+' ج.م');
-
-  const instFeeRow=document.getElementById('d_instFeeRow');
-  if(s.installmentFee>0){ instFeeRow.style.display='flex'; document.getElementById('d_instFee').textContent=fmt(s.installmentFee)+' ج.م'; }
-  else instFeeRow.style.display='none';
-
-  const discountsListEl=document.getElementById('d_discountsList');
-  if(usd){
-    discountsListEl.innerHTML='<div class="d-row"><span>مصاريف المعهد بالدولار — الخصومات مش متاحة عليها حاليًا</span><b>—</b></div>';
-  } else if(discountIds.length===0){
-    discountsListEl.innerHTML='<div class="d-row"><span>بدون خصومات</span><b>—</b></div>';
-  } else {
-    const base=Number(s.instituteFee||0);
-    discountsListEl.innerHTML = discountIds.map(id=>{
-      const d=getDiscount(id); if(!d) return '';
-      const amt = d.type==='percent' ? base*Number(d.value)/100 : Number(d.value);
-      const label = d.type==='percent' ? `${d.name} (${d.value}%)` : d.name;
-      return `<div class="d-row"><span>${escapeHtml(label)}</span><b>${fmt(amt)} ج.م</b></div>`;
-    }).join('') + `<div class="d-row"><span><b>إجمالي الخصم</b></span><b>${fmt(discountAmount(s))} ج.م</b></div>`;
-  }
-
-  document.getElementById('d_total').textContent=fmt(studentTotal(s))+' ج.م'+(fx?` + ${fmt(instituteUsdTotal(s))} ${sym}`:'');
-  document.getElementById('d_paid').textContent=fmt(paidAmount(s))+' ج.م'+(fx?` + ${fmt(paidAmountUsd(s))} ${sym}`:'');
-
-  const r=remaining(s);
-  const usdRem = fx ? instituteUsdRemaining(s) : 0;
-  const box=document.getElementById('d_statusBox');
-  box.className='status-box';
-  if(isFullyPaid(s) && (paidAmount(s)>0 || paidAmountUsd(s)>0)){
-    box.classList.add('status-clear');
-    document.getElementById('d_statusAmt').textContent='مكتمل السداد';
-    document.getElementById('d_statusLbl').textContent='لا يوجد مستحقات';
-  } else if(r>0.001 || usdRem>0.001){
-    box.classList.add('status-due');
-    const parts=[]; if(r>0.001) parts.push(fmt(r)+' ج.م'); if(usdRem>0.001) parts.push(fmt(usdRem)+' '+sym);
-    document.getElementById('d_statusAmt').textContent='عليه '+parts.join(' + ');
-    document.getElementById('d_statusLbl').textContent = (paidAmount(s)===0 && paidAmountUsd(s)===0) ? 'لم يبدأ الدفع' : 'متبقي من إجمالي المطلوب';
-  } else if(r<-0.001){
-    box.classList.add('status-credit');
-    document.getElementById('d_statusAmt').textContent='له '+fmt(-r)+' ج.م';
-    document.getElementById('d_statusLbl').textContent='مدفوع زيادة عن المطلوب';
-  } else {
-    box.classList.add('status-clear');
-    document.getElementById('d_statusAmt').textContent='مكتمل السداد';
-    document.getElementById('d_statusLbl').textContent='لا يوجد مستحقات';
-  }
-
-  document.getElementById('f_payForWrap').style.display = fx ? 'block' : 'none';
-  const payForUsdOption = document.querySelector('#f_payFor option[value="usd"]');
-  if(payForUsdOption) payForUsdOption.textContent = usd ? 'مصاريف المعهد (دولار)' : `مصاريف النظام الكندي (${sym})`;
-  document.getElementById('f_payFor').value='egp';
-  document.getElementById('f_payAmount').value='';
-  document.getElementById('f_payAmountUsd').value='';
-  document.getElementById('f_payRate').value='';
-  document.getElementById('f_payMethod').value='Cash';
-  document.getElementById('f_payNote').value='';
-  togglePayCurrencyFields();
-  renderPayList(s);
-
-  const instSection=document.getElementById('d_installmentSection');
-  if(s.paymentMethod==='installment' && s.installments && s.installments.length){
-    instSection.style.display='block';
-    const allocated = allocateInstallments(s);
-    document.getElementById('d_installmentList').innerHTML = allocated.map((inst,idx)=>{
-      const stColor = inst.status==='مدفوع'?'var(--good)': inst.status==='متأخر'?'var(--bad)':'var(--ink-soft)';
-      const penaltyTxt = inst.penalty>0 ? ` · غرامة ${fmt(inst.penalty)} ج.م` : '';
-      return `<div class="d-row"><span>قسط ${idx+1} — ${new Date(inst.dueDate).toLocaleDateString('ar-EG')}</span><b style="color:${stColor}">${fmt(inst.amount)} ج.م (${inst.status})${penaltyTxt}</b></div>`;
-    }).join('');
-    const pTotal = totalPenalties(s);
-    const pRow=document.getElementById('d_penaltyRow');
-    if(pTotal>0.001){ pRow.style.display='flex'; document.getElementById('d_penaltyTotal').textContent=fmt(pTotal)+' ج.م'; }
-    else pRow.style.display='none';
-  } else {
-    instSection.style.display='none';
-  }
-
-  document.getElementById('scrim').classList.add('open');
-  document.getElementById('drawer').classList.add('open');
-}
-function closeDrawer(){
-  document.getElementById('scrim').classList.remove('open');
-  document.getElementById('drawer').classList.remove('open');
-}
-function togglePayCurrencyFields(){
-  const payFor = document.getElementById('f_payFor').value;
-  const isUsdPay = payFor==='usd';
-  document.getElementById('f_payEgpFields').style.display = isUsdPay ? 'none':'block';
-  document.getElementById('f_payUsdFields').style.display = isUsdPay ? 'block':'none';
-}
-function renderPayList(s){
-  const payments=s.payments||[];
-  const list=document.getElementById('payList');
-  const sym = fxSymbol(s);
-  if(payments.length===0){ list.innerHTML='<div class="pay-empty">لسه مفيش دفعات مسجلة</div>'; return; }
-  list.innerHTML=payments.slice().reverse().map(p=>{
-    const isUsdPay = p.currency==='USD';
-    const amtVal = isUsdPay ? Number(p.amountUsd||p.amount||0) : Number(p.amount||0);
-    const isRefund = amtVal<0;
-    const tag = isRefund ? ' (استرداد)' : '';
-    const paySym = isUsdPay ? (p.fxCode==='CAD' ? 'C$' : '$') : '';
-    const amtText = isUsdPay ? `${isRefund?'-':''}${fmt(Math.abs(amtVal))} ${paySym}${p.rate?` (@ ${fmt(p.rate)})`:''}` : `${isRefund?'-':''}${fmt(Math.abs(amtVal))} ج.م`;
-    return `<div class="pay-row"><span>${new Date(p.date).toLocaleDateString('ar-EG')} ${p.method?'· '+escapeHtml(p.method):''}${p.note?' · '+escapeHtml(p.note):''}${tag}</span><span class="amt" style="color:${isRefund?'var(--bad)':'var(--good)'}">${amtText}</span></div>`;
-  }).join('');
-}
-async function addPayment(){
-  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
-  const fx = hasForeignPortion(s);
-  const payFor = fx ? document.getElementById('f_payFor').value : 'egp';
-  s.payments=s.payments||[];
-  if(payFor==='usd'){
-    const amountUsd=Number(document.getElementById('f_payAmountUsd').value)||0;
-    const rate=Number(document.getElementById('f_payRate').value)||0;
-    if(amountUsd===0){ showToast('اكتب مبلغ صحيح (رقم سالب = استرداد)'); return; }
-    if(rate<=0){ showToast('اكتب سعر الصرف وقت الدفع'); return; }
-    s.payments.push({date:new Date().toISOString(), currency:'USD', fxCode:fxCode(s), amountUsd, rate, amount: Math.round(amountUsd*rate*100)/100, method:document.getElementById('f_payMethod').value, note:document.getElementById('f_payNote').value.trim()});
-    await persist();
-    openDrawer(s.id);
-    render();
-    showToast(amountUsd<0 ? 'تم تسجيل الاسترداد' : 'تم تسجيل الدفعة');
-  } else {
-    const amount=Number(document.getElementById('f_payAmount').value)||0;
-    if(amount===0){ showToast('اكتب مبلغ صحيح (رقم سالب = استرداد)'); return; }
-    s.payments.push({date:new Date().toISOString(), currency:'EGP', amount, method:document.getElementById('f_payMethod').value, note:document.getElementById('f_payNote').value.trim()});
-    await persist();
-    openDrawer(s.id);
-    render();
-    showToast(amount<0 ? 'تم تسجيل الاسترداد' : 'تم تسجيل الدفعة');
-  }
-}
-
-function buildShareText(s){
-  const college=getCollege(s.collegeId);
-  const pb = partyBreakdown(s);
-  const today = new Date().toLocaleDateString('ar-EG');
-  const lines=[];
-  lines.push('CANADIAN INTERNATIONAL COLLEGE (CIC)');
-  lines.push('قسم الإيرادات — كشف حساب رسمي');
-  lines.push('');
-  lines.push(`التاريخ: ${today}`);
-  lines.push('');
-  lines.push(`عزيزي/عزيزتي ${s.name}،`);
-  lines.push('');
-  lines.push('نرفق لكم كشف الحساب الرسمي الخاص بكم لدى الكلية الكندية الدولية (CIC).');
-  lines.push('');
-  lines.push('بيانات الطالب');
-  lines.push(`الاسم: ${s.name}`);
-  lines.push(`الكود: ${s.code||'—'}`);
-  if(s.phone) lines.push(`الهاتف: ${s.phone}`);
-  if(s.email) lines.push(`الإيميل: ${s.email}`);
-  lines.push(`الكلية: ${college?college.name:'—'}`);
-  lines.push('');
-  lines.push('تفصيل المصاريف حسب الجهة');
-  lines.push(`الشركة: إجمالي ${fmt(pb.companyTotal)} ج.م — مدفوع ${fmt(pb.companyPaid)} ج.م — متبقي ${fmt(pb.companyRemaining)} ج.م`);
-  lines.push(`الجمعية: إجمالي ${fmt(pb.assocTotal)} ج.م — مدفوع ${fmt(pb.assocPaid)} ج.م — متبقي ${fmt(pb.assocRemaining)} ج.م`);
-  lines.push(`المعهد (بعد الخصم): إجمالي ${fmt(pb.instituteTotal)} ج.م — مدفوع ${fmt(pb.institutePaid)} ج.م — متبقي ${fmt(pb.instituteRemaining)} ج.م`);
-  lines.push('');
-  if(s.paymentMethod==='installment' && s.installments && s.installments.length){
-    lines.push('جدول الأقساط');
-    allocateInstallments(s).forEach((inst,idx)=>{
-      let line=`  ${idx+1}. استحقاق ${new Date(inst.dueDate).toLocaleDateString('ar-EG')} — ${fmt(inst.amount)} ج.م — الحالة: ${inst.status}`;
-      if(inst.penalty>0) line+=` — غرامة: ${fmt(inst.penalty)} ج.م`;
-      lines.push(line);
+  if(includeHandovers){
+    const ws1 = wb.addWorksheet('Handovers');
+    ws1.columns = [
+      {header:'Date', key:'date', width:14},
+      {header:'Time', key:'time', width:10},
+      ...CATEGORIES().map(c=>({header:c.label, key:c.key, width:18})),
+      {header:'Total', key:'total', width:14},
+      {header:'Note', key:'note', width:30},
+    ];
+    handoversInRange.slice().sort((a,b)=> new Date(a.handedOverAt)-new Date(b.handedOverAt)).forEach(h=>{
+      const dt=new Date(h.handedOverAt);
+      const row={ date: localDateStr(dt), time: dt.toTimeString().slice(0,5), total: h.total, note: h.note||'' };
+      CATEGORIES().forEach(c=>{ row[c.key]=h.totals[c.key]||0; });
+      ws1.addRow(row);
     });
-    lines.push('');
+    sheets.push(ws1);
   }
-  const payments=s.payments||[];
-  lines.push('سجل الدفعات');
-  if(payments.length){
-    payments.forEach(p=>{
-      const isRefund=p.amount<0;
-      lines.push(`  - ${new Date(p.date).toLocaleDateString('ar-EG')}: ${isRefund?'استرداد ':''}${fmt(Math.abs(p.amount))} ج.م${p.method?' عن طريق '+p.method:''}${p.note?' — '+p.note:''}`);
-    });
-  } else {
-    lines.push('  لا توجد دفعات مسجلة حتى الآن.');
-  }
-  lines.push('');
-  lines.push('ملخص الحساب');
-  lines.push(`إجمالي المدفوع: ${fmt(paidAmount(s))} ج.م`);
-  const r=remaining(s);
-  if(r>0.001) lines.push(`المتبقي: ${fmt(r)} ج.م`);
-  else if(r<-0.001) lines.push(`رصيد دائن (مدفوع زيادة): ${fmt(-r)} ج.م`);
-  else lines.push('الحساب مكتمل السداد.');
-  lines.push('');
-  lines.push('لأي استفسار بخصوص هذا الكشف، برجاء التواصل مع قسم الإيرادات.');
-  lines.push('');
-  lines.push('مع تحيات،');
-  lines.push('قسم الإيرادات');
-  lines.push('الكلية الكندية الدولية (CIC)');
-  return lines.join('\n');
-}
-function openShareWaModal(){
-  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
-  document.getElementById('waPhoneInput').value=(s.phone||'').replace(/[^0-9]/g,'');
-  document.getElementById('shareWaOverlay').classList.add('open');
-}
-function closeWaModal(){ document.getElementById('shareWaOverlay').classList.remove('open'); }
-function sendWhatsApp(){
-  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
-  const phone=document.getElementById('waPhoneInput').value.replace(/[^0-9]/g,'');
-  if(!phone){ showToast('اكتب رقم صحيح'); return; }
-  const text=encodeURIComponent(buildShareText(s));
-  window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-  closeWaModal();
-}
-function openShareEmailModal(){
-  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
-  document.getElementById('emailInput').value=s.email||'';
-  document.getElementById('emailMessageBox').value=buildShareText(s);
-  updateMailtoLink();
-  document.getElementById('shareEmailOverlay').classList.add('open');
-}
-function closeEmailModal(){ document.getElementById('shareEmailOverlay').classList.remove('open'); }
-function updateMailtoLink(){
-  const s=data.students.find(x=>x.id===currentDetailId); if(!s) return;
-  const to=document.getElementById('emailInput').value.trim();
-  const subject=encodeURIComponent('كشف حساب رسمي — '+s.name+' — الكلية الكندية الدولية (CIC)');
-  const body=encodeURIComponent(document.getElementById('emailMessageBox').value);
-  document.getElementById('mailtoLink').href = `mailto:${to}?subject=${subject}&body=${body}`;
-}
-function copyEmailMessage(){
-  const box=document.getElementById('emailMessageBox');
-  box.select();
-  navigator.clipboard.writeText(box.value).then(()=>{
-    showToast('تم نسخ الرسالة — الصقها في تطبيق البريد');
-  }).catch(()=>{
-    document.execCommand('copy');
-    showToast('تم نسخ الرسالة — الصقها في تطبيق البريد');
-  });
-}
 
-const DEFAULT_DATA_SHAPE = { batchName:"دفعة جديدة", colleges:[], discounts:[], students:[], installmentFeeSetting:{type:'percent',value:0}, penaltySetting:{type:'percent',value:0,grace:0} };
-async function maybeCreateDailyBackup(){
-  const todayStr = new Date().toISOString().slice(0,10);
-  if(data.lastBackupDate === todayStr) return;
-  try{
-    await AppStore.set('backup:'+todayStr, JSON.stringify(data));
-    data.lastBackupDate = todayStr;
-    await persist();
-    pruneOldBackups();
-  }catch(e){}
-}
-async function pruneOldBackups(){
-  try{
-    const list = await AppStore.list('backup:');
-    const keys = (list && list.keys) ? list.keys.slice().sort() : [];
-    const excess = keys.length - 30;
-    if(excess>0){ for(const k of keys.slice(0, excess)){ try{ await AppStore.delete(k); }catch(e){} } }
-  }catch(e){}
-}
-async function renderBackupList(){
-  const el=document.getElementById('backupList');
-  if(!el) return;
-  el.innerHTML='<div class="settings-empty">جاري التحميل...</div>';
-  try{
-    const list = await AppStore.list('backup:');
-    const keys = (list && list.keys) ? list.keys.slice().sort().reverse() : [];
-    if(keys.length===0){ el.innerHTML='<div class="settings-empty">لا توجد نسخ احتياطية تلقائية بعد</div>'; return; }
-    el.innerHTML = keys.map(k=>{
-      const dateLabel = k.replace('backup:','');
-      return `<div class="settings-item"><span>${dateLabel}</span><button class="del" style="color:var(--brand);" onclick="restoreBackup('${k}')">استعادة</button></div>`;
-    }).join('');
-  }catch(e){ el.innerHTML='<div class="settings-empty">تعذر تحميل النسخ الاحتياطية</div>'; }
-}
-async function restoreBackup(key){
-  if(!confirm('استعادة النظام لهذه النسخة؟ سيتم استبدال كل البيانات الحالية.')) return;
-  try{
-    const res = await AppStore.get(key);
-    if(!res || !res.value){ showToast('النسخة غير موجودة'); return; }
-    data = Object.assign({}, DEFAULT_DATA_SHAPE, JSON.parse(res.value));
-    await persist();
-    refreshCollegeSelects(); refreshDiscountSelects(); render();
-    showToast('تم الاستعادة من النسخة الاحتياطية');
-  }catch(e){ showToast('تعذرت الاستعادة'); }
-}
-function downloadBackupNow(){
-  const snapshot = JSON.stringify(data, null, 2);
-  const blob = new Blob([snapshot], {type:'application/json'});
+  if(includeEntries){
+    const ws2 = wb.addWorksheet('Entries');
+    ws2.columns = [
+      {header:'Date', key:'date', width:14},
+      {header:'Category', key:'category', width:22},
+      {header:'Amount', key:'amount', width:14},
+      {header:'Note', key:'note', width:26},
+      {header:'Status', key:'status', width:14},
+      {header:'Recorded At', key:'createdAt', width:20},
+    ];
+    entriesInRange.slice().sort((a,b)=> new Date(a.createdAt)-new Date(b.createdAt)).forEach(e=>{
+      ws2.addRow({ date:e.date, category:catLabel(e.category), amount:e.amount, note:e.note||'', status: e.handoverId?'Handed over':'Pending', createdAt: e.createdAt.slice(0,16).replace('T',' ') });
+    });
+    sheets.push(ws2);
+  }
+
+  if(handoversInRange.length===0 && entriesInRange.length===0){ showToast('مفيش بيانات في الفترة دي'); return; }
+
+  sheets.forEach(ws=>{
+    const headerRow=ws.getRow(1);
+    headerRow.eachCell(cell=>{
+      cell.fill={ type:'pattern', pattern:'solid', fgColor:{argb:'FF15151A'} };
+      cell.font={ color:{argb:'FFF0D584'}, bold:true, size:11 };
+      cell.alignment={ horizontal:'center', vertical:'middle' };
+    });
+  });
+
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], {type:'application/octet-stream'});
   const url = URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url; a.download = 'CIC_Backup_'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();
+  const rangeTag = (from||to) ? `${from||'start'}_to_${to||todayStr()}` : 'all';
+  a.href=url; a.download=`cash-treasury-${rangeTag}.xlsx`; a.click();
+  URL.revokeObjectURL(url);
+  closeExportModal();
+  showToast('تم تنزيل الملف');
+}
+
+function downloadBackup(){
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`cash-treasury-backup-${todayStr()}.json`; a.click();
   URL.revokeObjectURL(url);
   showToast('تم تنزيل النسخة الاحتياطية');
 }
-function handleRestoreFile(e){
-  const file=e.target.files[0]; if(!file) return;
-  if(!confirm('هيتم استبدال كل البيانات الحالية بهذا الملف. متابعة؟')){ e.target.value=''; return; }
-  const reader=new FileReader();
-  reader.onload = async (evt)=>{
+function restoreBackup(evt){
+  const file = evt.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ()=>{
     try{
-      const parsed = JSON.parse(evt.target.result);
-      data = Object.assign({}, DEFAULT_DATA_SHAPE, parsed);
-      await persist();
-      refreshCollegeSelects(); refreshDiscountSelects(); render();
-      showToast('تم استعادة النسخة الاحتياطية بنجاح');
-    }catch(err){ showToast('تعذر قراءة هذا الملف'); }
-    e.target.value='';
+      const parsed = JSON.parse(reader.result);
+      if(!parsed.entries || !parsed.handovers){ showToast('الملف مش بصيغة صحيحة'); return; }
+      if(!confirm('استعادة النسخة دي هتستبدل البيانات الحالية بالكامل. متأكد؟')) return;
+      data = parsed;
+      if(!data.categories || !data.categories.length){ data.categories = DEFAULT_CATEGORIES.map(c=>({...c})); }
+      await saveData();
+      populateCategorySelect();
+      render();
+      showToast('تم استعادة النسخة بنجاح');
+    }catch(e){ showToast('فشل قراءة الملف'); console.error(e); }
   };
   reader.readAsText(file);
+  evt.target.value='';
 }
 
-async function exportExcel(){
-  await exportStudentsToExcel(data.students, data.batchName||'Students');
-}
-async function exportStudentsToExcel(studentsList, filenameBase){
-  const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet('Students', { views:[{ state:'frozen', ySplit:1 }] });
-  const columns = [
-    {header:'Student Code', key:'code', width:14},
-    {header:'Name', key:'name', width:24},
-    {header:'Nationality', key:'nationality', width:12},
-    {header:'Canadian Program', key:'canadian', width:14},
-    {header:'Foreign Currency', key:'fxCode', width:12},
-    {header:'Registration Date', key:'regDate', width:16},
-    {header:'Payment Method', key:'payMethod', width:18},
-    {header:'Amount Paid (EGP)', key:'paid', width:16},
-    {header:'Remaining (EGP)', key:'remaining', width:16},
-    {header:'Foreign Fee Total', key:'instituteFeeUsd', width:16},
-    {header:'Foreign Fee Paid', key:'paidUsd', width:12},
-    {header:'Foreign Fee Remaining', key:'remainingUsd', width:16},
-    {header:'Payment Plan', key:'planType', width:14},
-    {header:'College', key:'college', width:18},
-    {header:'Fee Type', key:'feeType', width:12},
-    {header:'Unit Count', key:'unitCount', width:12},
-    {header:'Institute Fee (Base)', key:'instituteFee', width:16},
-    {header:'Company Fee', key:'companyFee', width:14},
-    {header:'Association Fee', key:'associationFee', width:14},
-    {header:'Ministry Fee', key:'ministryFee', width:14},
-    {header:'Discounts', key:'discounts', width:22},
-    {header:'Total Discount', key:'discountTotal', width:14},
-    {header:'Installment Fee', key:'instFee', width:14},
-    {header:'Total Due', key:'total', width:14},
-    {header:'Penalties Due', key:'penalty', width:14},
-    {header:'Phone', key:'phone', width:15},
-    {header:'Email', key:'email', width:24},
-    {header:'Status', key:'status', width:13},
-    {header:'Notes', key:'notes', width:30},
-  ];
-  ws.columns = columns;
-  studentsList.forEach(s=>{
-    const college=getCollege(s.collegeId);
-    const discountIds = s.discountIds || [];
-    const discountNames = discountIds.map(id=>getDiscount(id)).filter(Boolean).map(d=>d.name).join(', ');
-    const payMethods = Array.from(new Set((s.payments||[]).map(p=>p.method||'Cash'))).join(', ');
-    const notes = (s.payments||[]).filter(p=>p.note).map(p=>p.note).join('; ');
-    ws.addRow({
-      code:s.code||'', name:s.name,
-      nationality: s.nationality==='foreign' ? 'Foreign' : 'Egyptian',
-      canadian: s.isCanadian ? 'Yes' : 'No',
-      fxCode: hasForeignPortion(s) ? fxCode(s) : '—',
-      regDate: s.registeredAt ? s.registeredAt.slice(0,10) : '',
-      payMethod: payMethods || '—',
-      paid: paidAmount(s), remaining: remaining(s),
-      instituteFeeUsd: instituteUsdTotal(s), paidUsd: paidAmountUsd(s), remainingUsd: instituteUsdRemaining(s),
-      planType: s.paymentMethod==='installment' ? 'Installment' : 'Cash',
-      college: college?college.name:'', feeType: college? (college.feeType==='hour'?'Per Hour':'Per Subject') : '',
-      unitCount: s.unitCount||0, instituteFee: s.instituteFee||0,
-      companyFee: s.companyFeeAmount||0, associationFee: s.associationFeeAmount||0, ministryFee: ministryFeeOf(s),
-      discounts: discountNames, discountTotal: discountAmount(s), instFee: s.installmentFee||0,
-      total: studentTotal(s), penalty: totalPenalties(s), phone: s.phone||'', email: s.email||'',
-      status: payStatus(s)==='Paid'?'Fully Paid':payStatus(s)==='Partial'?'Balance Due':'Not Paid',
-      notes: notes || ''
-    });
-  });
-  const headerRow = ws.getRow(1);
-  headerRow.height = 24;
-  headerRow.eachCell(cell=>{
-    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF131C2E'} };
-    cell.font = { color:{argb:'FFFFFFFF'}, bold:true, size:11, name:'Calibri' };
-    cell.alignment = { horizontal:'center', vertical:'middle' };
-    cell.border = { bottom:{style:'medium', color:{argb:'FFB8912F'}} };
-  });
-  const moneyCols = ['instituteFee','companyFee','associationFee','ministryFee','paid','remaining','instituteFeeUsd','paidUsd','remainingUsd','discountTotal','instFee','total','penalty'];
-  ws.eachRow((row, rowNumber)=>{
-    if(rowNumber===1) return;
-    const bg = rowNumber%2===0 ? 'FFF2F3F6' : 'FFFFFFFF';
-    row.eachCell({includeEmpty:true}, cell=>{
-      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:bg} };
-      cell.alignment = { horizontal:'left', vertical:'middle' };
-      cell.border = { bottom:{style:'thin', color:{argb:'FFE1E4EA'}} };
-      cell.font = { name:'Calibri', size:11 };
-    });
-    moneyCols.forEach(k=>{ const colIdx = columns.findIndex(c=>c.key===k)+1; row.getCell(colIdx).numFmt = '#,##0.00'; });
-    const remCell = row.getCell(columns.findIndex(c=>c.key==='remaining')+1);
-    const rVal = Number(remCell.value)||0;
-    if(rVal>0.001) remCell.font = { color:{argb:'FFB23A2A'}, bold:true, name:'Calibri', size:11 };
-    else if(rVal<-0.001) remCell.font = { color:{argb:'FFB07D17'}, bold:true, name:'Calibri', size:11 };
-    else remCell.font = { color:{argb:'FF1F7A4D'}, bold:true, name:'Calibri', size:11 };
-  });
-  const lastColLetter = String.fromCharCode(64+columns.length);
-  ws.autoFilter = { from:'A1', to: lastColLetter+'1' };
-  const buf = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = (filenameBase||'Students')+'.xlsx';
-  a.click();
-  URL.revokeObjectURL(url);
-}
+document.getElementById('filterFrom').addEventListener('change', renderHistory);
+document.getElementById('filterTo').addEventListener('change', renderHistory);
 
-// ---- Daily student registration report ----
-function studentsRegisteredOn(dateStr){
-  return data.students.filter(s=> s.registeredAt && s.registeredAt.slice(0,10)===dateStr);
-}
-function openDailyReportModal(){
-  document.getElementById('reportDateInput').value = new Date().toISOString().slice(0,10);
-  updateReportCountHint();
-  document.getElementById('dailyReportOverlay').classList.add('open');
-}
-function closeDailyReportModal(){ document.getElementById('dailyReportOverlay').classList.remove('open'); }
-function updateReportCountHint(){
-  const dateStr = document.getElementById('reportDateInput').value;
-  const count = studentsRegisteredOn(dateStr).length;
-  document.getElementById('reportCountHint').textContent = `عدد الطلاب المسجلين في هذا التاريخ: ${count}`;
-}
-async function exportDailyReport(){
-  const dateStr = document.getElementById('reportDateInput').value;
-  const list = studentsRegisteredOn(dateStr);
-  if(list.length===0){ showToast('لا يوجد طلاب اتسجلوا في التاريخ ده'); return; }
-  await exportStudentsToExcel(list, `Daily_Registrations_${dateStr}`);
-  closeDailyReportModal();
-}
+let lastAutoDate = todayStr();
+document.getElementById('f_date').value = lastAutoDate;
+setInterval(()=>{
+  const nowToday = todayStr();
+  if(nowToday !== lastAutoDate){
+    const fDate = document.getElementById('f_date');
+    if(fDate.value === lastAutoDate){ fDate.value = nowToday; }
+    lastAutoDate = nowToday;
+  }
+}, 60000);
 
-// ---- Cash Ledger ----
-function populateLedgerCategories(){
-  const sel = document.getElementById('ledgerCategory');
-  let opts = data.colleges.map(c=>`<option value="معهد ${escapeHtml(c.name)}">معهد ${escapeHtml(c.name)}</option>`).join('');
-  opts += `<option value="الشركة">الشركة</option>`;
-  opts += `<option value="الجمعية">الجمعية</option>`;
-  opts += `<option value="استرداد">استرداد (Refund)</option>`;
-  opts += `<option value="توريد">توريد (تسليم كاش)</option>`;
-  opts += `<option value="أخرى">أخرى</option>`;
-  sel.innerHTML = opts;
-}
-function populateStudentCodesDatalist(){
-  const dl = document.getElementById('studentCodesList');
-  dl.innerHTML = data.students.filter(s=>s.code).map(s=>`<option value="${escapeHtml(s.code)}">${escapeHtml(s.name)}</option>`).join('');
-}
-function getStudentByCode(code){
-  return data.students.find(s=> (s.code||'').toLowerCase()===String(code||'').toLowerCase());
-}
-function openCashLedger(){
-  document.getElementById('ledgerDateInput').value = new Date().toISOString().slice(0,10);
-  document.getElementById('ledgerStudentSearch').value='';
-  document.getElementById('ledgerAmount').value='';
-  document.getElementById('ledgerStudentCode').value='';
-  document.getElementById('ledgerNote').value='';
-  populateLedgerCategories();
-  populateStudentCodesDatalist();
-  renderLedgerForDate(document.getElementById('ledgerDateInput').value);
-  document.getElementById('cashLedgerOverlay').classList.add('open');
-}
-function closeCashLedger(){ document.getElementById('cashLedgerOverlay').classList.remove('open'); }
-function ledgerEntryRowHtml(e, showDate){
-  const sign = e.direction==='in' ? '+' : '-';
-  const color = e.direction==='in' ? 'var(--good)' : 'var(--bad)';
-  const timeLabel = showDate
-    ? `📅 ${e.date}`
-    : new Date(e.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-  const studentInfo = e.studentCode ? (()=>{ const st=getStudentByCode(e.studentCode); return ' — كود '+escapeHtml(e.studentCode)+(st?' ('+escapeHtml(st.name)+')':' (طالب غير معروف)'); })() : '';
-  const details = `${timeLabel} — ${escapeHtml(e.category)}${studentInfo}${e.note?' — '+escapeHtml(e.note):''}`;
-  return `<div class="settings-item"><span>${details}</span><span style="display:flex;align-items:center;gap:8px;"><b style="color:${color};white-space:nowrap;">${sign}${fmt(e.amount)} ج.م</b><button class="del" onclick="removeLedgerEntry('${e.id}')">حذف</button></span></div>`;
-}
-function updateLedgerTotals(entries){
-  const totalIn = entries.filter(e=>e.direction==='in').reduce((s,e)=>s+e.amount,0);
-  const totalOut = entries.filter(e=>e.direction==='out').reduce((s,e)=>s+e.amount,0);
-  document.getElementById('ledgerTotalIn').textContent = fmt(totalIn)+' ج.م';
-  document.getElementById('ledgerTotalOut').textContent = fmt(totalOut)+' ج.م';
-  document.getElementById('ledgerNet').textContent = fmt(totalIn-totalOut)+' ج.م';
-}
-function renderLedgerForDate(dateStr){
-  const entries = (data.cashLedger||[]).filter(e=>e.date===dateStr).sort((a,b)=> new Date(a.timestamp)-new Date(b.timestamp));
-  const list = document.getElementById('ledgerEntriesList');
-  list.innerHTML = entries.length===0 ? '<div class="settings-empty">لا توجد معاملات في هذا اليوم</div>' : entries.map(e=>ledgerEntryRowHtml(e,false)).join('');
-  updateLedgerTotals(entries);
-}
-function searchLedgerByStudent(code){
-  const q = code.trim().toLowerCase();
-  if(!q){ renderLedgerForDate(document.getElementById('ledgerDateInput').value); return; }
-  const results = (data.cashLedger||[]).filter(e=> (e.studentCode||'').toLowerCase().includes(q))
-    .sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp));
-  const list = document.getElementById('ledgerEntriesList');
-  list.innerHTML = results.length===0 ? '<div class="settings-empty">لا توجد نتائج بالاسم ده</div>' : results.map(e=>ledgerEntryRowHtml(e,true)).join('');
-  updateLedgerTotals(results);
-}
-async function addLedgerEntry(){
-  const category = document.getElementById('ledgerCategory').value;
-  const direction = document.getElementById('ledgerDirection').value;
-  const amount = Number(document.getElementById('ledgerAmount').value)||0;
-  if(amount<=0){ showToast('اكتب مبلغ صحيح'); return; }
-  const studentCode = document.getElementById('ledgerStudentCode').value.trim();
-  const note = document.getElementById('ledgerNote').value.trim();
-  const dateStr = document.getElementById('ledgerDateInput').value || new Date().toISOString().slice(0,10);
-  data.cashLedger = data.cashLedger || [];
-  data.cashLedger.push({
-    id: uid(), date: dateStr, direction, category, studentCode, amount, note,
-    recordedBy: currentUser ? currentUser.email : '', timestamp: new Date().toISOString()
-  });
-  document.getElementById('ledgerAmount').value='';
-  document.getElementById('ledgerStudentCode').value='';
-  document.getElementById('ledgerNote').value='';
-  await persist();
-  document.getElementById('ledgerStudentSearch').value='';
-  renderLedgerForDate(dateStr);
-  showToast('تم تسجيل المعاملة');
-}
-async function removeLedgerEntry(id){
-  if(!confirm('حذف المعاملة دي؟')) return;
-  data.cashLedger = (data.cashLedger||[]).filter(e=>e.id!==id);
-  await persist();
-  const searchVal = document.getElementById('ledgerStudentSearch').value;
-  if(searchVal.trim()) searchLedgerByStudent(searchVal);
-  else renderLedgerForDate(document.getElementById('ledgerDateInput').value);
-  showToast('تم الحذف');
-}
-async function exportLedgerDay(){
-  const dateStr = document.getElementById('ledgerDateInput').value;
-  const entries = (data.cashLedger||[]).filter(e=>e.date===dateStr).sort((a,b)=> new Date(a.timestamp)-new Date(b.timestamp));
-  if(entries.length===0){ showToast('لا توجد معاملات في هذا اليوم لتصديرها'); return; }
-  const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet('Cash Ledger');
-  const columns = [
-    {header:'Time', key:'time', width:12},
-    {header:'Direction', key:'direction', width:12},
-    {header:'Category', key:'category', width:24},
-    {header:'Student Code', key:'studentCode', width:16},
-    {header:'Student Name', key:'studentName', width:22},
-    {header:'Amount', key:'amount', width:14},
-    {header:'Note', key:'note', width:28},
-    {header:'Recorded By', key:'recordedBy', width:22},
-  ];
-  ws.columns = columns;
-  entries.forEach(e=>{
-    const st = e.studentCode ? getStudentByCode(e.studentCode) : null;
-    ws.addRow({
-      time: new Date(e.timestamp).toLocaleTimeString('en-GB'),
-      direction: e.direction==='in' ? 'In' : 'Out',
-      category: e.category, studentCode: e.studentCode||'', studentName: st?st.name:'', amount: e.amount,
-      note: e.note||'', recordedBy: e.recordedBy||''
-    });
-  });
-  const totalIn = entries.filter(e=>e.direction==='in').reduce((s,e)=>s+e.amount,0);
-  const totalOut = entries.filter(e=>e.direction==='out').reduce((s,e)=>s+e.amount,0);
-  ws.addRow({});
-  ws.addRow({category:'TOTAL IN', amount: totalIn});
-  ws.addRow({category:'TOTAL OUT', amount: totalOut});
-  ws.addRow({category:'NET', amount: totalIn-totalOut});
-  const headerRow = ws.getRow(1);
-  headerRow.height = 22;
-  headerRow.eachCell(cell=>{
-    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF131C2E'} };
-    cell.font = { color:{argb:'FFFFFFFF'}, bold:true, size:11, name:'Calibri' };
-    cell.alignment = { horizontal:'center', vertical:'middle' };
-    cell.border = { bottom:{style:'medium', color:{argb:'FFB8912F'}} };
-  });
-  const amountColIdx = columns.findIndex(c=>c.key==='amount')+1;
-  ws.eachRow((row, rowNumber)=>{
-    if(rowNumber===1) return;
-    row.getCell(amountColIdx).numFmt = '#,##0.00';
-  });
-  const buf = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-  const url = URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download = `Cash_Ledger_${dateStr}.xlsx`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-function handleImportFile(e){
-  const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload = async (evt)=>{
-    try{
-      const wb = XLSX.read(evt.target.result, {type:'array'});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-      let added=0, createdColleges=0;
-      rows.forEach(row=>{
-        const name = String(row['Name']||row['Student Name']||'').trim();
-        if(!name) return;
-        const collegeName = String(row['College']||'').trim();
-        let college = data.colleges.find(c=>c.name===collegeName);
-        if(!college && collegeName){
-          college = {id:uid(), name:collegeName, feeType:'subject', unitPrice:0, companyFee:0, associationFee:0};
-          data.colleges.push(college);
-          createdColleges++;
-        }
-        const s = {
-          id:uid(), code:String(row['Code']||'').trim(), name,
-          phone:String(row['Phone']||'').trim(), email:String(row['Email']||'').trim(),
-          collegeId: college? college.id : '', unitCount:0,
-          instituteFee: college? Number(college.unitPrice||0) : 0,
-          companyFeeAmount: college? Number(college.companyFee||0) : 0,
-          associationFeeAmount: college? Number(college.associationFee||0) : 0,
-          discountIds:[],
-          paymentMethod:'cash', installmentFee:0, installmentFeeApplied:false, installmentCount:0, installmentFirstDate:null, installmentInterval:0, installments:[],
-          payments:[]
-        };
-        const initial=Number(row['Initial Payment'])||0;
-        if(initial>0) s.payments.push({date:new Date().toISOString(), amount:initial, method:'Cash', note:'Imported from Excel'});
-        data.students.push(s);
-        added++;
-      });
-      await persist();
-      refreshCollegeSelects();
-      render();
-      showToast(`تم استيراد ${added} طالب${createdColleges? ' — تم إنشاء '+createdColleges+' كلية جديدة تلقائيًا، راجع أسعارها في الإعدادات':''}`);
-    }catch(err){ showToast('حصل خطأ في قراءة الملف'); }
-    e.target.value='';
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-document.getElementById('addBtn').addEventListener('click', openAddModal);
-document.getElementById('settingsBtn').addEventListener('click', openSettings);
-document.getElementById('exportBtn').addEventListener('click', exportExcel);
-document.getElementById('dailyReportBtn').addEventListener('click', openDailyReportModal);
-document.getElementById('reportDateInput').addEventListener('change', updateReportCountHint);
-document.getElementById('dailyReportOverlay').addEventListener('click', e=>{ if(e.target.id==='dailyReportOverlay') closeDailyReportModal(); });
-document.getElementById('cashLedgerBtn').addEventListener('click', openCashLedger);
-document.getElementById('ledgerDateInput').addEventListener('change', ()=>{ document.getElementById('ledgerStudentSearch').value=''; renderLedgerForDate(document.getElementById('ledgerDateInput').value); });
-document.getElementById('ledgerStudentSearch').addEventListener('input', e=>searchLedgerByStudent(e.target.value));
-document.getElementById('ledgerCategory').addEventListener('change', ()=>{
-  const cat=document.getElementById('ledgerCategory').value;
-  document.getElementById('ledgerDirection').value = (cat==='استرداد'||cat==='توريد') ? 'out' : 'in';
-});
-document.getElementById('cashLedgerOverlay').addEventListener('click', e=>{ if(e.target.id==='cashLedgerOverlay') closeCashLedger(); });
-document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
-document.getElementById('importFile').addEventListener('change', handleImportFile);
-document.getElementById('restoreFileInput').addEventListener('change', handleRestoreFile);
-document.getElementById('logoutBtn').addEventListener('click', logout);
-document.getElementById('searchInput').addEventListener('input', render);
-document.getElementById('filterCollege').addEventListener('change', render);
-document.getElementById('filterStatus').addEventListener('change', render);
-document.getElementById('studentOverlay').addEventListener('click', e=>{ if(e.target.id==='studentOverlay') closeStudentModal(); });
-document.getElementById('settingsOverlay').addEventListener('click', e=>{ if(e.target.id==='settingsOverlay') closeSettings(); });
-document.getElementById('scrim').addEventListener('click', closeDrawer);
-document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-document.getElementById('shareWaOverlay').addEventListener('click', e=>{ if(e.target.id==='shareWaOverlay') closeWaModal(); });
-document.getElementById('shareEmailOverlay').addEventListener('click', e=>{ if(e.target.id==='shareEmailOverlay') closeEmailModal(); });
-
-loadData();
-document.getElementById('footerYear').textContent = new Date().getFullYear();
+updateSyncBtn();
+loadData().then(()=>{ populateCategorySelect(); render(); });
 </script>
 </body>
 </html>
